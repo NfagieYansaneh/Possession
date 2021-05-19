@@ -30,6 +30,11 @@ public class PlayerInputHandler : MonoBehaviour
         input.Player.HeavyAttack.performed += OnHeavyAttackPerformed;
 
         input.Player.BasicAbility.performed += OnBasicAbilityPerformed;
+
+        input.Player.UltimateAbility.performed += OnUltimateAbilityPerformed;
+
+        input.Player.CrownThrow.performed += OnCrownThrowPerformed;
+
     }
 
     void OnMovementPerformed(InputAction.CallbackContext context)
@@ -77,6 +82,22 @@ public class PlayerInputHandler : MonoBehaviour
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformBasicAbility(context);
+        }
+    }
+
+    void OnUltimateAbilityPerformed(InputAction.CallbackContext context)
+    {
+        if (possessedCharacter != null)
+        {
+            possessedCharacter.PerformUltimateAbility(context);
+        }
+    }
+
+    void OnCrownThrowPerformed(InputAction.CallbackContext context)
+    {
+        if (possessedCharacter != null)
+        {
+            possessedCharacter.PerformCrownThrow(context);
         }
     }
 

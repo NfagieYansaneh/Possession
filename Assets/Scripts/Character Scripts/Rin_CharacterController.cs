@@ -7,7 +7,7 @@ using System; // rid of this later
 
 public class Rin_CharacterController : BaseCharacterController
 {
-    Vector2 movementDirection = Vector2.zero;
+    // Vector2 movementDirection = Vector2.zero; // already defined in BaseCharacterController.cs
     bool dodging = false;
 
     /* The variables & functions you have access too on baseCharacterController is...
@@ -82,5 +82,16 @@ public class Rin_CharacterController : BaseCharacterController
     public override void PerformBasicAbility(InputAction.CallbackContext context)
     {
         Debug.LogWarning("Basic Ability performed");
+    }
+
+    public override void PerformUltimateAbility(InputAction.CallbackContext context)
+    {
+        Debug.LogWarning("Ultimate Ability performed");
+    }
+
+    public override void PerformCrownThrow(InputAction.CallbackContext context)
+    {
+        base.PerformCrownThrow(context);
+        Debug.LogWarning("Crown Throw performed");
     }
 }
