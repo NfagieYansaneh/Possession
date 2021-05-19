@@ -24,6 +24,8 @@ public class BaseCharacterController : MonoBehaviour
     public Transform groundCheck;               // A position marking where to check if the player is grounded
     public Transform ceilingCheck;              // A position marking where to check for ceilings
 
+    public Collider2D myCollider;
+
     public float groundedRadius = .2f;          // Radius of the overlap circle to determine if grounded
     [HideInInspector] public bool isGrounded;                    // Whether or not the player is grounded.
     public float ceilingRadius = .2f;           // Radius of the overlap circle to determine if the player can stand up
@@ -44,6 +46,14 @@ public class BaseCharacterController : MonoBehaviour
 
     public UnityEvent OnLandEvent;              // Event called when landed
 
+    [Header("Crown")]
+    public GameObject crownObject;
+    public Crown crownScript;
+
+    [Header("Player Input Handler (For changing possession)")]
+    public PlayerInputHandler playerInputHandler;
+    public Vector2 movementDirection = Vector2.zero;
+
     void Awake()
     {
         input = new InputMaster();
@@ -51,6 +61,7 @@ public class BaseCharacterController : MonoBehaviour
         // input.Player.Movement.performed += ctx => Debug.Log(ctx.ReadValueAsObject());  THIS IS A LAMBDA FUNCTION
 
         rb = GetComponent<Rigidbody2D>();
+        myCollider = GetComponent<Collider2D>();
     }
 
     // FixedUpdate is called every 'x' seconds
@@ -162,6 +173,33 @@ public class BaseCharacterController : MonoBehaviour
     public virtual void PerformBasicAbility(InputAction.CallbackContext context)
     {
         // meant to be overwritten
+    }
+
+    public virtual void PerformUltimateAbility(InputAction.CallbackContext context)
+    {
+        // meant to be overwritten
+    }
+
+    public virtual void PerformCrownThrow(InputAction.CallbackContext context)
+    {
+        // not typically meant to be overwritten
+        crownObject.SetActive(true);
+        crownObject.transform.position = transform.position;
+        crownScript.ThrowMe(movementDirection, myCollider);
+    }
+
+    public virtual void PossessMe()
+    {
+        // not typically meant to be overwritten
+        playerInputHandler.possessedCharacter.OnPossessionLeave(); // calls the 'leave' function on previous possession
+        playerInputHandler.possessedCharacter = this;
+    }
+
+    public virtual void OnPossessionLeave()
+    {
+        // not typically meant to be overwritten
+        movementDirection = Vector2.zero;
+        targetVelocity = Vector2.zero;
     }
 
     public virtual void RunAtFixedUpdate()

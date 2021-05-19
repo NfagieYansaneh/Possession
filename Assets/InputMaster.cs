@@ -65,6 +65,22 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Ultimate Ability"",
+                    ""type"": ""Button"",
+                    ""id"": ""b257cba1-ab49-4efc-9407-c6b230ffc4de"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Crown Throw"",
+                    ""type"": ""Button"",
+                    ""id"": ""f00e3504-cb9f-41c8-8c6d-e2210d24b924"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -276,6 +292,28 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""action"": ""Basic Ability"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8dc714f0-c3d0-40af-9129-c752a6fc6f56"",
+                    ""path"": ""<Keyboard>/l"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and mouse"",
+                    ""action"": ""Ultimate Ability"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5be70062-4f70-4bce-a07a-f90f6485bfaf"",
+                    ""path"": ""<Keyboard>/u"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and mouse"",
+                    ""action"": ""Crown Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -318,6 +356,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
         m_Player_LightAttack = m_Player.FindAction("Light Attack", throwIfNotFound: true);
         m_Player_HeavyAttack = m_Player.FindAction("Heavy Attack", throwIfNotFound: true);
         m_Player_BasicAbility = m_Player.FindAction("Basic Ability", throwIfNotFound: true);
+        m_Player_UltimateAbility = m_Player.FindAction("Ultimate Ability", throwIfNotFound: true);
+        m_Player_CrownThrow = m_Player.FindAction("Crown Throw", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -373,6 +413,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_LightAttack;
     private readonly InputAction m_Player_HeavyAttack;
     private readonly InputAction m_Player_BasicAbility;
+    private readonly InputAction m_Player_UltimateAbility;
+    private readonly InputAction m_Player_CrownThrow;
     public struct PlayerActions
     {
         private @InputMaster m_Wrapper;
@@ -383,6 +425,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
         public InputAction @LightAttack => m_Wrapper.m_Player_LightAttack;
         public InputAction @HeavyAttack => m_Wrapper.m_Player_HeavyAttack;
         public InputAction @BasicAbility => m_Wrapper.m_Player_BasicAbility;
+        public InputAction @UltimateAbility => m_Wrapper.m_Player_UltimateAbility;
+        public InputAction @CrownThrow => m_Wrapper.m_Player_CrownThrow;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -410,6 +454,12 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @BasicAbility.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBasicAbility;
                 @BasicAbility.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBasicAbility;
                 @BasicAbility.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnBasicAbility;
+                @UltimateAbility.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUltimateAbility;
+                @UltimateAbility.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUltimateAbility;
+                @UltimateAbility.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUltimateAbility;
+                @CrownThrow.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
+                @CrownThrow.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
+                @CrownThrow.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -432,6 +482,12 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @BasicAbility.started += instance.OnBasicAbility;
                 @BasicAbility.performed += instance.OnBasicAbility;
                 @BasicAbility.canceled += instance.OnBasicAbility;
+                @UltimateAbility.started += instance.OnUltimateAbility;
+                @UltimateAbility.performed += instance.OnUltimateAbility;
+                @UltimateAbility.canceled += instance.OnUltimateAbility;
+                @CrownThrow.started += instance.OnCrownThrow;
+                @CrownThrow.performed += instance.OnCrownThrow;
+                @CrownThrow.canceled += instance.OnCrownThrow;
             }
         }
     }
@@ -462,5 +518,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         void OnLightAttack(InputAction.CallbackContext context);
         void OnHeavyAttack(InputAction.CallbackContext context);
         void OnBasicAbility(InputAction.CallbackContext context);
+        void OnUltimateAbility(InputAction.CallbackContext context);
+        void OnCrownThrow(InputAction.CallbackContext context);
     }
 }

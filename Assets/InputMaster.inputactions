@@ -52,6 +52,22 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press"
+                },
+                {
+                    "name": "Ultimate Ability",
+                    "type": "Button",
+                    "id": "b257cba1-ab49-4efc-9407-c6b230ffc4de",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
+                },
+                {
+                    "name": "Crown Throw",
+                    "type": "Button",
+                    "id": "f00e3504-cb9f-41c8-8c6d-e2210d24b924",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
                 }
             ],
             "bindings": [
@@ -261,6 +277,28 @@
                     "processors": "",
                     "groups": "Keyboard and mouse",
                     "action": "Basic Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8dc714f0-c3d0-40af-9129-c752a6fc6f56",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
+                    "action": "Ultimate Ability",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5be70062-4f70-4bce-a07a-f90f6485bfaf",
+                    "path": "<Keyboard>/u",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
+                    "action": "Crown Throw",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
