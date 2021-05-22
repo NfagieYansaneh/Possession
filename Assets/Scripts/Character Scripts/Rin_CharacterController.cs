@@ -8,7 +8,6 @@ using System; // rid of this later
 public class Rin_CharacterController : BaseCharacterController
 {
     // Vector2 movementDirection = Vector2.zero; // already defined in BaseCharacterController.cs
-    bool dodging = false;
 
     /* The variables & functions you have access too on baseCharacterController is...
      * 
@@ -53,20 +52,41 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformJump(InputAction.CallbackContext context)
     {
-        if (isGrounded)
+        if (jumpIndex <= maxJumps)
         {
+            float targetVerticalVelocity;
+
+            if (isGrounded) { 
+                // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
+                targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
+            } else
+            {
+                float currentHeightReduction = Mathf.Pow(successiveJumpHeightReduction, airJumpsPerformed);
+                targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * airborneJumpHeight * currentHeightReduction);
+                airJumpsPerformed++;
+            }
             isGrounded = false;
 
-            // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
-            float targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
             curVerticalVelocity = targetVerticalVelocity;
+            jumpIndex++;
         }
     }
 
     public override void PerformDodge(InputAction.CallbackContext context)
     {
-        SetVelocityTimed(movementDirection * 5, 1, false, false);
+        if (movementDirection == Vector2.zero) // make sure to set proper deadzones!
+        {
+            SetVelocityTimed(Vector2.zero, neutralDodgeTime, false, false);
+        }
+        else
+        {
+            float calculatedSpeed = dodgeDistance / dodgeTime;
+            SetVelocityTimed(movementDirection * calculatedSpeed, dodgeTime, false, false);
+        }
         dodging = true;
+
+        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 2, instead of 1 (which represents our ground jump)
+        jumpIndex = 2;
     }
 
     public override void PerformLightAttack(InputAction.CallbackContext context)

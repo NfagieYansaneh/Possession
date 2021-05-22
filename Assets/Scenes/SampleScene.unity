@@ -5092,7 +5092,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!95 &122422206
 Animator:
   serializedVersion: 3
@@ -5238,30 +5238,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 7.5
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 4
+  airborneJumpHeight: 1
+  successiveJumpHeightReduction: 0
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0
+  neutralDodgeTime: 0
+  dodgeDistance: 0
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 288159493}
   ceilingCheck: {fileID: 1150836341}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -5375,7 +5400,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &335915582
 Rigidbody2D:
   serializedVersion: 4
@@ -5435,30 +5460,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 16
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 4
+  airborneJumpHeight: 1
+  successiveJumpHeightReduction: 0
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0
+  neutralDodgeTime: 0
+  dodgeDistance: 0
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 757983739}
   ceilingCheck: {fileID: 950923428}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -6501,30 +6551,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 7.5
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 3.5
+  airborneJumpHeight: 3
+  successiveJumpHeightReduction: 0.905
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0.275
+  neutralDodgeTime: 0.573
+  dodgeDistance: 0.3
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 735758528}
   ceilingCheck: {fileID: 1350444472}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -7222,30 +7315,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 16
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 4
+  airborneJumpHeight: 1
+  successiveJumpHeightReduction: 0
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0
+  neutralDodgeTime: 0
+  dodgeDistance: 0
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 1188521845}
   ceilingCheck: {fileID: 2119955256}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -7839,30 +7957,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 16
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 4
+  airborneJumpHeight: 1
+  successiveJumpHeightReduction: 0
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0
+  neutralDodgeTime: 0
+  dodgeDistance: 0
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 163278126}
   ceilingCheck: {fileID: 1325332524}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -7953,7 +8096,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &1894952956
 Rigidbody2D:
   serializedVersion: 4
@@ -8013,30 +8156,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c57c163dd3d4c4ab66aa8989410833, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 4
   movementSmoothing: 0
   applySmoothing: 1
   movementSpeed: 16
+  facingRight: 1
+  startMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  endMovementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  t_startMovementCurveTimestamp: 0
+  t_endMovementCurveTimestamp: 0
+  airControl: 1
+  jumpHeight: 4
+  airborneJumpHeight: 1
+  successiveJumpHeightReduction: 0
+  maxJumps: 2
+  jumpIndex: 1
+  airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  airControl: 1
+  fallingGravityMultiplier: 1.8
+  dodging: 0
+  dodgeTime: 0
+  neutralDodgeTime: 0
+  dodgeDistance: 0
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 164687693}
   ceilingCheck: {fileID: 972737546}
-  myCollider: {fileID: 0}
   groundedRadius: 0.25
   isGrounded: 0
+  isFalling: 0
   ceilingRadius: 0.2
-  facingRight: 1
+  myCollider: {fileID: 0}
+  OnLandEvent:
+    m_PersistentCalls:
+      m_Calls: []
   curVerticalVelocity: 0
   t_velocityTimestamp: 0
   t_velocity: {x: 0, y: 0}
   t_gravityTimestamp: 0
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
