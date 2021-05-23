@@ -8,12 +8,17 @@ public class Crown : MonoBehaviour
     public float affinity;
     public Rigidbody2D rb;
     public LayerMask layerMaskCollision;
+    public AnimationCurve velocityChangeCurve; // how our speed changes overtime when our velocity changes (typically by deflections)
+
+    // t_ variables are for timing purposes (and are hidden)
+    [HideInInspector] public float t_velocityChangeCurveTimestamp = 0f;
 
     [HideInInspector]
     public Collider2D sendersCollider; // for ignoring the collider of the character who sent the crown
 
     [HideInInspector]
-    public Vector3 direction;
+    public Vector2 direction;
+    public Vector2 velocity;
 
     public void Start()
     {
@@ -21,12 +26,18 @@ public class Crown : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void ThrowMe(Vector3 newDirection, Collider2D newSendersCollider)
+    public void FixedUpdate()
+    {
+        rb.velocity = velocity * velocityChangeCurve.Evaluate(Time.time - t_velocityChangeCurveTimestamp);
+    }
+
+    public void ThrowMe(Vector2 newDirection, Collider2D newSendersCollider)
     {
         // gameObject.SetActive(true); // A deactivated game object can not activate itself
         direction = newDirection;
-        rb.velocity = direction * speed;
+        velocity = direction * speed;
         sendersCollider = newSendersCollider;
+        t_velocityChangeCurveTimestamp = Time.time;
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
@@ -49,7 +60,8 @@ public class Crown : MonoBehaviour
             Debug.DrawRay(hit.point, hit.normal, Color.green, 1f);
             Debug.LogError("REFLECTED");
             direction = Vector2.Reflect(direction, hit.normal);
-            rb.velocity = direction * speed;
+            velocity = direction * speed;
+            t_velocityChangeCurveTimestamp = Time.time;
         }
     }
 }

@@ -25,6 +25,7 @@ public class Rin_CharacterController : BaseCharacterController
         if(t_velocityTimestamp <= Time.time && dodging == true)
         {
             // Run end dodging script
+            curVerticalVelocity = 0f;
             dodging = false;
         } 
     }
@@ -55,6 +56,7 @@ public class Rin_CharacterController : BaseCharacterController
         if (jumpIndex <= maxJumps)
         {
             float targetVerticalVelocity;
+            isFalling = false;
 
             if (isGrounded) { 
                 // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
@@ -76,14 +78,18 @@ public class Rin_CharacterController : BaseCharacterController
     {
         if (movementDirection == Vector2.zero) // make sure to set proper deadzones!
         {
-            SetVelocityTimed(Vector2.zero, neutralDodgeTime, false, false);
+            SetVelocityTimed(Vector2.zero, neutralDodgeTime, false);
         }
         else
         {
             float calculatedSpeed = dodgeDistance / dodgeTime;
-            SetVelocityTimed(movementDirection * calculatedSpeed, dodgeTime, false, false);
+            SetVelocityTimed(movementDirection * calculatedSpeed, dodgeTime, false);
         }
+
+        t_dodgeCurveTimestamp = Time.time;
         dodging = true;
+        isFalling = false;
+        curVerticalVelocity = 0f;
 
         // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 2, instead of 1 (which represents our ground jump)
         jumpIndex = 2;

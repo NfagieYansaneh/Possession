@@ -49,6 +49,9 @@ public class BaseCharacterController : MonoBehaviour
     public float neutralDodgeTime;
     [Range(0f, 5f)]
     public float dodgeDistance;
+    public AnimationCurve dodgeCurve;
+    [HideInInspector] public float t_dodgeCurveTimestamp;
+
 
     [Header("Ground Checking")]
     public LayerMask whatIsGround;              // A mask determining what is ground to the character
@@ -87,6 +90,10 @@ public class BaseCharacterController : MonoBehaviour
     void Awake()
     {
         input = new InputMaster();
+
+        t_velocityTimestamp = 0f;
+        t_velocity = Vector2.zero;
+        t_gravityTimestamp = 0f;
 
         // input.Player.Movement.performed += ctx => Debug.Log(ctx.ReadValueAsObject());  THIS IS A LAMBDA FUNCTION
 
@@ -138,7 +145,17 @@ public class BaseCharacterController : MonoBehaviour
         if (t_velocityTimestamp >= Time.time)
         {
             // if we are still within a timed velocity's period, than use its timed velocity
-            rb.velocity = (applySmoothing)? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
+            if (dodging)
+            {
+                float x = (Time.time - t_dodgeCurveTimestamp) / dodgeTime;
+                rb.velocity = t_velocity * dodgeCurve.Evaluate(x);
+            }
+            else
+            {
+                Debug.Log(t_velocityTimestamp + " : " + Time.time);
+                //Debug.Log("WAKKKAWAKKKA");
+                rb.velocity = (applySmoothing) ? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
+            }
         } else {
             // rb.velocity = (applySmoothing)? Vector2.SmoothDamp(rb.velocity, targetVelocity, ref velocity, movementSmoothing) : targetVelocity;
             rb.velocity = targetVelocity * startMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
@@ -181,13 +198,10 @@ public class BaseCharacterController : MonoBehaviour
 
     // set velocity over a duration of time. Decide whether to apply gravity or smoothing when doing so...
     private bool prevSmoothing;
-    public void SetVelocityTimed(Vector2 newVelocity, float duration, bool smoothing, bool applyGravity)
+    public void SetVelocityTimed(Vector2 newVelocity, float duration, bool applyGravity)
     {
         t_velocityTimestamp = Time.time + duration;
         t_velocity = newVelocity;
-
-        applySmoothing = smoothing;
-        prevSmoothing = applySmoothing;
 
         if(!applyGravity) { 
             t_gravityTimestamp = Time.time + duration;
