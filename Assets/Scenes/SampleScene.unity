@@ -5383,7 +5383,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 184357562}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2086248678}
@@ -5489,7 +5489,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!50 &335915582
 Rigidbody2D:
   serializedVersion: 4
@@ -5551,11 +5551,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 16
+  movementSpeed: 7.25
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.034785714
+      value: 1.5585122
+      inSlope: -7.588957
+      outSlope: -7.588957
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2729979
+    - serializedVersion: 3
+      time: 0.19454841
+      value: 1.1710229
+      inSlope: -0.5232099
+      outSlope: -0.5232099
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.31019035
+    - serializedVersion: 3
+      time: 0.5915476
+      value: 1.0054398
+      inSlope: -1.0754486
+      outSlope: -1.0754486
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19788629
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -5565,46 +5601,73 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_startMovementCurveTimestamp: 0
+  t_startMovementCurveTimestamp: 150.85811
   t_endMovementCurveTimestamp: 0
   airControl: 1
-  jumpHeight: 4
-  airborneJumpHeight: 1
-  successiveJumpHeightReduction: 0
+  jumpHeight: 3.5
+  airborneJumpHeight: 3.8
+  successiveJumpHeightReduction: 0.85
   maxJumps: 2
   jumpIndex: 1
   airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  fallingGravityMultiplier: 1.8
+  fallingGravityMultiplier: 1.6
   dodging: 0
-  dodgeTime: 0
-  neutralDodgeTime: 0
-  dodgeDistance: 0
+  dodgeTime: 0.14
+  neutralDodgeTime: 0.573
+  dodgeDistance: 3
   dodgeCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.108001485
+      value: 1.3546741
+      inSlope: -0.2867038
+      outSlope: -0.2867038
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2190047
+    - serializedVersion: 3
+      time: 0.9904499
+      value: 0.9970856
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_dodgeCurveTimestamp: 0
+  t_dodgeCurveTimestamp: 150.10933
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 757983739}
   ceilingCheck: {fileID: 950923428}
   groundedRadius: 0.25
-  isGrounded: 0
+  isGrounded: 1
   isFalling: 0
   ceilingRadius: 0.2
-  myCollider: {fileID: 0}
+  myCollider: {fileID: 962515799}
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
-  curVerticalVelocity: 0
-  t_velocityTimestamp: 0
-  t_velocity: {x: 0, y: 0}
-  t_gravityTimestamp: 0
+  curVerticalVelocity: -1
+  t_velocityTimestamp: 150.24933
+  t_velocity: {x: 0, y: 21.428572}
+  t_gravityTimestamp: 150.24933
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -5668,7 +5731,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 335915581}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.49, y: 2.0200002, z: 0}
+  m_LocalPosition: {x: 10.29, y: 2.0200002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 757983739}
@@ -5801,7 +5864,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &430561632
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5836,8 +5899,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430561631}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11.18, y: 0.002, z: 0}
-  m_LocalScale: {x: 0.9226, y: 12.262293, z: 1}
+  m_LocalPosition: {x: -16.56, y: 0.0020001, z: 0}
+  m_LocalScale: {x: 0.9226, y: 20.53934, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 21
@@ -5985,7 +6048,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553217040}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 2.3321803, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 1.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1035450382}
@@ -6093,7 +6156,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 558516269}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.12, y: -5.81, z: 0}
+  m_LocalPosition: {x: 0.12, y: -7.23, z: 0}
   m_LocalScale: {x: 25.811255, y: 0.5700811, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -6470,7 +6533,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 771254703}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 2.3321805, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 1.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1386999586}
@@ -6630,7 +6693,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 824929073}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.18, y: -1.9300001, z: 0}
+  m_LocalPosition: {x: 4.18, y: -3.0021803, z: 0}
   m_LocalScale: {x: 5.1061625, y: 0.9534375, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -6661,7 +6724,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 857999177}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1035450382}
@@ -6734,7 +6797,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &909998898
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6769,8 +6832,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 909998897}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.2, y: 0.04, z: 0}
-  m_LocalScale: {x: 0.9226, y: 12.262293, z: 1}
+  m_LocalPosition: {x: 16.54, y: 0.04, z: 0}
+  m_LocalScale: {x: 0.9226, y: 19.006554, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 22
@@ -6791,7 +6854,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &942712973
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6826,8 +6889,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 942712972}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0795, y: 6.38, z: 0}
-  m_LocalScale: {x: 25.811255, y: 0.5700811, z: 1}
+  m_LocalPosition: {x: 0.0795, y: 9.74, z: 0}
+  m_LocalScale: {x: 33.23199, y: 1.1971703, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 23
@@ -6999,7 +7062,7 @@ MonoBehaviour:
   airControl: 1
   jumpHeight: 3.5
   airborneJumpHeight: 3.8
-  successiveJumpHeightReduction: 0.905
+  successiveJumpHeightReduction: 0.85
   maxJumps: 2
   jumpIndex: 1
   airJumpsPerformed: 0
@@ -7143,7 +7206,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962515797}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.9546256, y: -2.2232354, z: 0}
+  m_LocalPosition: {x: -3.9546256, y: -3.2954156, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1928034232}
@@ -7240,7 +7303,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1012742140}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 2.3321803, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 1.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 986928087}
@@ -7421,7 +7484,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1165476601}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 986928087}
@@ -7503,7 +7566,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1170894539}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 2.3321805, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 1.2600002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 986928087}
@@ -7904,7 +7967,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1192032480}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1035450382}
@@ -7986,7 +8049,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1207573083}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2086248678}
@@ -8456,7 +8519,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1398520531}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.54, y: -0.05, z: 0.66}
+  m_LocalPosition: {x: -3.54, y: -1.1221802, z: 0.66}
   m_LocalScale: {x: 8.325281, y: 3.403125, z: 1}
   m_Children: []
   m_Father: {fileID: 1067119443}
@@ -8616,8 +8679,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1449005065}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -6.69, z: 0}
-  m_LocalScale: {x: 31.422539, y: 2.4837794, z: 1}
+  m_LocalPosition: {x: 0, y: -7.77, z: 0}
+  m_LocalScale: {x: 36.062275, y: 2.4837794, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
@@ -8756,7 +8819,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1452051946}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 2.3321805, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 1.2600002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2086248678}
@@ -9052,9 +9115,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bbb6ec61cc4e8e4298fa7b3f915ab63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 20
+  speed: 25
   affinity: 0
-  rb: {fileID: 0}
+  rb: {fileID: 1487752144}
   layerMaskCollision:
     serializedVersion: 2
     m_Bits: 8
@@ -9063,47 +9126,29 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.06065213
-      value: 1.9948953
-      inSlope: -6.6231093
-      outSlope: -6.6231093
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.16575678
-    - serializedVersion: 3
-      time: 0.08495132
-      value: 1.9135759
-      inSlope: -10.96747
-      outSlope: -10.96747
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.17621803
+      time: 1
       value: 1
       inSlope: 0
       outSlope: 0
-      tangentMode: 0
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_velocityChangeCurveTimestamp: 0
-  sendersCollider: {fileID: 0}
-  direction: {x: 0, y: 0}
-  velocity: {x: 0, y: 0}
+  t_velocityChangeCurveTimestamp: 1180.416
+  sendersCollider: {fileID: 962515799}
+  direction: {x: -0.7071063, y: 0.707107}
+  velocity: {x: -14.142126, y: 14.14214}
 --- !u!50 &1487752144
 Rigidbody2D:
   serializedVersion: 4
@@ -9123,7 +9168,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!58 &1487752145
 CircleCollider2D:
@@ -9338,7 +9383,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1499287007}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 2.3321803, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 1.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1386999586}
@@ -9450,7 +9495,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1643796607}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1386999586}
@@ -9561,7 +9606,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8
+  orthographic size: 9
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -9648,7 +9693,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1702705723}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 2.3321805, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 1.2600002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1035450382}
@@ -9754,7 +9799,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!50 &1821118982
 Rigidbody2D:
   serializedVersion: 4
@@ -9816,11 +9861,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 16
+  movementSpeed: 7.25
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.034785714
+      value: 1.5585122
+      inSlope: -7.588957
+      outSlope: -7.588957
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2729979
+    - serializedVersion: 3
+      time: 0.19454841
+      value: 1.1710229
+      inSlope: -0.5232099
+      outSlope: -0.5232099
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.31019035
+    - serializedVersion: 3
+      time: 0.5915476
+      value: 1.0054398
+      inSlope: -1.0754486
+      outSlope: -1.0754486
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19788629
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -9830,46 +9911,73 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_startMovementCurveTimestamp: 0
+  t_startMovementCurveTimestamp: 150.85811
   t_endMovementCurveTimestamp: 0
   airControl: 1
-  jumpHeight: 4
-  airborneJumpHeight: 1
-  successiveJumpHeightReduction: 0
+  jumpHeight: 3.5
+  airborneJumpHeight: 3.8
+  successiveJumpHeightReduction: 0.85
   maxJumps: 2
   jumpIndex: 1
   airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  fallingGravityMultiplier: 1.8
+  fallingGravityMultiplier: 1.6
   dodging: 0
-  dodgeTime: 0
-  neutralDodgeTime: 0
-  dodgeDistance: 0
+  dodgeTime: 0.14
+  neutralDodgeTime: 0.573
+  dodgeDistance: 3
   dodgeCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.108001485
+      value: 1.3546741
+      inSlope: -0.2867038
+      outSlope: -0.2867038
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2190047
+    - serializedVersion: 3
+      time: 0.9904499
+      value: 0.9970856
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_dodgeCurveTimestamp: 0
+  t_dodgeCurveTimestamp: 150.10933
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 163278126}
   ceilingCheck: {fileID: 1325332524}
   groundedRadius: 0.25
-  isGrounded: 0
+  isGrounded: 1
   isFalling: 0
   ceilingRadius: 0.2
-  myCollider: {fileID: 0}
+  myCollider: {fileID: 962515799}
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
-  curVerticalVelocity: 0
-  t_velocityTimestamp: 0
-  t_velocity: {x: 0, y: 0}
-  t_gravityTimestamp: 0
+  curVerticalVelocity: -1
+  t_velocityTimestamp: 150.24933
+  t_velocity: {x: 0, y: 21.428572}
+  t_gravityTimestamp: 150.24933
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -9933,7 +10041,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1821118981}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.67, y: -1.8499997, z: 0}
+  m_LocalPosition: {x: -6.6, y: -1.8499997, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 163278126}
@@ -9960,7 +10068,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!50 &1894952956
 Rigidbody2D:
   serializedVersion: 4
@@ -10022,11 +10130,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 16
+  movementSpeed: 7.25
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.034785714
+      value: 1.5585122
+      inSlope: -7.588957
+      outSlope: -7.588957
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2729979
+    - serializedVersion: 3
+      time: 0.19454841
+      value: 1.1710229
+      inSlope: -0.5232099
+      outSlope: -0.5232099
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.31019035
+    - serializedVersion: 3
+      time: 0.5915476
+      value: 1.0054398
+      inSlope: -1.0754486
+      outSlope: -1.0754486
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19788629
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -10036,46 +10180,73 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_startMovementCurveTimestamp: 0
+  t_startMovementCurveTimestamp: 150.85811
   t_endMovementCurveTimestamp: 0
   airControl: 1
-  jumpHeight: 4
-  airborneJumpHeight: 1
-  successiveJumpHeightReduction: 0
+  jumpHeight: 3.5
+  airborneJumpHeight: 3.8
+  successiveJumpHeightReduction: 0.85
   maxJumps: 2
   jumpIndex: 1
   airJumpsPerformed: 0
   gravity: 30
   gravityMultiplier: 1
-  fallingGravityMultiplier: 1.8
+  fallingGravityMultiplier: 1.6
   dodging: 0
-  dodgeTime: 0
-  neutralDodgeTime: 0
-  dodgeDistance: 0
+  dodgeTime: 0.14
+  neutralDodgeTime: 0.573
+  dodgeDistance: 3
   dodgeCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.108001485
+      value: 1.3546741
+      inSlope: -0.2867038
+      outSlope: -0.2867038
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.2190047
+    - serializedVersion: 3
+      time: 0.9904499
+      value: 0.9970856
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  t_dodgeCurveTimestamp: 0
+  t_dodgeCurveTimestamp: 150.10933
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 164687693}
   ceilingCheck: {fileID: 972737546}
   groundedRadius: 0.25
-  isGrounded: 0
+  isGrounded: 1
   isFalling: 0
   ceilingRadius: 0.2
-  myCollider: {fileID: 0}
+  myCollider: {fileID: 962515799}
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
-  curVerticalVelocity: 0
-  t_velocityTimestamp: 0
-  t_velocity: {x: 0, y: 0}
-  t_gravityTimestamp: 0
+  curVerticalVelocity: -1
+  t_velocityTimestamp: 150.24933
+  t_velocity: {x: 0, y: 21.428572}
+  t_gravityTimestamp: 150.24933
   crownObject: {fileID: 1487752142}
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
@@ -10139,7 +10310,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1894952955}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.43, y: -3.7099998, z: 0}
+  m_LocalPosition: {x: -9.44, y: -2.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 164687693}
@@ -10172,7 +10343,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925354007}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6835776, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 0.6835776, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1386999586}
@@ -10335,7 +10506,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1938192358}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.18, y: -4.61, z: 1}
+  m_LocalPosition: {x: 4.18, y: -5.6821804, z: 1}
   m_LocalScale: {x: 5.1061625, y: 5.918463, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -10366,7 +10537,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1981919770}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 2.3321803, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 1.26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2086248678}
@@ -10448,7 +10619,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2025839326}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.6835775, y: 1.3321804, z: 0}
+  m_LocalPosition: {x: 1.6835775, y: 0.2600001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 986928087}
