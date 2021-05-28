@@ -16,7 +16,7 @@ public class BaseCharacterController : MonoBehaviour
     public float movementSmoothing = 0f;        // How much to smooth out movement
     public bool applySmoothing = false;         // Decides whether to apply the ability to smooth out movement
     public float movementSpeed = 0f;            // Determines the speed of the characters movement
-    public bool facingRight = true;            // For determining which way the player is currently facing.
+    public bool facingRight = true;             // For determining which way the player is currently facing.
 
     public AnimationCurve startMovementCurve; // how movement rises when started
     public AnimationCurve endMovementCurve; // how movement decays when stopped
@@ -31,7 +31,7 @@ public class BaseCharacterController : MonoBehaviour
     public float airborneJumpHeight = 1;
     [Tooltip("successiveJumpHeightReduction")]
     [Range(0f, 1f)]
-    public float successiveJumpHeightReduction;  // reduces the height of each successive airborne jump
+    public float successiveJumpHeightReduction; // reduces the height of each successive airborne jump
     public int maxJumps = 2;                    // tells us how many jumps can we perform (including a jump from the ground)
     public int jumpIndex = 1;                   // tells us which jump we are at (1 represent our first jump);
     public int airJumpsPerformed = 0;           // tells us how many air jumps we have performed while airborne
@@ -82,10 +82,14 @@ public class BaseCharacterController : MonoBehaviour
     [Header("Crown")]
     public GameObject crownObject;
     public Crown crownScript;
+    public static List<BaseCharacterController> baseCharacterControllers; // list containing all base character controllers in scene
+    //[Min(1f)]
+    //public float crownAffinityScalar = 1f;
 
     [Header("Player Input Handler (For changing possession)")]
     public PlayerInputHandler playerInputHandler;
     public Vector2 movementDirection = Vector2.zero;
+
 
     void Awake()
     {
@@ -99,6 +103,18 @@ public class BaseCharacterController : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         myCollider = GetComponent<Collider2D>();
+    }
+
+    private void OnEnable()
+    {
+        if (baseCharacterControllers == null) baseCharacterControllers = new List<BaseCharacterController>();
+
+        baseCharacterControllers.Add(this);
+    }
+
+    private void OnDisable()
+    {
+        baseCharacterControllers.Remove(this);
     }
 
     // FixedUpdate is called every 'x' seconds
@@ -152,7 +168,6 @@ public class BaseCharacterController : MonoBehaviour
             }
             else
             {
-                Debug.Log(t_velocityTimestamp + " : " + Time.time);
                 //Debug.Log("WAKKKAWAKKKA");
                 rb.velocity = (applySmoothing) ? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
             }
@@ -208,6 +223,8 @@ public class BaseCharacterController : MonoBehaviour
             curVerticalVelocity = 0f;
         }
     }
+
+    // functions that can be overwritten depending on each characters needs
 
     public virtual void PerformMovement(InputAction.CallbackContext context)
     {

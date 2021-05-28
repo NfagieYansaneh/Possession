@@ -6038,7 +6038,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &335915582
 Rigidbody2D:
   serializedVersion: 4
@@ -6100,7 +6100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.25
+  movementSpeed: 7.5
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -8263,7 +8263,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.25
+  movementSpeed: 7.5
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -8462,7 +8462,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962515797}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.12, y: -2.72, z: 0}
+  m_LocalPosition: {x: 1, y: -2.72, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1928034232}
@@ -9696,39 +9696,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 25
-  affinity: 0
   rb: {fileID: 1487752144}
   layerMaskCollision:
     serializedVersion: 2
     m_Bits: 8
-  velocityChangeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  t_velocityChangeCurveTimestamp: 1180.416
-  sendersCollider: {fileID: 962515799}
+  playerInputHandler: {fileID: 1450726900}
+  possessedPlayersCollider: {fileID: 0}
   direction: {x: -0.7071063, y: 0.707107}
-  velocity: {x: -14.142126, y: 14.14214}
+  characterAffinity: 600
+  characterAffnRange: 7
+  seekedCharacters: []
+  characterMask:
+    serializedVersion: 2
+    m_Bits: 1
+  dampening: 1
 --- !u!50 &1487752144
 Rigidbody2D:
   serializedVersion: 4
@@ -9737,7 +9718,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1487752142}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -9748,7 +9729,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
   m_Constraints: 0
 --- !u!58 &1487752145
 CircleCollider2D:
@@ -9765,7 +9746,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.7
+  m_Radius: 0.5
 --- !u!212 &1487752146
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10309,6 +10290,7 @@ GameObject:
   - component: {fileID: 1687258584}
   - component: {fileID: 1687258582}
   - component: {fileID: 1687258586}
+  - component: {fileID: 1687258583}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -10324,6 +10306,26 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
   m_Enabled: 1
+--- !u!114 &1687258583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1687258581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AssetsPPU: 32
+  m_RefResolutionX: 1024
+  m_RefResolutionY: 576
+  m_UpscaleRT: 1
+  m_PixelSnapping: 0
+  m_CropFrameX: 1
+  m_CropFrameY: 1
+  m_StretchFill: 1
 --- !u!20 &1687258584
 Camera:
   m_ObjectHideFlags: 0
@@ -14914,7 +14916,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.25
+  movementSpeed: 7.5
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -15094,7 +15096,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1821118981}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.25, y: -1.38, z: 0}
+  m_LocalPosition: {x: 1, y: 6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 163278126}
@@ -15285,7 +15287,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &1894952956
 Rigidbody2D:
   serializedVersion: 4
@@ -15347,7 +15349,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.25
+  movementSpeed: 7.5
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
