@@ -65,7 +65,7 @@ public class BaseCharacterController : MonoBehaviour
     public UnityEvent OnLandEvent;              // Event called when landed
 
     // Other variables (misc and private)
-    private Rigidbody2D rb;
+    [HideInInspector] public Rigidbody2D rb;
     private Vector2 velocity = Vector2.zero;
     private Vector2 targetVelocity = Vector2.zero;
 
