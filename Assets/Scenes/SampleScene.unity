@@ -5422,7 +5422,7 @@ GameObject:
   - component: {fileID: 122422211}
   - component: {fileID: 122422210}
   - component: {fileID: 122422209}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rin Run
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5576,7 +5576,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.5
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -5704,7 +5704,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 163278126}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5734,7 +5734,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 164687693}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5999,7 +5999,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 288159493}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6033,7 +6033,7 @@ GameObject:
   - component: {fileID: 335915584}
   - component: {fileID: 335915583}
   - component: {fileID: 335915582}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rin Pink
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6101,7 +6101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.5
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -7951,7 +7951,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 735758528}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7981,7 +7981,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 757983739}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8244,7 +8244,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 950923428}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8279,7 +8279,7 @@ GameObject:
   - component: {fileID: 962515800}
   - component: {fileID: 962515799}
   - component: {fileID: 962515798}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: redone_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8347,7 +8347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.5
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -8547,7 +8547,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 962515797}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8, y: -2, z: 0}
+  m_LocalPosition: {x: 10, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1928034232}
@@ -8564,7 +8564,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 972737546}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8758,7 +8758,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1150836341}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8793,7 +8793,7 @@ GameObject:
   - component: {fileID: 1175180002}
   - component: {fileID: 1175180006}
   - component: {fileID: 1175180005}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: New Rin Run
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9078,7 +9078,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188521845}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9371,7 +9371,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1325332524}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9401,7 +9401,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1350444472}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9431,7 +9431,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1367591841}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: -----Characters-------
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9555,7 +9555,7 @@ GameObject:
   - component: {fileID: 1459144755}
   - component: {fileID: 1459144759}
   - component: {fileID: 1459144758}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rin
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -9576,7 +9576,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 16
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -9782,24 +9782,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bbb6ec61cc4e8e4298fa7b3f915ab63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 29
+  throwSpeed: 30
+  velocity: {x: 29.525873, y: 5.3125415}
+  playerInputHandler: {fileID: 1450726900}
   rb: {fileID: 1487752144}
-  layerMaskCollision:
+  layerGroundMaskCollision:
     serializedVersion: 2
     m_Bits: 8
-  playerInputHandler: {fileID: 1450726900}
-  possessedPlayersCollider: {fileID: 0}
-  direction: {x: -0.7071063, y: 0.707107}
-  characterAffinity: 600
+  layerCharacterMaskCollision:
+    serializedVersion: 2
+    m_Bits: 64
+  possessedPlayersCollider: {fileID: 335915583}
+  direction: {x: 0.6401098, y: 0.7682835}
+  enablePN: 1
   characterAffnRange: 8
   characterAffnExitRange: 8
+  forceLockOnRadius: 3
   seekedCharacters: []
-  characterMask:
-    serializedVersion: 2
-    m_Bits: 1
-  dampening: 1
-  velocity: {x: 0, y: 0}
+  seeking: 1
+  cone: 74
   maxAngCorr: 3.4
+  dampening: 1
 --- !u!50 &1487752144
 Rigidbody2D:
   serializedVersion: 4
@@ -10515,7 +10518,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1702812631}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14939,7 +14942,7 @@ GameObject:
   - component: {fileID: 1821118984}
   - component: {fileID: 1821118983}
   - component: {fileID: 1821118982}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rin Cyan
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -15007,7 +15010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.5
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -15188,7 +15191,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1821118981}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3, y: 6, z: 0}
+  m_LocalPosition: {x: -8, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 163278126}
@@ -15373,7 +15376,7 @@ GameObject:
   - component: {fileID: 1894952958}
   - component: {fileID: 1894952957}
   - component: {fileID: 1894952956}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rin Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15441,7 +15444,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 7.5
+  movementSpeed: 8
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -15639,7 +15642,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1928034232}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ground Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17465,7 +17468,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2119955256}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ceiling Check
   m_TagString: Untagged
   m_Icon: {fileID: 0}
