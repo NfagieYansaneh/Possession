@@ -9793,14 +9793,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   possessedPlayersCollider: {fileID: 335915583}
-  direction: {x: 0.6401098, y: 0.7682835}
   enablePN: 1
   characterAffnRange: 8
   characterAffnExitRange: 8
   forceLockOnRadius: 3
   seekedCharacters: []
   seeking: 1
-  cone: 74
+  crownFOVAngle: 74
+  ignoreCollisionFOVAngle: 5
   maxAngCorr: 3.4
   dampening: 1
 --- !u!50 &1487752144

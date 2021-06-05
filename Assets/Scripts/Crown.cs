@@ -24,9 +24,6 @@ public class Crown : MonoBehaviour
     [HideInInspector]
     public Collider2D possessedPlayersCollider;
 
-    [HideInInspector]
-    public Vector2 direction;
-
     [Header("Character Seeking & PN")]
     public bool enablePN = true;
     public float characterAffnRange = 1f;
@@ -38,15 +35,35 @@ public class Crown : MonoBehaviour
     public bool seeking = false;
     BaseCharacterController seekedCharacter;
 
+    // seekedCharacterDirection is a Vector2 value that represents the displacement from the crown towards the seekedCharacter
+    private Vector2 seekedCharacterDirection = Vector2.zero;
+
+    // seekedCharacterDistance is the distance from the crown to the seekedCharacter
+    private float seekedCharacterDistance = 0f;
+
+    // seekedCharacterDot is the dot product from our crown's velocity and the direction towards the seekedCharacter
+    private float seekedCharacterDot = 0f;
+
     [Range(0f, 180f)]
-    public float cone;
+    public float crownFOVAngle;
+    [Range(0f, 180f)]
+    public float ignoreCollisionFOVAngle; // used to ignore collision that would result in a deflection if the collision is neglible
     public float maxAngCorr;
     public float dampening = 0.85f;
-    Vector3 prevLOS;
-    Vector3 LOS;
-    Vector3 LOSGain;
-    float LOSAng;
-    //public LayerMask characterMask;
+    private Vector3 prevLOS;
+    private Vector3 LOS;
+    private Vector3 LOSGain;
+    private float LOSAng;
+
+    float crownFOVDot;
+    float ignoreCollisionFOVDot;
+
+    Vector3 upperFOVBound;
+    Vector3 lowerFOVBound;
+    Vector3 upperIgnoreFOVBound;
+    Vector3 lowerIgnoreFOVBound;
+
+
 
     public void Start()
     {
@@ -55,28 +72,41 @@ public class Crown : MonoBehaviour
         //gameObject.SetActive(false);
     }
 
-    Vector3 upperBound;
-    Vector3 lowerBound;
-
     public void FixedUpdate()
     {
-        upperBound = transform.right * (characterAffnRange / 2);
-        lowerBound = transform.right * (characterAffnRange / 2);
-        upperBound = Vector3.RotateTowards(rb.velocity.normalized, Vector2.Perpendicular(rb.velocity.normalized), -cone * Mathf.Deg2Rad, 0.0f);
-        lowerBound = Vector3.RotateTowards(rb.velocity.normalized, -Vector2.Perpendicular(rb.velocity.normalized), -cone * Mathf.Deg2Rad, 0.0f);
-        dotProduct = Vector3.Dot(rb.velocity.normalized, upperBound);
+        // For drawing and setting up the values for the crowns FOV for seeking characters when outside of a characters forceLockOnRadius
+        // This will be shifted outside of FixedUpdate() and into Start() later for performance reasons as we don't need to continously compute this number over and over
+        // again. This is only in FixedUpdate() for convenice.
 
-        SeekCharacters();
+        upperFOVBound = transform.right * (characterAffnRange / 2);
+        lowerFOVBound = transform.right * (characterAffnRange / 2);
+        upperFOVBound = Vector3.RotateTowards(rb.velocity.normalized, Vector2.Perpendicular(rb.velocity.normalized), -crownFOVAngle * Mathf.Deg2Rad, 0.0f);
+        lowerFOVBound = Vector3.RotateTowards(rb.velocity.normalized, -Vector2.Perpendicular(rb.velocity.normalized), -crownFOVAngle * Mathf.Deg2Rad, 0.0f);
+
+        upperIgnoreFOVBound = transform.right * (characterAffnRange / 2);
+        lowerIgnoreFOVBound = transform.right * (characterAffnRange / 2);
+        upperIgnoreFOVBound = Vector3.RotateTowards(rb.velocity.normalized, Vector2.Perpendicular(rb.velocity.normalized), -ignoreCollisionFOVAngle * Mathf.Deg2Rad, 0.0f);
+        lowerIgnoreFOVBound = Vector3.RotateTowards(rb.velocity.normalized, -Vector2.Perpendicular(rb.velocity.normalized), -ignoreCollisionFOVAngle * Mathf.Deg2Rad, 0.0f);
+
+        // if dot product towards a potential possessiable character is greater than or equal to crownFOVDot. Then we are in the crown's FOV
+        crownFOVDot = Vector3.Dot(rb.velocity.normalized, upperFOVBound);
+        ignoreCollisionFOVDot = Vector3.Dot(rb.velocity.normalized, upperIgnoreFOVBound);
+
         if (enablePN) ApplyPorportionalNavigation();
     }
 
-    float dotProduct;
+    // purely for debugging in order for me to visualise the process of seeking and tracking down characters so possession takes place
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, transform.position + upperBound);
-        Gizmos.DrawLine(transform.position, transform.position + lowerBound);
-        //Handles.Label(transform.position + Vector3.up * 2f, Convert.ToString(dotProduct));
+        Gizmos.DrawLine(transform.position, transform.position + upperFOVBound);
+        Gizmos.DrawLine(transform.position, transform.position + lowerFOVBound);
+
+        Handles.Label(transform.position + Vector3.up * 2f, Convert.ToString(crownFOVDot));
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawLine(transform.position, transform.position + upperIgnoreFOVBound);
+        Gizmos.DrawLine(transform.position, transform.position + lowerIgnoreFOVBound);
 
         for (int i = 0; i < seekedCharacters.Count; i++)
         {
@@ -85,7 +115,7 @@ public class Crown : MonoBehaviour
             Vector2 direction = seekedCharacters[i].transform.position - transform.position;
             float dot = Vector2.Dot(direction.normalized, rb.velocity.normalized);
 
-            //Handles.Label(transform.position + distanceHalf, Convert.ToString(dot));
+            Handles.Label(transform.position + distanceHalf, Convert.ToString(dot));
 
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(seekedCharacters[i].transform.position, forceLockOnRadius);
@@ -102,9 +132,12 @@ public class Crown : MonoBehaviour
         }
     }
 
+    // throws crown
     public void ThrowMe(Vector2 desiredDirection, Collider2D newCollider)
     {
         // gameObject.SetActive(true); // A deactivated game object can not activate itself
+        Vector2 direction = Vector2.zero;
+
         if (desiredDirection == Vector2.zero)
         {
             direction = playerInputHandler.possessedCharacter.transform.right;
@@ -118,9 +151,10 @@ public class Crown : MonoBehaviour
         rb.velocity = velocity = direction * throwSpeed;
     }
 
-    public void SeekCharacters() // adds characters to the seeking list if they are within the character affinity range
+    // adds characters to the seeking list if they are within the character affinity range
+    public void SeekCharacters()
     {
-        foreach(BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
+        foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
         {
             if (baseCharacterController == playerInputHandler.possessedCharacter) continue; // ignore currently possessed character
 
@@ -144,6 +178,7 @@ public class Crown : MonoBehaviour
 
                 // check for override settings!
             }
+
             // removing seeked characters
             else if (distance > characterAffnExitRange)
             {
@@ -153,23 +188,25 @@ public class Crown : MonoBehaviour
         }
     }
 
-    public int ApplyPorportionalNavigation() // return 0 if it was able to seek a character, else returns -1
+    // iterates through all seekedCharacters list and vetts them inorder to find the best character to seek. Thus, assigning this to seekedCharacter
+    // returns true if able to find a character to seek that meets all the requirements. Else, returns false.
+    // overwriteValues & overwriteRbVelocity is just used to overwrite values for niche cases like vetting characters based on the direction of our deflection
+    // velocity when we collider with the ground
+    public bool VettSeekedCharacters(bool overwriteValues, Vector2 overwriteRbVelocity)
     {
-        // Tutorial that taught me how to intergrate proportional navigation into my crown
-        // https://www.moddb.com/members/blahdy/blogs/gamedev-introduction-to-proportional-navigation-part-i
-        // https://answers.unity.com/questions/585035/lookat-2d-equivalent-.html
-
-        // previousDistance is the distance from the crown to the seekedCharacter
-        float previousDistance = 0f;
-
-        // previousDot is the dot product from our crown's velocity and the direction towards the seekedCharacter
-        float previousDot = 0f;
-
         seeking = false;
         foreach (BaseCharacterController baseCharacterController in seekedCharacters)
         {
             Vector2 direction = baseCharacterController.transform.position - transform.position;
-            float dot = Vector2.Dot(direction.normalized, rb.velocity.normalized);
+            float dot;
+
+            if (overwriteValues == false)
+            {
+                dot = Vector2.Dot(direction.normalized, rb.velocity.normalized);
+            } else
+            {
+                dot = Vector2.Dot(direction.normalized, overwriteRbVelocity);
+            }
 
             float distance = direction.magnitude;
 
@@ -182,24 +219,37 @@ public class Crown : MonoBehaviour
             // second case handles a situation where our 'dot' is greater than the 'previousDot' but is not too far from the originally seekedCharacter
             // third case handles a situation where our 'dot' is or is not greater than the 'previousDot' but is far closer to the originally seekedCharacter
 
-            if (dot >= dotProduct && !seeking ||
-                dot >= dotProduct && dot > previousDot && !(Vector2.Distance(transform.position, seekedCharacter.transform.position) <= forceLockOnRadius) ||
+            if (dot >= crownFOVDot && !seeking ||
+                dot >= crownFOVDot && dot > seekedCharacterDot && !(Vector2.Distance(transform.position, seekedCharacter.transform.position) <= forceLockOnRadius) ||
                 distance < forceLockOnRadius && !seeking ||
-                distance < forceLockOnRadius && seeking && distance < previousDistance)
+                distance < forceLockOnRadius && seeking && distance < seekedCharacterDistance)
             {
-                previousDot = dot;
+                seekedCharacterDot = dot;
                 seeking = true;
                 seekedCharacter = baseCharacterController;
-                previousDistance = distance;
+                seekedCharacterDistance = distance;
+                seekedCharacterDirection = direction;
             }
             else if (seekedCharacter == baseCharacterController) // can no longer seek that character because it does not pass any of the 3 cases above
             {
-                Debug.LogWarning("hmmm");
+                Debug.LogWarning(seekedCharacter + " No longer reaches the requirements to be seeked");
                 seeking = false;
             }
         }
 
-        if (!seeking) return -1;
+        if (!seeking) return false;
+        else return true;
+    }
+
+    // return true if it was able to apply porportional navigation, else returns false
+    public bool ApplyPorportionalNavigation()
+    {
+        // Tutorial that taught me how to intergrate proportional navigation into my crown
+        // https://www.moddb.com/members/blahdy/blogs/gamedev-introduction-to-proportional-navigation-part-i
+        // https://answers.unity.com/questions/585035/lookat-2d-equivalent-.html
+
+        SeekCharacters();
+        if (VettSeekedCharacters(false, Vector2.zero) == false) return false;
 
         // Obtaining Line Of Sight (LOS) rotation rate
         transform.right = seekedCharacter.transform.position - transform.position;
@@ -212,7 +262,7 @@ public class Crown : MonoBehaviour
         int N = 3;
 
         float rotationSpeed = Mathf.Clamp(Mathf.Abs(LOSGain.magnitude * N), 0, maxAngCorr); //rotation_Speed = Omega * N (Clamped to maximum rotation speed)
-        if (LOSAng < cone) // used to be 60
+        if (LOSAng < crownFOVAngle) // used to be 60
         {
             Quaternion rot = Quaternion.AngleAxis(rotationSpeed, perpVec.normalized); // rotate with rotationSpeed around perpVec axis.
             //rb.velocity = Vector3.RotateTowards(rb.velocity, )
@@ -233,17 +283,20 @@ public class Crown : MonoBehaviour
         //Debug.Log(transform.right);
         //rb.rotation = transform.localRotation.z;
 
-        return 0;
+        return true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collider)
+    public void HandleDeflectionResponse(Collider2D collider)
     {
-        if(collider == possessedPlayersCollider) {
+        // I should be using Physics2D.IgnoreCollision so I will implement that later
+        if (collider == possessedPlayersCollider)
+        {
             return;
         }
 
         BaseCharacterController baseCharacterController = collider.gameObject.GetComponent<BaseCharacterController>();
 
+        // if we collided with a character. Possess that character...
         if (baseCharacterController != null)
         {
             seekedCharacters.Clear();
@@ -253,9 +306,19 @@ public class Crown : MonoBehaviour
 
         else if (collider.gameObject.layer == 3) // else if it hits the ground, deflect off it
         {
+            if (seeking && seekedCharacterDot >= ignoreCollisionFOVDot)
+            {
+                return;
+
+                // in this case, we ignore collision because we are still seeking a character along the crown's path and the ground's collider
+                // is not too much in the way of the crown's vision since 'seeking' is still set true. Seeking would have been set false as soon as line of
+                // to that seekedCharacter was broken.
+            }
+
             RaycastHit2D hit;
-            hit = Physics2D.Raycast(transform.position, rb.velocity.normalized, 1f, layerGroundMaskCollision); // detcting ground 
-            direction = Vector2.Reflect(rb.velocity.normalized, hit.normal);
+            // substraction is to make sure raycast is formed whilst not being submerged in another collider as this results in fault reflected vector calculations
+            hit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y) - (0.5f*rb.velocity.normalized), rb.velocity.normalized, 1.5f, layerGroundMaskCollision); // detcting ground 
+            Vector2 reflectDirection = Vector2.Reflect(rb.velocity.normalized, hit.normal);
 
 
             // Debugging
@@ -263,35 +326,43 @@ public class Crown : MonoBehaviour
             Debug.DrawRay(hit.point, hit.normal, Color.green, 1f);
             //Debug.DrawRay(hit.point, direction, Color.yellow, 1f);
 
-            rb.velocity = direction * rb.velocity.magnitude * dampening;
-            if (seeking && enablePN)
+            velocity = reflectDirection * rb.velocity.magnitude * dampening;
+            if (enablePN)
             {
-                /*bool ready = false;
-                float previousDot = 0f;
-                float previousDistance = 0f;
-                foreach (BaseCharacterController potentialSeek in seekedCharacters)
+
+                // search for a possible character to possess upon deflection and recorrect our deflection vector towards that character
+                if (VettSeekedCharacters(true, reflectDirection.normalized))
                 {
-                    Vector2 direction = potentialSeek.transform.position - transform.position;
-                    float dot = Vector2.Dot(direction.normalized, rb.velocity.normalized);
-
-                    if (dot > previousDot || direction.magnitude < forceLockOnRadius && !ready ||
-                        direction.magnitude < forceLockOnRadius && direction.magnitude < previousDistance && ready)
+                    // So many magic numbers
+                    if (seekedCharacterDistance < forceLockOnRadius)
                     {
-                        ready = true;
-                        seekedCharacter = potentialSeek; 
+                        velocity = Vector3.RotateTowards(velocity, seekedCharacterDirection.normalized, 80f * Mathf.Deg2Rad, 0.0f);
                     }
-                }*/
-
-                Vector3 x = seekedCharacter.transform.position - transform.position;
-                if(x.magnitude < forceLockOnRadius) rb.velocity = Vector3.RotateTowards(rb.velocity, x.normalized, 80f * Mathf.Deg2Rad, 0.0f);
-                else if (x.magnitude - 2f < forceLockOnRadius) rb.velocity = Vector3.RotateTowards(rb.velocity, x.normalized, 60f * Mathf.Deg2Rad, 0.0f);
-                else
-                rb.velocity = Vector3.RotateTowards(rb.velocity, x.normalized, 40f * Mathf.Deg2Rad, 0.0f);
+                    else if (seekedCharacterDistance - 2f < forceLockOnRadius)
+                    {
+                        velocity = Vector3.RotateTowards(velocity, seekedCharacterDirection.normalized, 45f * Mathf.Deg2Rad, 0.0f);
+                    }
+                    else
+                    {
+                        velocity = Vector3.RotateTowards(velocity, seekedCharacterDirection.normalized, 35f * Mathf.Deg2Rad, 0.0f);
+                    }
+                }
             }
 
-            velocity = rb.velocity;
+            rb.velocity = velocity;
             // t_velocityChangeCurveTimestamp = Time.time;
 
         }
+    }
+
+    // handles deflection & assisted redirection upon deflection
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        HandleDeflectionResponse(collider);
+    }
+
+    private void OnTriggerStay2D(Collider2D collider)
+    {
+        HandleDeflectionResponse(collider);
     }
 }
