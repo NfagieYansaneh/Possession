@@ -9489,6 +9489,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48c658d5f2eefe74a91d82710e5465d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  universalFixedMinDeadzone: 0.125
+  universalFixedMaxDeadzone: 0.92499995
+  groundHorizontalDeadzone: 0.2
+  groundVerticalDeadzone: 0.2
+  aerialHorizontalDeadzone: 0.2
+  aerialVerticalDeadzone: 0.2
   possessedCharacter: {fileID: 962515800}
 --- !u!4 &1450726901
 Transform:

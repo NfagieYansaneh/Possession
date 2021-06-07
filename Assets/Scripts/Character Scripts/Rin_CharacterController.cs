@@ -32,10 +32,23 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformMovement(InputAction.CallbackContext context)
     {
-        movementDirection = context.ReadValue<Vector2>();
+        //movementDirection = context.ReadValue<Vector2>();
+        movementDirection = playerInputHandler.groundMovementDirection;
+
+        if (movementDirection.magnitude <= playerInputHandler.universalFixedMinDeadzone)
+        {
+            // Debug.LogWarning("IN DEADZONE");
+            movementDirection = Vector2.zero;
+        } else
+        {
+            // Debug.Log(movementDirection.magnitude + " : " + playerInputHandler.universalFixedMinDeadzone);
+        }
+
+        Vector2 targetVelocity;
 
         // calculates our velocity, but leaves the character current vertical velocity alone
-        Vector2 targetVelocity = new Vector2(movementSpeed * movementDirection.x, curVerticalVelocity);
+        targetVelocity = new Vector2(movementSpeed * movementDirection.x, curVerticalVelocity);
+
         SetVelocity(targetVelocity);
 
         // flips player based on movement keys

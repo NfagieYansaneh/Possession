@@ -10,6 +10,24 @@ public class PlayerInputHandler : MonoBehaviour
     // Variable stores an instance of the InputMaster, which holds all of our input actions for input processing
     InputMaster input;
 
+    public float universalFixedMinDeadzone = 0.125f;
+    public float universalFixedMaxDeadzone = 0.925f;
+
+    public float groundHorizontalDeadzone = 0.2f;
+    public float groundVerticalDeadzone = 0.2f;
+
+    public float aerialHorizontalDeadzone = 0.2f;
+    public float aerialVerticalDeadzone = 0.2f;
+
+    [HideInInspector] public Vector2 RAWmovementDirection     = Vector2.zero;
+    [HideInInspector] public Vector2 groundMovementDirection  = Vector2.zero;
+    [HideInInspector] public Vector2 aerialMovementDirection  = Vector2.zero;
+    [HideInInspector] public Vector2 dashingMovementDirection = Vector2.zero;
+
+    [HideInInspector] public Vector2 RAWattackDirection       = Vector2.zero;
+    [HideInInspector] public Vector2 groundAttackDirection    = Vector2.zero;
+    [HideInInspector] public Vector2 aerialAttackDirection    = Vector2.zero;
+
     public BaseCharacterController possessedCharacter;
 
     private void Awake()
@@ -37,8 +55,41 @@ public class PlayerInputHandler : MonoBehaviour
 
     }
 
+    void RefineMovement()
+    {
+        if (RAWmovementDirection.magnitude <= universalFixedMinDeadzone)
+        {
+            groundMovementDirection = aerialMovementDirection = Vector2.zero;
+            return;
+        }
+
+        // Refining groundMovementDirection that only handles horizontal ground movement
+        if (RAWmovementDirection.x > groundHorizontalDeadzone || RAWmovementDirection.x < -groundHorizontalDeadzone)
+            groundMovementDirection.x = (RAWmovementDirection.x > 0f) ? 1f : -1f;
+        else groundMovementDirection.x = 0f;
+
+        // Aerial
+        if (RAWmovementDirection.x > aerialHorizontalDeadzone)
+        {
+            aerialMovementDirection.x = RAWmovementDirection.x;
+        }
+
+        if (RAWmovementDirection.y > aerialVerticalDeadzone)
+        {
+            aerialMovementDirection.y = RAWmovementDirection.y;
+        }
+    }
+
+    void RefineAttack()
+    {
+
+    }
+
     void OnMovementPerformed(InputAction.CallbackContext context)
     {
+        RAWmovementDirection = context.ReadValue<Vector2>();
+        RefineMovement();
+
         if(possessedCharacter != null)
         {
             possessedCharacter.PerformMovement(context);

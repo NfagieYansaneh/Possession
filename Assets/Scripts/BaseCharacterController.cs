@@ -142,9 +142,18 @@ public class BaseCharacterController : MonoBehaviour
                     airJumpsPerformed = 0;
                 }
 
-                if (!wasGrounded) // If I was perivously not grounded, this means I had just landed
+                if (!wasGrounded && curVerticalVelocity < 0f) // If I was perivously not grounded, this means I had just landed
                 {
                     // Debug.Log("Grounded");
+                    // Snap to ground
+                    RaycastHit2D hit = Physics2D.BoxCast(new Vector2(transform.position.x, transform.position.y - transform.localScale.y/2), Vector2.one, 0, Vector2.down, 1f, whatIsGround);
+                    if (hit == true)
+                    {
+                        Debug.Log("Hey");
+                        float distanceToGround = transform.position.y - hit.point.y;
+                        transform.position += Vector3.up * (0.5f - distanceToGround);
+                    }
+
                     OnLandEvent.Invoke();
                 }
             }
@@ -169,7 +178,7 @@ public class BaseCharacterController : MonoBehaviour
             else
             {
                 //Debug.Log("WAKKKAWAKKKA");
-                rb.velocity = (applySmoothing) ? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
+                //rb.velocity = (applySmoothing) ? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
             }
         } else {
             // rb.velocity = (applySmoothing)? Vector2.SmoothDamp(rb.velocity, targetVelocity, ref velocity, movementSmoothing) : targetVelocity;
@@ -195,13 +204,29 @@ public class BaseCharacterController : MonoBehaviour
             else
             {
                 // Else, stay still (-1f helps just sort out the possiblity of hovering over the ground)
+
                 curVerticalVelocity = -1f;
             }
 
-            rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
+            if (isGrounded)
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, whatIsGround);
+                if (hit != false)
+                {
+                    //Debug.Log("Hey?");
+                    rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
+                }
+            }
+            else
+            {
+
+                rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
+            }
         } else {
             // do nothing
         }
+
+        // STOP USING rb.velocity AND USE VELOCITY (Performant?)
 
     }
 
@@ -266,7 +291,7 @@ public class BaseCharacterController : MonoBehaviour
         // not typically meant to be overwritten
         crownObject.SetActive(true);
         crownObject.transform.position = transform.position;
-        crownScript.ThrowMe(movementDirection, myCollider);
+        crownScript.ThrowMe(playerInputHandler.RAWmovementDirection, myCollider);
     }
 
     public virtual void PossessMe()
