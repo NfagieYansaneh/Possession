@@ -29,6 +29,7 @@ public class BaseCharacterController : MonoBehaviour
     public bool airControl = true;              // Whether you can steer while jumping
     public float jumpHeight = 1;
     public float airborneJumpHeight = 1;
+
     [Tooltip("successiveJumpHeightReduction")]
     [Range(0f, 1f)]
     public float successiveJumpHeightReduction; // reduces the height of each successive airborne jump
@@ -105,6 +106,12 @@ public class BaseCharacterController : MonoBehaviour
         myCollider = GetComponent<Collider2D>();
     }
 
+    private void Start()
+    {
+        //StartCoroutine(SnapToGround());
+        size = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+    }
+
     private void OnEnable()
     {
         if (baseCharacterControllers == null) baseCharacterControllers = new List<BaseCharacterController>();
@@ -117,6 +124,40 @@ public class BaseCharacterController : MonoBehaviour
         baseCharacterControllers.Remove(this);
     }
 
+    Vector3 size;
+    RaycastHit2D groundHit;
+
+    Vector2 position;
+    private void OnDrawGizmosSelected()
+    {
+        if (groundHit == false)
+        {
+            Gizmos.color = Color.magenta;
+        }
+        else if (snapping)
+            Gizmos.color = Color.yellow;
+        else
+            Gizmos.color = Color.red;
+        //Gizmos.DrawWireCube(groundCheck.position, size);
+        Vector2 tempPosition = new Vector2(position.x, position.y - 0.55f / 2);
+        Gizmos.DrawWireCube(tempPosition, size);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(transform.position, groundHit.point);
+
+        Gizmos.color = Color.magenta;
+        if (groundHit == true)
+        {
+            float diff = groundHit.point.y - groundCheck.position.y;
+            Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - diff));
+        }
+    }
+
+    void Update()
+    {
+
+    }
+
     // FixedUpdate is called every 'x' seconds
     void FixedUpdate()
     {
@@ -125,9 +166,41 @@ public class BaseCharacterController : MonoBehaviour
 
         // Player is grounded if the circlecast to groundcheck position hits anything designated as ground
         // Based on whether that object is in the ground layer
-        Collider2D[] Colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundedRadius, whatIsGround);
+        position = groundCheck.position + Vector3.up * size.y/2;
+        groundHit = Physics2D.BoxCast(position, size, 0f, Vector2.down, 0.55f / 2, whatIsGround);
+
+        if(groundHit == true)
+        {
+            if (curVerticalVelocity <= 0f)
+            {
+                isGrounded = true;
+                isFalling = false;
+
+                // reset our jumps
+                jumpIndex = 1;
+                airJumpsPerformed = 0;
+                curVerticalVelocity = 0f;
+
+                distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
+                if (distanceToGround != 0f) snapping = true;
+                else snapping = false;
+
+                //if(distanceToGround > 0f)
+                transform.position -= Vector3.up * (distanceToGround);
+
+                if (!wasGrounded)
+                {
+
+                    OnLandEvent.Invoke();
+                }
+            }
+        }
+
+        //Collider2D[] Colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundedRadius, whatIsGround);
 
         // Loop through all detected 'ground' colliders in order to determine if we are grounded
+
+        /*
         for (int i = 0; i < Colliders.Length; i++)
         {
             if (Colliders[i].gameObject != gameObject) // if the collider does not equal us
@@ -158,9 +231,54 @@ public class BaseCharacterController : MonoBehaviour
                 }
             }
         }
+        */
 
-        Move();
+        // Move();
+        HandleMovement();
         RunAtFixedUpdate();
+    }
+
+    bool snapping = false;
+    float distanceToGround = 0f;
+
+    public void HandleMovement()
+    {
+        // Handle Dashing
+
+        // Handle General movement
+        Vector2 velocity;
+        velocity = targetVelocity * startMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
+
+        // Handles Gravity
+        if (!isGrounded)
+        {
+            if (curVerticalVelocity < 0f)
+            {
+                // applies fallingGravityMultiplier if we are falling
+                curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * Time.deltaTime;
+                isFalling = true;
+            }
+            else
+            {
+                // else apply typical gravity
+                curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
+            }
+        } 
+        else
+        {
+            curVerticalVelocity = 0f;
+        }
+
+        if (isGrounded && groundHit)
+        {
+            rb.velocity = new Vector2(velocity.x, 0f);
+            Debug.DrawRay(groundHit.point, groundHit.normal, Color.magenta);
+            float dot = Vector2.Dot(groundHit.normal, Vector2.right);
+            if (dot == 1f || dot == -1f) return;
+            rb.velocity = Vector3.ProjectOnPlane(rb.velocity, groundHit.normal);
+            return;
+        }
+        rb.velocity = new Vector2(velocity.x, curVerticalVelocity);
     }
 
     public void Move()
@@ -205,7 +323,7 @@ public class BaseCharacterController : MonoBehaviour
             {
                 // Else, stay still (-1f helps just sort out the possiblity of hovering over the ground)
 
-                curVerticalVelocity = -1f;
+                curVerticalVelocity = 0f;
             }
 
             if (isGrounded)
