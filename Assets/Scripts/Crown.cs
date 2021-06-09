@@ -303,8 +303,9 @@ public class Crown : MonoBehaviour
             baseCharacterController.PossessMe();
             gameObject.SetActive(false);
         }
-
-        else if (collider.gameObject.layer == 3) // else if it hits the ground, deflect off it
+        // layermask == (layermask | (1 << layer))
+        // change order of checking????
+        else if (collider.gameObject.layer == 3 || collider.gameObject.layer == 7) // else if it hits the ground, deflect off it
         {
             if (seeking && seekedCharacterDot >= ignoreCollisionFOVDot)
             {

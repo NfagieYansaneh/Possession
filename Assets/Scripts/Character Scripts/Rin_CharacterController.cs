@@ -21,13 +21,8 @@ public class Rin_CharacterController : BaseCharacterController
      */
 
     public override void RunAtFixedUpdate()
-    { 
-        if(t_velocityTimestamp <= Time.time && dodging == true)
-        {
-            // Run end dodging script
-            curVerticalVelocity = 0f;
-            dodging = false;
-        } 
+    {
+        base.RunAtFixedUpdate();
     }
 
     public override void PerformMovement(InputAction.CallbackContext context)
@@ -55,11 +50,13 @@ public class Rin_CharacterController : BaseCharacterController
         if (movementDirection.x < -0.2 && facingRight == true)
         {
             facingRight = false;
+
             transform.localScale = new Vector3(-1, 1, 1);
         }
         else if (movementDirection.x > 0.2 && facingRight == false)
         {
             facingRight = true;
+
             transform.localScale = new Vector3(1, 1, 1);
         }
     }
@@ -89,23 +86,7 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformDodge(InputAction.CallbackContext context)
     {
-        if (movementDirection == Vector2.zero) // make sure to set proper deadzones!
-        {
-            SetVelocityTimed(Vector2.zero, neutralDodgeTime, false);
-        }
-        else
-        {
-            float calculatedSpeed = dodgeDistance / dodgeTime;
-            SetVelocityTimed(movementDirection * calculatedSpeed, dodgeTime, false);
-        }
-
-        t_dodgeCurveTimestamp = Time.time;
-        dodging = true;
-        isFalling = false;
-        curVerticalVelocity = 0f;
-
-        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 2, instead of 1 (which represents our ground jump)
-        jumpIndex = 2;
+        base.PerformDodge(context);
     }
 
     public override void PerformLightAttack(InputAction.CallbackContext context)

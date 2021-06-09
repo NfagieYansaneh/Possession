@@ -48,11 +48,21 @@ public class BaseCharacterController : MonoBehaviour
     public float dodgeTime;
     [Range(0f, 1f)]
     public float neutralDodgeTime;
-    [Range(0f, 5f)]
+    [Range(0f, 15f)]
     public float dodgeDistance;
     public AnimationCurve dodgeCurve;
-    [HideInInspector] public float t_dodgeCurveTimestamp;
 
+    [HideInInspector] public float dodgeTimestamp = 0f;
+    [HideInInspector] public bool gravityEnabled = false;
+    [HideInInspector] public Vector2 dodgeVelocity = Vector2.zero;
+
+    [HideInInspector] public float t_dodgeCurveTimestamp;
+    public Vector2 dashingBoxSize = Vector2.zero;
+    [HideInInspector] public Vector2 dashingBoxPosition = Vector2.zero;
+    public Vector2 dashingBoxOffset = Vector2.zero;
+
+    RaycastHit2D dashingHit;
+    bool dashingBoxClipped = false;
 
     [Header("Ground Checking")]
     public LayerMask whatIsGround;              // A mask determining what is ground to the character
@@ -62,8 +72,23 @@ public class BaseCharacterController : MonoBehaviour
     public bool isGrounded;                     // Whether or not the player is grounded.
     public bool isFalling;                      // Whether or not the player is falling
     public float ceilingRadius = .2f;           // Radius of the overlap circle to determine if the player can stand up
+
+    Vector2 ceilingCheckBoxSize = Vector2.zero;
+    Vector2 ceilingCheckBoxPosition = Vector2.zero;
+
+    RaycastHit2D ceilingHit;
+
+    bool ceilingCheckBoxClipped = false;
+
+    Vector2 groundCheckBoxSize = Vector2.zero;
+    Vector2 groundCheckBoxPosition = Vector2.zero;
+
+    RaycastHit2D[] groundHits = new RaycastHit2D[3]; // can recieve up to 3 hits
+    RaycastHit2D groundHit;
+
     public Collider2D myCollider;
     public UnityEvent OnLandEvent;              // Event called when landed
+    bool snapping = true;                       // When snapping the player towards ground
 
     // Other variables (misc and private)
     [HideInInspector] public Rigidbody2D rb;
@@ -73,9 +98,6 @@ public class BaseCharacterController : MonoBehaviour
     [HideInInspector] public float curVerticalVelocity = 0f;
 
     // t_ variables are for timing purposes (and are hidden)
-    [HideInInspector] public float t_velocityTimestamp = 0f;
-    [HideInInspector] public Vector2 t_velocity = Vector2.zero;
-    [HideInInspector] public float t_gravityTimestamp = 0f;
 
     // Variable stores an instance of the InputMaster, which holds all of our input actions for input processing
     InputMaster input;
@@ -83,7 +105,7 @@ public class BaseCharacterController : MonoBehaviour
     [Header("Crown")]
     public GameObject crownObject;
     public Crown crownScript;
-    public static List<BaseCharacterController> baseCharacterControllers; // list containing all base character controllers in scene
+    public static List<BaseCharacterController> baseCharacterControllers; // list containing all base character controllers in scene !!!!!
     //[Min(1f)]
     //public float crownAffinityScalar = 1f;
 
@@ -96,10 +118,6 @@ public class BaseCharacterController : MonoBehaviour
     {
         input = new InputMaster();
 
-        t_velocityTimestamp = 0f;
-        t_velocity = Vector2.zero;
-        t_gravityTimestamp = 0f;
-
         // input.Player.Movement.performed += ctx => Debug.Log(ctx.ReadValueAsObject());  THIS IS A LAMBDA FUNCTION
 
         rb = GetComponent<Rigidbody2D>();
@@ -108,8 +126,9 @@ public class BaseCharacterController : MonoBehaviour
 
     private void Start()
     {
-        //StartCoroutine(SnapToGround());
-        size = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+        // StartCoroutine(SnapToGround());
+        groundCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+        ceilingCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
     }
 
     private void OnEnable()
@@ -117,6 +136,11 @@ public class BaseCharacterController : MonoBehaviour
         if (baseCharacterControllers == null) baseCharacterControllers = new List<BaseCharacterController>();
 
         baseCharacterControllers.Add(this);
+        foreach(BaseCharacterController baseCharacterController in baseCharacterControllers)
+        {
+            if (baseCharacterController == this) continue;
+            Physics2D.IgnoreCollision(baseCharacterController.myCollider, myCollider);
+        }
     }
 
     private void OnDisable()
@@ -124,53 +148,152 @@ public class BaseCharacterController : MonoBehaviour
         baseCharacterControllers.Remove(this);
     }
 
-    Vector3 size;
-    RaycastHit2D groundHit;
-
-    Vector2 position;
     private void OnDrawGizmosSelected()
     {
-        if (groundHit == false)
+        // Debugging sake
+        if (!Application.isPlaying)
         {
-            Gizmos.color = Color.magenta;
+            groundCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+            ceilingCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+
+            ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
+            groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
+            dashingBoxPosition = new Vector2(transform.position.x + dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
+        }
+
+        // ground
+        if (!groundHit || !Application.isPlaying)
+        {
+            Gizmos.color = Color.green;
         }
         else if (snapping)
             Gizmos.color = Color.yellow;
         else
             Gizmos.color = Color.red;
-        //Gizmos.DrawWireCube(groundCheck.position, size);
-        Vector2 tempPosition = new Vector2(position.x, position.y - 0.55f / 2);
-        Gizmos.DrawWireCube(tempPosition, size);
+        //Gizmos.DrawWireCube(groundCheck.position, groundCheckBoxSize);
+        Vector2 tempPosition = new Vector2(groundCheckBoxPosition.x, groundCheckBoxPosition.y - 0.55f / 2);
+        Gizmos.DrawWireCube(tempPosition, groundCheckBoxSize);
 
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(transform.position, groundHit.point);
 
-        Gizmos.color = Color.magenta;
+        // ceiling
+        if (!ceilingCheckBoxClipped || !Application.isPlaying)
+        {
+            Gizmos.color = Color.green;
+        } 
+        else
+        {
+            Gizmos.color = Color.red;
+        }
+
+        Gizmos.DrawWireCube(ceilingCheckBoxPosition, ceilingCheckBoxSize);
+
+        // dashing
+        if (dashingBoxClipped) Gizmos.color = Color.red;
+        else Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(dashingBoxPosition, dashingBoxSize);
+        /* Gizmos.color = Color.magenta;
         if (groundHit == true)
         {
             float diff = groundHit.point.y - groundCheck.position.y;
             Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - diff));
-        }
+        } */
+
+        Gizmos.color = Color.yellow;/*
+        Gizmos.DrawLine(transform.position, groundHits[0].point);
+        Gizmos.DrawLine(transform.position, groundHits[1].point);
+        Gizmos.DrawLine(transform.position, groundHits[2].point);
+        Gizmos.DrawLine(transform.position, groundHits[3].point);
+        Gizmos.DrawLine(transform.position, groundHits[4].point);*/
     }
 
     void Update()
     {
+        if(Time.time > dodgeTimestamp)
+        {
+            dodging = false;
+            gravityEnabled = true;
+            // Do some end dodging shiz
+        }
 
+        ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
+        groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
+        if(facingRight)
+            dashingBoxPosition = new Vector2(transform.position.x + dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
+        else
+            dashingBoxPosition = new Vector2(transform.position.x - dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
     }
 
     // FixedUpdate is called every 'x' seconds
     void FixedUpdate()
+    {
+
+        HandleCollisionsAndSnapping();
+        HandleMovement();
+        RunAtFixedUpdate();
+    }
+
+    public void HandleCollisionsAndSnapping()
     {
         bool wasGrounded = isGrounded;
         isGrounded = false;
 
         // Player is grounded if the circlecast to groundcheck position hits anything designated as ground
         // Based on whether that object is in the ground layer
-        position = groundCheck.position + Vector3.up * size.y/2;
-        groundHit = Physics2D.BoxCast(position, size, 0f, Vector2.down, 0.55f / 2, whatIsGround);
+        //position = groundCheck.position + Vector3.up * groundCheckBoxSize.y/2;
+  
+        ContactFilter2D contactFilter2D = new ContactFilter2D();
+        contactFilter2D.SetLayerMask(whatIsGround);
 
-        if(groundHit == true)
+        int numberOfContacts = Physics2D.BoxCast(groundCheckBoxPosition, groundCheckBoxSize, 0f, Vector2.down, contactFilter2D, groundHits, 0.55f / 2);
+        Debug.Log(numberOfContacts);
+        float previousDistanceY = 0f;
+        groundHit = new RaycastHit2D();
+        Vector2 previousClosestPoint = Vector2.zero;
+        RaycastHit2D previousHit = new RaycastHit2D();
+
+        for (int index = 0; index < numberOfContacts; index++)
         {
+            Vector2 position = groundCheckBoxPosition;
+            position.y = groundCheckBoxPosition.y + groundCheckBoxSize.y / 2;
+            Vector2 closestPoint = Physics2D.ClosestPoint(position, groundHits[index].collider);
+            //if (closestPoint.y > position.y) closestPoint.y = position.y;
+
+            Debug.DrawRay(closestPoint, Vector2.up, Color.red);
+            float distanceY = groundCheckBoxPosition.y - closestPoint.y;
+            if (previousDistanceY > distanceY || previousDistanceY == 0f)
+            {
+                previousDistanceY = distanceY;
+                previousClosestPoint = closestPoint;
+                previousHit = groundHits[index];
+            }
+        }
+
+        if (previousClosestPoint != Vector2.zero)
+        {
+            // this seems inefficient?
+            Vector2 direction;
+            if (previousClosestPoint.x < groundCheckBoxPosition.x + groundCheckBoxSize.x / 2 && previousClosestPoint.x > groundCheckBoxPosition.x - groundCheckBoxSize.x / 2 &&
+                previousClosestPoint.y < groundCheckBoxPosition.y + groundCheckBoxSize.y / 2 && previousClosestPoint.y > groundCheckBoxPosition.y - groundCheckBoxSize.y / 2)
+            {
+                direction = previousClosestPoint - new Vector2(transform.position.x, transform.position.y);
+            } else
+            {
+                direction = previousHit.point - new Vector2(transform.position.x, transform.position.y);
+            }
+
+            groundHit = Physics2D.Raycast(transform.position, direction.normalized, direction.magnitude + 0.5f, whatIsGround);
+            float dot = Vector2.Dot(groundHit.normal, Vector2.right);
+            if (dot == 1f || dot == -1f) groundHit = new RaycastHit2D();
+        }
+
+        // ground
+        if (groundHit == true)
+        {
+            Debug.DrawRay(groundHit.point, groundHit.normal, Color.magenta);
+
+            // If ground has been detected
             if (curVerticalVelocity <= 0f)
             {
                 isGrounded = true;
@@ -181,12 +304,15 @@ public class BaseCharacterController : MonoBehaviour
                 airJumpsPerformed = 0;
                 curVerticalVelocity = 0f;
 
-                distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
-                if (distanceToGround != 0f) snapping = true;
-                else snapping = false;
+                if (!dodging || dodging && dodgeVelocity.y < 0f && isGrounded)
+                {
+                    float distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
+                    if (distanceToGround != 0f) snapping = true;
+                    else snapping = false;
 
-                //if(distanceToGround > 0f)
-                transform.position -= Vector3.up * (distanceToGround);
+                    //if(distanceToGround > 0f)
+                    transform.position -= Vector3.up * (distanceToGround);
+                }
 
                 if (!wasGrounded)
                 {
@@ -196,61 +322,43 @@ public class BaseCharacterController : MonoBehaviour
             }
         }
 
-        //Collider2D[] Colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundedRadius, whatIsGround);
-
-        // Loop through all detected 'ground' colliders in order to determine if we are grounded
-
-        /*
-        for (int i = 0; i < Colliders.Length; i++)
+        // ceiling
+        if (curVerticalVelocity > 0f)
         {
-            if (Colliders[i].gameObject != gameObject) // if the collider does not equal us
-            {
-                if (curVerticalVelocity < 0f)
-                {
-                    isGrounded = true;
-                    isFalling = false;
-
-                    // reset our jumps
-                    jumpIndex = 1;
-                    airJumpsPerformed = 0;
-                }
-
-                if (!wasGrounded && curVerticalVelocity < 0f) // If I was perivously not grounded, this means I had just landed
-                {
-                    // Debug.Log("Grounded");
-                    // Snap to ground
-                    RaycastHit2D hit = Physics2D.BoxCast(new Vector2(transform.position.x, transform.position.y - transform.localScale.y/2), Vector2.one, 0, Vector2.down, 1f, whatIsGround);
-                    if (hit == true)
-                    {
-                        Debug.Log("Hey");
-                        float distanceToGround = transform.position.y - hit.point.y;
-                        transform.position += Vector3.up * (0.5f - distanceToGround);
-                    }
-
-                    OnLandEvent.Invoke();
-                }
-            }
+            ceilingCheckBoxClipped = Physics2D.OverlapBox(ceilingCheckBoxPosition, ceilingCheckBoxSize, 0f, whatIsGround);
         }
-        */
+        else ceilingCheckBoxClipped = false;
 
-        // Move();
-        HandleMovement();
-        RunAtFixedUpdate();
+        // dashing
+        dashingBoxClipped = Physics2D.OverlapBox(dashingBoxPosition, dashingBoxSize, 0f, whatIsGround);
     }
 
-    bool snapping = false;
-    float distanceToGround = 0f;
-
+    bool slowing = false;
     public void HandleMovement()
     {
         // Handle Dashing
 
         // Handle General movement
         Vector2 velocity;
-        velocity = targetVelocity * startMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
+        if (dodging)
+        {
+            velocity = dodgeVelocity * dodgeCurve.Evaluate((Time.time - t_dodgeCurveTimestamp)/dodgeTime);
+        }
+        else
+        {
+            if (!slowing)
+            {
+                velocity = targetVelocity * startMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
+            }
+            else
+            {
+                velocity = (facingRight) ? targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) :
+                   targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) ;
+            }
+        }
 
-        // Handles Gravity
-        if (!isGrounded)
+        // Handles Gravity to calculate curVerticalVelocity
+        if (!isGrounded && gravityEnabled)
         {
             if (curVerticalVelocity < 0f)
             {
@@ -264,107 +372,41 @@ public class BaseCharacterController : MonoBehaviour
                 curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
             }
         } 
-        else
+        else if (gravityEnabled)
         {
             curVerticalVelocity = 0f;
         }
-
-        if (isGrounded && groundHit)
+        Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
+        if (isGrounded && playerInputHandler.groundMovementDirection != Vector2.zero)
         {
-            rb.velocity = new Vector2(velocity.x, 0f);
-            Debug.DrawRay(groundHit.point, groundHit.normal, Color.magenta);
             float dot = Vector2.Dot(groundHit.normal, Vector2.right);
-            if (dot == 1f || dot == -1f) return;
-            rb.velocity = Vector3.ProjectOnPlane(rb.velocity, groundHit.normal);
+            if (dot == 1f || dot == -1f)
+            {
+                Debug.LogWarning("?");
+                return;
+            }
+            //Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
+            rb.velocity = -Vector2.Perpendicular(groundHit.normal) * velocity.x;
+            Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
+            Debug.Log("v : " + rb.velocity + " vm : " + rb.velocity.magnitude);
             return;
         }
+
         rb.velocity = new Vector2(velocity.x, curVerticalVelocity);
-    }
-
-    public void Move()
-    {
-        // sets velocity w/ smoothing
-
-        if (t_velocityTimestamp >= Time.time)
-        {
-            // if we are still within a timed velocity's period, than use its timed velocity
-            if (dodging)
-            {
-                float x = (Time.time - t_dodgeCurveTimestamp) / dodgeTime;
-                rb.velocity = t_velocity * dodgeCurve.Evaluate(x);
-            }
-            else
-            {
-                //Debug.Log("WAKKKAWAKKKA");
-                //rb.velocity = (applySmoothing) ? Vector2.SmoothDamp(rb.velocity, t_velocity, ref velocity, movementSmoothing) : t_velocity;
-            }
-        } else {
-            // rb.velocity = (applySmoothing)? Vector2.SmoothDamp(rb.velocity, targetVelocity, ref velocity, movementSmoothing) : targetVelocity;
-            rb.velocity = targetVelocity * startMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
-        }
-
-        // Handles gravity
-        if (t_gravityTimestamp <= Time.time)
-        {
-            if (!isGrounded)
-            {
-                // If not grounded, accelerate downwards
-                if(curVerticalVelocity < 0f)
-                {
-                    // applies fallingGravityMultiplier if we are falling
-                    curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * Time.deltaTime;
-                    isFalling = true; 
-                } else {
-                    // else apply typical gravity
-                    curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
-                }
-            }
-            else
-            {
-                // Else, stay still (-1f helps just sort out the possiblity of hovering over the ground)
-
-                curVerticalVelocity = 0f;
-            }
-
-            if (isGrounded)
-            {
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, whatIsGround);
-                if (hit != false)
-                {
-                    //Debug.Log("Hey?");
-                    rb.velocity = Vector3.ProjectOnPlane(rb.velocity, hit.normal);
-                }
-            }
-            else
-            {
-
-                rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
-            }
-        } else {
-            // do nothing
-        }
-
-        // STOP USING rb.velocity AND USE VELOCITY (Performant?)
-
     }
 
     public void SetVelocity(Vector2 newVelocity)
     {
+        if (newVelocity == Vector2.zero)
+        {
+            t_startMovementCurveTimestamp = Time.time;
+            slowing = true;
+            return;
+        }
+
+        slowing = false;
         t_startMovementCurveTimestamp = Time.time;
         targetVelocity = newVelocity;
-    }
-
-    // set velocity over a duration of time. Decide whether to apply gravity or smoothing when doing so...
-    private bool prevSmoothing;
-    public void SetVelocityTimed(Vector2 newVelocity, float duration, bool applyGravity)
-    {
-        t_velocityTimestamp = Time.time + duration;
-        t_velocity = newVelocity;
-
-        if(!applyGravity) { 
-            t_gravityTimestamp = Time.time + duration;
-            curVerticalVelocity = 0f;
-        }
     }
 
     // functions that can be overwritten depending on each characters needs
@@ -381,7 +423,27 @@ public class BaseCharacterController : MonoBehaviour
 
     public virtual void PerformDodge(InputAction.CallbackContext context)
     {
-        // meant to be overwritten
+        // not meant to be typically overwritten
+
+        if (playerInputHandler.RAWmovementDirection == Vector2.zero) // make sure to set proper deadzones!
+        {
+            dodgeTimestamp = Time.time + neutralDodgeTime;
+            dodgeVelocity = Vector2.zero;
+        }
+        else
+        {
+            dodgeTimestamp = Time.time + dodgeTime;
+            dodgeVelocity = playerInputHandler.RAWmovementDirection.normalized * (dodgeDistance / dodgeTime * (dodgeCurve.keys[2].time - dodgeCurve.keys[1].time));
+        }
+
+        t_dodgeCurveTimestamp = Time.time;
+        gravityEnabled = false;
+        dodging = true;
+        curVerticalVelocity = 0f;
+
+        // please, shift jumpIndex down by 1 oml
+        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 2 (which represents our air jump), instead of 1 (which represents our ground jump)
+        jumpIndex = 2;
     }
 
     public virtual void PerformLightAttack(InputAction.CallbackContext context)
