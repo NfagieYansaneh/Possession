@@ -80,6 +80,7 @@ public class Rin_CharacterController : BaseCharacterController
             isGrounded = false;
 
             curVerticalVelocity = targetVerticalVelocity;
+            rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
             jumpIndex++;
         }
     }

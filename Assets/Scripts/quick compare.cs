@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class BaseCharacterController : MonoBehaviour
+public class quickCompare : MonoBehaviour
 {
     // Character controller : https://github.com/Brackeys/2D-Character-Controller/blob/master/CharacterController2D.cs
     // Input system : https://www.youtube.com/watch?v=IurqiqduMVQ
@@ -70,15 +70,7 @@ public class BaseCharacterController : MonoBehaviour
     public Transform ceilingCheck;              // A position marking where to check for ceilings
     public float groundedRadius = .2f;          // Radius of the overlap circle to determine if grounded
     public bool isGrounded;                     // Whether or not the player is grounded.
-    [Tooltip("Max slope angle will not go up to 85f because that is a situation that will never occurr")]
-    [Range(0f, 85f)]
-    public float maxSlopeAngle = 45f;
-    [Range(0f, 85f)]
-    public float maxSteepSlopeAngle = 55f;
-    public bool isSliding;                     // Whether or not the player is sliding.
     public bool isFalling;                      // Whether or not the player is falling
-    public bool isOnWalkableSlope;
-    public bool isOnSteepSlope;
     public float ceilingRadius = .2f;           // Radius of the overlap circle to determine if the player can stand up
 
     Vector2 ceilingCheckBoxSize = Vector2.zero;
@@ -143,8 +135,8 @@ public class BaseCharacterController : MonoBehaviour
     {
         if (baseCharacterControllers == null) baseCharacterControllers = new List<BaseCharacterController>();
 
-        baseCharacterControllers.Add(this);
-        foreach(BaseCharacterController baseCharacterController in baseCharacterControllers)
+
+        foreach (BaseCharacterController baseCharacterController in baseCharacterControllers)
         {
             if (baseCharacterController == this) continue;
             Physics2D.IgnoreCollision(baseCharacterController.myCollider, myCollider);
@@ -153,7 +145,7 @@ public class BaseCharacterController : MonoBehaviour
 
     private void OnDisable()
     {
-        baseCharacterControllers.Remove(this);
+
     }
 
     private void OnDrawGizmosSelected()
@@ -189,7 +181,7 @@ public class BaseCharacterController : MonoBehaviour
         if (!ceilingCheckBoxClipped || !Application.isPlaying)
         {
             Gizmos.color = Color.green;
-        } 
+        }
         else
         {
             Gizmos.color = Color.red;
@@ -218,7 +210,7 @@ public class BaseCharacterController : MonoBehaviour
 
     void Update()
     {
-        if(Time.time > dodgeTimestamp)
+        if (Time.time > dodgeTimestamp)
         {
             dodging = false;
             gravityEnabled = true;
@@ -227,7 +219,7 @@ public class BaseCharacterController : MonoBehaviour
 
         ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
         groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
-        if(facingRight)
+        if (facingRight)
             dashingBoxPosition = new Vector2(transform.position.x + dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
         else
             dashingBoxPosition = new Vector2(transform.position.x - dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
@@ -252,19 +244,17 @@ public class BaseCharacterController : MonoBehaviour
         // Based on whether that object is in the ground layer
         //position = groundCheck.position + Vector3.up * groundCheckBoxSize.y/2;
 
-        // Checking for ground contacts
-        ContactFilter2D groundContactFilter2D = new ContactFilter2D();
-        groundContactFilter2D.SetLayerMask(whatIsGround);
+        ContactFilter2D contactFilter2D = new ContactFilter2D();
+        contactFilter2D.SetLayerMask(whatIsGround);
 
-        int numberOfContacts = Physics2D.BoxCast(groundCheckBoxPosition, groundCheckBoxSize, 0f, Vector2.down, groundContactFilter2D, groundHits, 0.55f / 2);
+        int numberOfContacts = Physics2D.BoxCast(groundCheckBoxPosition, groundCheckBoxSize, 0f, Vector2.down, contactFilter2D, groundHits, 0.55f / 2);
+
         groundHit = new RaycastHit2D();
-        bool groundContactFound = false;
 
         float previousDistanceY = 0f;
         Vector2 previousClosestPoint = Vector2.zero;
         RaycastHit2D previousHit = new RaycastHit2D();
 
-        // Filters through ground contacts to find ground contact closest to player's feet
         for (int index = 0; index < numberOfContacts; index++)
         {
             Vector2 position = groundCheckBoxPosition;
@@ -274,22 +264,17 @@ public class BaseCharacterController : MonoBehaviour
 
             Debug.DrawRay(closestPoint, Vector2.up, Color.red);
             float distanceY = groundCheckBoxPosition.y - closestPoint.y;
-            if (previousDistanceY > distanceY || groundContactFound == false)
+            if (previousDistanceY > distanceY || previousDistanceY == 0f)
             {
                 previousDistanceY = distanceY;
                 previousClosestPoint = closestPoint;
                 previousHit = groundHits[index];
-
-                groundContactFound = true;
             }
         }
 
-        // if contact point was found, vett it to determine whether it reaches the requirements for a ground contact point
-        if (groundContactFound)
+        if (previousClosestPoint != Vector2.zero)
         {
             // this seems inefficient?
-
-            // Checks wether the closest point is withing player's groundCheckBox that is meant to represent the player's feet
             Vector2 direction;
             if (previousClosestPoint.x <= groundCheckBoxPosition.x + groundCheckBoxSize.x / 2 && previousClosestPoint.x >= groundCheckBoxPosition.x - groundCheckBoxSize.x / 2 &&
                 previousClosestPoint.y <= groundCheckBoxPosition.y)
@@ -298,69 +283,58 @@ public class BaseCharacterController : MonoBehaviour
                 direction = previousClosestPoint - new Vector2(transform.position.x, transform.position.y);
                 groundHit = Physics2D.Raycast(transform.position, direction.normalized, direction.magnitude + 0.5f, whatIsGround);
             }
-            else if (previousHit.point.y <= groundCheckBoxPosition.y) // else use groundHit (which may not be the closest point to the players feet)
+            else if (previousHit.point.y <= groundCheckBoxPosition.y)
             {
                 Debug.LogError("Using previous hit");
                 groundHit = previousHit;
             }
-            else // contact point is not desirable
+            else
             {
-                groundContactFound = false;
-                Debug.LogWarning("oh no"); // 
+                Debug.LogWarning("oh no"); // Pray that this never happens
+                return;
             }
 
-            // if we found a desirable ground contact point...
+            // groundHit = Physics2D.Raycast(transform.position, direction.normalized, direction.magnitude + 0.5f, whatIsGround);
+            float dot = Vector2.Dot(groundHit.normal, Vector2.right);
+
+            // if (dot == 1f || dot == -1f) groundHit = new RaycastHit2D();
+        }
+
+        // ground
+        if (groundHit == true)
+        {
             Debug.DrawRay(groundHit.point, groundHit.normal, Color.magenta);
 
             // If ground has been detected
-            if (groundContactFound && curVerticalVelocity <= 0f && groundHit == true)
+            if (curVerticalVelocity <= 0f)
             {
-                isGrounded = (85f <= Vector2.Angle(Vector2.up, groundHit.normal) && Vector2.Angle(Vector2.up, groundHit.normal) <= 95f) ? false : true;
+                isGrounded = true;
                 isFalling = false;
-                isOnWalkableSlope = (Vector2.Angle(Vector2.up, groundHit.normal) < maxSlopeAngle) ? true : false;
-                isOnSteepSlope = (Vector2.Angle(Vector2.up, groundHit.normal) < maxSteepSlopeAngle) ? true : false;
-                isSliding = (isOnSteepSlope || 85f <= Vector2.Angle(Vector2.up, groundHit.normal) && Vector2.Angle(Vector2.up, groundHit.normal) <= 95f) ? false : true;
+                isGrounded = (Vector2.Angle(Vector2.up, groundHit.normal) < 45f) ? true : false;
                 // reset our jumps
                 jumpIndex = 1;
                 airJumpsPerformed = 0;
 
-                if ((!dodging || dodging && dodgeVelocity.y < 0f) && isGrounded && (isOnWalkableSlope || isOnSteepSlope))
+                if ((!dodging || dodging && dodgeVelocity.y < 0f) && isGrounded)
                 {
-                    bool willSnap = true;
-                    // apply snapping when
-                    if(isOnSteepSlope)
-                    {
-                        if(playerInputHandler.groundMovementDirection.x != 0f && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f)
-                        {
-                            willSnap = false;
-                        } else isOnWalkableSlope = true;
+                    float distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
+                    if (distanceToGround != 0f) snapping = true;
+                    else snapping = false;
 
-                        if (playerInputHandler.RAWmovementDirection.y < 0f)
-                        {
-                            isOnWalkableSlope = true;
-                            willSnap = true;
-                        }
-                    }
-
-                    if (willSnap)
-                    {
-                        Debug.LogWarning("Snapping?");
-                        float distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
-                        if (distanceToGround != 0f) snapping = true;
-                        else snapping = false;
-
-                        transform.position -= Vector3.up * (distanceToGround);
-                    }
+                    //if(distanceToGround > 0f)
+                    transform.position -= Vector3.up * (distanceToGround);
                 }
 
                 if (!wasGrounded)
                 {
+                    // if (Vector2.Angle(Vector2.up, groundHit.normal) < 45f) curVerticalVelocity = 0f;
+
                     OnLandEvent.Invoke();
                 }
             }
         }
 
-        // ceiling checking
+        // ceiling
         if (curVerticalVelocity > 0f)
         {
             ceilingCheckBoxClipped = Physics2D.OverlapBox(ceilingCheckBoxPosition, ceilingCheckBoxSize, 0f, whatIsGround);
@@ -371,7 +345,6 @@ public class BaseCharacterController : MonoBehaviour
         dashingBoxClipped = Physics2D.OverlapBox(dashingBoxPosition, dashingBoxSize, 0f, whatIsGround);
     }
 
-
     bool slowing = false;
     public void HandleMovement()
     {
@@ -381,7 +354,7 @@ public class BaseCharacterController : MonoBehaviour
         Vector2 velocity;
         if (dodging)
         {
-            velocity = dodgeVelocity * dodgeCurve.Evaluate((Time.time - t_dodgeCurveTimestamp)/dodgeTime);
+            velocity = dodgeVelocity * dodgeCurve.Evaluate((Time.time - t_dodgeCurveTimestamp) / dodgeTime);
             rb.velocity = velocity;
             return;
 
@@ -395,38 +368,38 @@ public class BaseCharacterController : MonoBehaviour
             else
             {
                 velocity = (facingRight) ? targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) :
-                   targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) ;
+                   targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp);
             }
         }
 
         // Handles Gravity to calculate curVerticalVelocity
-        if (!isGrounded && gravityEnabled || isSliding && gravityEnabled)
+        float maxSlopeAngle = 45f;
+        if (!isGrounded && gravityEnabled)
         {
 
-            if (curVerticalVelocity < 0f && !isSliding)
+            if (curVerticalVelocity < 0f && (Vector2.Angle(Vector2.up, groundHit.normal) < 45f))
             {
-                // Debug.LogWarning("Gravity Activated AMP");
+                Debug.LogWarning("Gravity Activated AMP");
                 // applies fallingGravityMultiplier if we are falling
                 curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * Time.deltaTime;
                 isFalling = true;
             }
             else
             {
-                // Debug.LogWarning("Gravity Activated");
+                Debug.LogWarning("Gravity Activated");
                 // else apply typical gravity
                 curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
             }
-        } 
+        }
         else if (gravityEnabled)
         {
             curVerticalVelocity = 0f;
         }
 
-        // Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
-        // Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
+        Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
+        Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
 
-        // Sliding and grounded
-        if(isSliding && isGrounded)
+        if (Vector2.Angle(Vector2.up, groundHit.normal) > maxSlopeAngle)
         {
             if (Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection) > 0f)
             {
@@ -441,16 +414,58 @@ public class BaseCharacterController : MonoBehaviour
             }
         }
 
-        // Not sliding and grounded
-        else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !(isOnSteepSlope && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f) && playerInputHandler.RAWmovementDirection.y >= 0f)
+        else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && (Vector2.Angle(Vector2.up, groundHit.normal) < 45f))
         {
+
+            //Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
             rb.velocity = -Vector2.Perpendicular(groundHit.normal) * velocity.x;
+            //Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
+            Debug.Log("v : " + rb.velocity + " vm : " + rb.velocity.magnitude);
             return;
         }
+        /*
+        if (isGrounded || !isGrounded && (Vector2.Angle(Vector2.up, groundHit.normal) > 45f))
+        {
+            Debug.LogWarning(Vector2.Angle(Vector2.up, groundHit.normal));
+            Debug.Log(curVerticalVelocity);
+            if (Vector2.SignedAngle(Vector2.up, groundHit.normal) > maxSlopeAngle)
+            {
+                if (playerInputHandler.groundMovementDirection.x < 0f)
+                {
+                    Debug.LogWarning("A");
+                    rb.velocity = new Vector2(velocity.x, 0f);
+                    return;
+                }
+                //Debug.Log(curVerticalVelocity);
+                // Vector3 vectorToProject = new Vector2(velocity.x, curVerticalVelocity);
+                // -Vector2.Perpendicular(groundHit.normal) * velocity.x 
+                rb.velocity = -Vector2.Perpendicular(groundHit.normal) * (curVerticalVelocity) * Vector2.Dot(Vector2.up, -Vector2.Perpendicular(groundHit.normal));
+                return;
+            } else if (Vector2.SignedAngle(Vector2.up, groundHit.normal) < -maxSlopeAngle)
+            {
+                if (playerInputHandler.groundMovementDirection.x > 0f)
+                {
+                    Debug.LogWarning("B");
+                    rb.velocity = new Vector2(velocity.x, 0f);
+                    return;
+                }
+                rb.velocity = -Vector2.Perpendicular(groundHit.normal) * (curVerticalVelocity) * Vector2.Dot(Vector2.up, -Vector2.Perpendicular(groundHit.normal));
+                return;
+            }
+            
+            if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && (Vector2.Angle(Vector2.up, groundHit.normal) < 45f))
+            {
 
-        // Sliding but not grounded (stopgap for a bug)
+                //Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
+                rb.velocity = -Vector2.Perpendicular(groundHit.normal) * velocity.x;
+                //Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
+                Debug.Log("v : " + rb.velocity + " vm : " + rb.velocity.magnitude);
+                return;
+            }
+            
+        } */
 
-        rb.velocity = new Vector2(velocity.x, curVerticalVelocity); 
+        rb.velocity = new Vector2(velocity.x, curVerticalVelocity);
     }
 
     public void SetVelocity(Vector2 newVelocity)
@@ -536,7 +551,6 @@ public class BaseCharacterController : MonoBehaviour
     {
         // not typically meant to be overwritten
         playerInputHandler.possessedCharacter.OnPossessionLeave(); // calls the 'leave' function on previous possession
-        playerInputHandler.possessedCharacter = this;
     }
 
     public virtual void OnPossessionLeave()
