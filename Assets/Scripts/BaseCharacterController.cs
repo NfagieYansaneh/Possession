@@ -33,8 +33,8 @@ public class BaseCharacterController : MonoBehaviour
     [Tooltip("successiveJumpHeightReduction")]
     [Range(0f, 1f)]
     public float successiveJumpHeightReduction; // reduces the height of each successive airborne jump
-    public int maxJumps = 2;                    // tells us how many jumps can we perform (including a jump from the ground)
-    public int jumpIndex = 1;                   // tells us which jump we are at (1 represent our first jump);
+    public int maxJumps = 1;                    // "maxJumps - 1" tells us how many jumps can we perform (including a jump from the ground)
+    public int jumpIndex = 0;                   // tells us which jump we are at (0 represent our first jump);
     public int airJumpsPerformed = 0;           // tells us how many air jumps we have performed while airborne
 
     public float gravity = 2f;                  // Determines the base strength of gravity
@@ -43,26 +43,34 @@ public class BaseCharacterController : MonoBehaviour
     public float fallingGravityMultiplier = 1.2f; // Used to amplify gravity when falling for the sake of game feel
 
     [Header("Dodging")]
+
+    public int maxDodges = 1;
+    public int dodgeIndex = 0;
+
     public bool dodging = false;
+    [HideInInspector] Vector2 dodgeDirection = Vector2.zero;
+    [HideInInspector] public bool dodgeCarryingMomentum = false;
     [Range(0f, 1f)]
     public float dodgeTime;
+
     [Range(0f, 1f)]
     public float neutralDodgeTime;
     [Range(0f, 15f)]
     public float dodgeDistance;
     public AnimationCurve dodgeCurve;
+    public AnimationCurve dodgeMomentumFallofCurve;
 
     [HideInInspector] public float dodgeTimestamp = 0f;
-    [HideInInspector] public bool gravityEnabled = false;
+    public bool gravityEnabled = true;
     [HideInInspector] public Vector2 dodgeVelocity = Vector2.zero;
 
     [HideInInspector] public float t_dodgeCurveTimestamp;
-    public Vector2 dashingBoxSize = Vector2.zero;
-    [HideInInspector] public Vector2 dashingBoxPosition = Vector2.zero;
-    public Vector2 dashingBoxOffset = Vector2.zero;
+    [HideInInspector] public float dodgeMomentumFallofCurveTimestamp;
+    public Vector2 dodgeBoxSize = Vector2.zero;
+    [HideInInspector] public Vector2 dodgeBoxPosition = Vector2.zero;
+    public Vector2 dodgeBoxOffset = Vector2.zero;
 
-    RaycastHit2D dashingHit;
-    bool dashingBoxClipped = false;
+    bool dodgeBoxClipped = false;
 
     [Header("Ground Checking")]
     public LayerMask whatIsGround;              // A mask determining what is ground to the character
@@ -79,12 +87,14 @@ public class BaseCharacterController : MonoBehaviour
     public bool isFalling;                      // Whether or not the player is falling
     public bool isOnWalkableSlope;
     public bool isOnSteepSlope;
+    public bool willIgnoreSteepSlope;
     public float ceilingRadius = .2f;           // Radius of the overlap circle to determine if the player can stand up
-
+   
+    public float ceilingTimeAmount = 0.1f;
+    public bool ceilingTimerActive = false;
     Vector2 ceilingCheckBoxSize = Vector2.zero;
     Vector2 ceilingCheckBoxPosition = Vector2.zero;
-
-    RaycastHit2D ceilingHit;
+    float ceilingTimestamp = 0f;
 
     bool ceilingCheckBoxClipped = false;
 
@@ -95,12 +105,15 @@ public class BaseCharacterController : MonoBehaviour
     RaycastHit2D groundHit;
 
     public Collider2D myCollider;
+    // Quick fix
+    public CircleCollider2D circleCollider2D;
+
     public UnityEvent OnLandEvent;              // Event called when landed
     bool snapping = true;                       // When snapping the player towards ground
 
     // Other variables (misc and private)
     [HideInInspector] public Rigidbody2D rb;
-    private Vector2 velocity = Vector2.zero;
+   // private Vector2 velocity = Vector2.zero;
     private Vector2 targetVelocity = Vector2.zero;
 
     [HideInInspector] public float curVerticalVelocity = 0f;
@@ -129,7 +142,8 @@ public class BaseCharacterController : MonoBehaviour
         // input.Player.Movement.performed += ctx => Debug.Log(ctx.ReadValueAsObject());  THIS IS A LAMBDA FUNCTION
 
         rb = GetComponent<Rigidbody2D>();
-        myCollider = GetComponent<Collider2D>();
+        //myCollider = GetComponent<Collider2D>();
+        //circleCollider2D = GetComponent<CircleCollider2D>();
     }
 
     private void Start()
@@ -137,6 +151,7 @@ public class BaseCharacterController : MonoBehaviour
         // StartCoroutine(SnapToGround());
         groundCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
         ceilingCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
+        jumpIndex = 0;
     }
 
     private void OnEnable()
@@ -147,7 +162,11 @@ public class BaseCharacterController : MonoBehaviour
         foreach(BaseCharacterController baseCharacterController in baseCharacterControllers)
         {
             if (baseCharacterController == this) continue;
+            // fix this later, but it works, just a little clunky
             Physics2D.IgnoreCollision(baseCharacterController.myCollider, myCollider);
+            Physics2D.IgnoreCollision(baseCharacterController.circleCollider2D, circleCollider2D);
+            Physics2D.IgnoreCollision(baseCharacterController.circleCollider2D, myCollider);
+            Physics2D.IgnoreCollision(baseCharacterController.myCollider, circleCollider2D);
         }
     }
 
@@ -166,7 +185,7 @@ public class BaseCharacterController : MonoBehaviour
 
             ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
             groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
-            dashingBoxPosition = new Vector2(transform.position.x + dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
+            dodgeBoxPosition = new Vector2(transform.position.x + dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
         }
 
         // ground
@@ -197,40 +216,43 @@ public class BaseCharacterController : MonoBehaviour
 
         Gizmos.DrawWireCube(ceilingCheckBoxPosition, ceilingCheckBoxSize);
 
-        // dashing
-        if (dashingBoxClipped) Gizmos.color = Color.red;
+        // dodge
+        if (dodgeBoxClipped) Gizmos.color = Color.red;
         else Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(dashingBoxPosition, dashingBoxSize);
-        /* Gizmos.color = Color.magenta;
-        if (groundHit == true)
-        {
-            float diff = groundHit.point.y - groundCheck.position.y;
-            Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - diff));
-        } */
+        Gizmos.DrawWireCube(dodgeBoxPosition, dodgeBoxSize);
 
-        Gizmos.color = Color.yellow;/*
-        Gizmos.DrawLine(transform.position, groundHits[0].point);
-        Gizmos.DrawLine(transform.position, groundHits[1].point);
-        Gizmos.DrawLine(transform.position, groundHits[2].point);
-        Gizmos.DrawLine(transform.position, groundHits[3].point);
-        Gizmos.DrawLine(transform.position, groundHits[4].point);*/
+        Gizmos.color = Color.yellow;
     }
 
     void Update()
     {
-        if(Time.time > dodgeTimestamp)
+        // Handling timers and shiz
+        if(Time.time > dodgeTimestamp && dodging)
         {
+            dodgeMomentumFallofCurveTimestamp = Time.time + dodgeMomentumFallofCurve.keys[dodgeMomentumFallofCurve.length - 1].time;
+            dodgeCarryingMomentum = true;
             dodging = false;
             gravityEnabled = true;
             // Do some end dodging shiz
         }
 
+        if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
+        {
+            dodgeCarryingMomentum = false;
+        }
+
+        if(Time.time > ceilingTimestamp && ceilingTimerActive)
+        {
+            ceilingTimerActive = false;
+            curVerticalVelocity = -1f;
+        }
+
         ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
         groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
         if(facingRight)
-            dashingBoxPosition = new Vector2(transform.position.x + dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
+            dodgeBoxPosition = new Vector2(transform.position.x + dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
         else
-            dashingBoxPosition = new Vector2(transform.position.x - dashingBoxOffset.x, transform.position.y + dashingBoxOffset.y);
+            dodgeBoxPosition = new Vector2(transform.position.x - dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
     }
 
     // FixedUpdate is called every 'x' seconds
@@ -290,23 +312,23 @@ public class BaseCharacterController : MonoBehaviour
             // this seems inefficient?
 
             // Checks wether the closest point is withing player's groundCheckBox that is meant to represent the player's feet
-            Vector2 direction;
+            Vector2 directionTowardsClosestPoint;
             if (previousClosestPoint.x <= groundCheckBoxPosition.x + groundCheckBoxSize.x / 2 && previousClosestPoint.x >= groundCheckBoxPosition.x - groundCheckBoxSize.x / 2 &&
                 previousClosestPoint.y <= groundCheckBoxPosition.y)
             {
-                Debug.Log("Closest Point");
-                direction = previousClosestPoint - new Vector2(transform.position.x, transform.position.y);
-                groundHit = Physics2D.Raycast(transform.position, direction.normalized, direction.magnitude + 0.5f, whatIsGround);
+                //Debug.Log("Closest Point");
+                directionTowardsClosestPoint = previousClosestPoint - new Vector2(transform.position.x, transform.position.y);
+                groundHit = Physics2D.Raycast(transform.position, directionTowardsClosestPoint.normalized, directionTowardsClosestPoint.magnitude + 0.5f, whatIsGround);
             }
             else if (previousHit.point.y <= groundCheckBoxPosition.y) // else use groundHit (which may not be the closest point to the players feet)
             {
-                Debug.LogError("Using previous hit");
+                //Debug.LogError("Using previous hit");
                 groundHit = previousHit;
             }
             else // contact point is not desirable
             {
                 groundContactFound = false;
-                Debug.LogWarning("oh no"); // 
+                //Debug.LogWarning("oh no"); // 
             }
 
             // if we found a desirable ground contact point...
@@ -315,36 +337,48 @@ public class BaseCharacterController : MonoBehaviour
             // If ground has been detected
             if (groundContactFound && curVerticalVelocity <= 0f && groundHit == true)
             {
-                isGrounded = (85f <= Vector2.Angle(Vector2.up, groundHit.normal) && Vector2.Angle(Vector2.up, groundHit.normal) <= 95f) ? false : true;
+                float incidentAngle = Vector2.Angle(Vector2.up, groundHit.normal);
+                isGrounded = (85f <= incidentAngle && incidentAngle <= 95f) ? false : true;
                 isFalling = false;
-                isOnWalkableSlope = (Vector2.Angle(Vector2.up, groundHit.normal) < maxSlopeAngle) ? true : false;
-                isOnSteepSlope = (Vector2.Angle(Vector2.up, groundHit.normal) < maxSteepSlopeAngle) ? true : false;
-                isSliding = (isOnSteepSlope || 85f <= Vector2.Angle(Vector2.up, groundHit.normal) && Vector2.Angle(Vector2.up, groundHit.normal) <= 95f) ? false : true;
+                isOnWalkableSlope = (incidentAngle < maxSlopeAngle) ? true : false;
+                isOnSteepSlope = (incidentAngle < maxSteepSlopeAngle && maxSlopeAngle < incidentAngle) ? true : false;
+                isSliding = (maxSteepSlopeAngle > incidentAngle || 85f <= incidentAngle && incidentAngle <= 95f) ? false : true;
                 // reset our jumps
-                jumpIndex = 1;
+                jumpIndex = 0;
                 airJumpsPerformed = 0;
+                dodgeIndex = 0;
 
                 if ((!dodging || dodging && dodgeVelocity.y < 0f) && isGrounded && (isOnWalkableSlope || isOnSteepSlope))
                 {
+
                     bool willSnap = true;
                     // apply snapping when
                     if(isOnSteepSlope)
                     {
-                        if(playerInputHandler.groundMovementDirection.x != 0f && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f)
-                        {
-                            willSnap = false;
-                        } else isOnWalkableSlope = true;
+                        Vector2 directionOfRaycast = (facingRight) ? Vector2.left : Vector2.right;
+                        RaycastHit2D hit = Physics2D.Raycast(groundCheckBoxPosition, directionOfRaycast, 1f, whatIsGround);
 
-                        if (playerInputHandler.RAWmovementDirection.y < 0f)
+                        if(playerInputHandler.groundMovementDirection.x != 0f 
+                            && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f
+                            && hit.normal != groundHit.normal)
                         {
+                            Debug.Log("TRIGGERED");
+                            willIgnoreSteepSlope = true;
+                            willSnap = false;
+                        } 
+                        else
+                        {
+                            willIgnoreSteepSlope = false;
                             isOnWalkableSlope = true;
-                            willSnap = true;
                         }
+                    }
+                    else
+                    {
+                        willIgnoreSteepSlope = false;
                     }
 
                     if (willSnap)
                     {
-                        Debug.LogWarning("Snapping?");
                         float distanceToGround = groundCheck.transform.position.y - groundHit.point.y;
                         if (distanceToGround != 0f) snapping = true;
                         else snapping = false;
@@ -357,32 +391,79 @@ public class BaseCharacterController : MonoBehaviour
                 {
                     OnLandEvent.Invoke();
                 }
+            } 
+            else
+            {
+                isSliding = false;
             }
+        } else
+        {
+            isSliding = false;
         }
 
         // ceiling checking
         if (curVerticalVelocity > 0f)
         {
             ceilingCheckBoxClipped = Physics2D.OverlapBox(ceilingCheckBoxPosition, ceilingCheckBoxSize, 0f, whatIsGround);
+            if (ceilingCheckBoxClipped && !ceilingTimerActive)
+            {
+                ceilingTimerActive = true;
+                ceilingTimestamp = Time.time + ceilingTimeAmount;
+            }
+            else if (!ceilingCheckBoxClipped)
+            {
+                ceilingTimerActive = false;
+                ceilingCheckBoxClipped = false;
+            }
         }
-        else ceilingCheckBoxClipped = false;
+        else
+        {
+            ceilingTimerActive = false;
+            ceilingCheckBoxClipped = false;
+        }
 
-        // dashing
-        dashingBoxClipped = Physics2D.OverlapBox(dashingBoxPosition, dashingBoxSize, 0f, whatIsGround);
+        // dodge
+        dodgeBoxClipped = Physics2D.OverlapBox(dodgeBoxPosition, dodgeBoxSize, 0f, whatIsGround);
     }
 
 
-    bool slowing = false;
+    bool slowing = false; // rename this variable
     public void HandleMovement()
     {
-        // Handle Dashing
-
-        // Handle General movement
         Vector2 velocity;
+        
+        // in the case where we are dodging, apply appropriate values to 'velocity'
         if (dodging)
         {
+            //Debug.Log(Vector2.Dot(playerInputHandler.RAWmovementDirection.normalized, groundHit.normal));
+
             velocity = dodgeVelocity * dodgeCurve.Evaluate((Time.time - t_dodgeCurveTimestamp)/dodgeTime);
+            if (dodgeBoxClipped)
+            {
+                Vector2 direction = dodgeVelocity.normalized;
+                Vector2 position = new Vector2(transform.position.x, transform.position.y);
+                //Debug.DrawRay(position, direction, Color.cyan, 120f);
+                //RaycastHit2D hit = Physics2D.BoxCast(position, direction, 0f, direction, 0.5f);
+                RaycastHit2D hit = Physics2D.Raycast(position, direction, 0.8f, whatIsGround);
+                if (hit)
+                {
+                    //Debug.Log("Im being called");
+                    //Debug.DrawRay(hit.point, hit.normal, Color.magenta, 120f);
+                    //Debug.LogWarning("called");
+                    velocity = Vector2.Perpendicular(hit.normal) * -velocity;
+
+                    if (facingRight) rb.velocity = new Vector2(velocity.x, velocity.y);
+                    else rb.velocity = new Vector2(velocity.x, -velocity.y);
+                    return;
+                }
+
+                // No catch?
+            }
+
+            // come back to this 
+            //Debug.Log("just work");
             rb.velocity = velocity;
+
             return;
 
         }
@@ -397,6 +478,21 @@ public class BaseCharacterController : MonoBehaviour
                 velocity = (facingRight) ? targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) :
                    targetVelocity * endMovementCurve.Evaluate(Time.time - t_startMovementCurveTimestamp) ;
             }
+
+            if (dodgeCarryingMomentum)
+            {
+                if (!isGrounded)
+                {
+                    //dodgeMomentumFallofCurveTimestamp += Time.fixedDeltaTime;
+                    dodgeMomentumFallofCurveTimestamp = Time.time + dodgeMomentumFallofCurve.keys[dodgeMomentumFallofCurve.length - 1].time;
+                    velocity += calculatedDodgeSpeed * dodgeDirection * dodgeMomentumFallofCurve.Evaluate(0f);
+                }
+                else
+                {
+
+                    velocity += calculatedDodgeSpeed * dodgeDirection * dodgeMomentumFallofCurve.Evaluate(Time.time - dodgeMomentumFallofCurveTimestamp);
+                }
+            }
         }
 
         // Handles Gravity to calculate curVerticalVelocity
@@ -407,14 +503,36 @@ public class BaseCharacterController : MonoBehaviour
             {
                 // Debug.LogWarning("Gravity Activated AMP");
                 // applies fallingGravityMultiplier if we are falling
-                curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * Time.deltaTime;
+                if (playerInputHandler.aerialMovementDirection.y < 0f)
+                {
+                    // get rid of magic number
+                    curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * 2f * Time.deltaTime;
+                }
+                else
+                {
+                    curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * Time.deltaTime;
+                }
                 isFalling = true;
             }
             else
             {
                 // Debug.LogWarning("Gravity Activated");
                 // else apply typical gravity
-                curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
+                if (playerInputHandler.spaceKeyHeld && !isSliding)
+                {
+                    // get rid of magic number
+                    curVerticalVelocity -= gravity * gravityMultiplier * 0.8f * Time.deltaTime;
+                } 
+                else if(Vector2.Dot(playerInputHandler.groundMovementDirection, groundHit.normal) < 0f && isSliding)
+                {
+                    // get rid of magic number
+                    curVerticalVelocity -= gravity * gravityMultiplier * 0.3f * Time.deltaTime;
+                }
+                else
+                {
+                    curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
+                }
+                //curVerticalVelocity -= gravity * gravityMultiplier * Time.deltaTime;
             }
         } 
         else if (gravityEnabled)
@@ -442,7 +560,7 @@ public class BaseCharacterController : MonoBehaviour
         }
 
         // Not sliding and grounded
-        else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !(isOnSteepSlope && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f) && playerInputHandler.RAWmovementDirection.y >= 0f)
+        else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope)
         {
             rb.velocity = -Vector2.Perpendicular(groundHit.normal) * velocity.x;
             return;
@@ -450,7 +568,11 @@ public class BaseCharacterController : MonoBehaviour
 
         // Sliding but not grounded (stopgap for a bug)
 
-        rb.velocity = new Vector2(velocity.x, curVerticalVelocity); 
+        // does this even work as intended?
+        if (gravityEnabled)
+            rb.velocity = new Vector2(velocity.x, curVerticalVelocity);
+        else
+            rb.velocity = velocity;
     }
 
     public void SetVelocity(Vector2 newVelocity)
@@ -479,11 +601,14 @@ public class BaseCharacterController : MonoBehaviour
         // meant to be overwritten
     }
 
+    float calculatedDodgeSpeed = 0f; 
     public virtual void PerformDodge(InputAction.CallbackContext context)
     {
         // not meant to be typically overwritten
-
-        if (playerInputHandler.RAWmovementDirection == Vector2.zero) // make sure to set proper deadzones!
+        if (dodgeIndex > maxDodges - 1) return;
+        
+        calculatedDodgeSpeed = (dodgeDistance / dodgeTime * (dodgeCurve.keys[2].time - dodgeCurve.keys[1].time));
+        if (playerInputHandler.universalMovementDirection == Vector2.zero) // make sure to set proper deadzones!
         {
             dodgeTimestamp = Time.time + neutralDodgeTime;
             dodgeVelocity = Vector2.zero;
@@ -491,17 +616,19 @@ public class BaseCharacterController : MonoBehaviour
         else
         {
             dodgeTimestamp = Time.time + dodgeTime;
-            dodgeVelocity = playerInputHandler.RAWmovementDirection.normalized * (dodgeDistance / dodgeTime * (dodgeCurve.keys[2].time - dodgeCurve.keys[1].time));
+            dodgeVelocity = playerInputHandler.universalMovementDirection.normalized * calculatedDodgeSpeed;
         }
 
+        dodgeDirection = playerInputHandler.universalMovementDirection.normalized;
         t_dodgeCurveTimestamp = Time.time;
         gravityEnabled = false;
         dodging = true;
         curVerticalVelocity = 0f;
 
-        // please, shift jumpIndex down by 1 oml
-        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 2 (which represents our air jump), instead of 1 (which represents our ground jump)
-        jumpIndex = 2;
+        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 1 (which represents our air jump), instead of 0 (which represents our ground jump)
+        if (jumpIndex == maxJumps) jumpIndex -= 1;
+        else jumpIndex -= (maxJumps-jumpIndex);
+        if(!isGrounded)dodgeIndex++;
     }
 
     public virtual void PerformLightAttack(InputAction.CallbackContext context)
@@ -529,12 +656,31 @@ public class BaseCharacterController : MonoBehaviour
         // not typically meant to be overwritten
         crownObject.SetActive(true);
         crownObject.transform.position = transform.position;
-        crownScript.ThrowMe(playerInputHandler.RAWmovementDirection, myCollider);
+        crownScript.ThrowMe(playerInputHandler.universalMovementDirection, myCollider);
     }
 
     public virtual void PossessMe()
     {
         // not typically meant to be overwritten
+        Vector2 targetVelocity = new Vector2(movementSpeed * playerInputHandler.groundMovementDirection.x, curVerticalVelocity);
+        SetVelocity(targetVelocity);
+
+        // hacked together
+        if (playerInputHandler.groundMovementDirection.x < -0.2 && facingRight == true)
+        {
+            dodgeCarryingMomentum = false;
+            facingRight = false;
+
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        else if (playerInputHandler.groundMovementDirection.x > 0.2 && facingRight == false)
+        {
+            dodgeCarryingMomentum = false;
+            facingRight = true;
+
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+
         playerInputHandler.possessedCharacter.OnPossessionLeave(); // calls the 'leave' function on previous possession
         playerInputHandler.possessedCharacter = this;
     }

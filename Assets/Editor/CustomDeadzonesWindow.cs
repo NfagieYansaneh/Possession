@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 // deadzones are meant to refine raw data input
 
@@ -18,10 +21,17 @@ public class CustomDeadzonesWindow : EditorWindow
 
     Vector3 groundDeadzonePosition = Vector3.zero;
     Vector3 aerialDeadzonePosition = Vector3.zero;
+    Vector3 universalDeadzonePosition = Vector3.zero;
+    Vector3 attackDeadzonePosition = Vector3.zero;
+    Vector3 RAWMovementDeadzonePosition = Vector3.zero;
+    Vector3 RAWAttackDeadzonePosition = Vector3.zero;
 
     Vector3 groundMovementGUIPosition = Vector3.zero;
-
     Vector3 aerialMovementGUIPosition = Vector3.zero;
+    Vector3 universalDeadzoneGUIPosition = Vector3.zero;
+    Vector3 attackDeadzoneGUIPosition = Vector3.zero;
+    Vector3 RAWMovementDeadzoneGUIPosition = Vector3.zero;
+    Vector3 RAWAttackDeadzoneGUIPosition = Vector3.zero;
 
     static CustomDeadzonesWindow window;
     static PlayerInputHandler playerInputHandler = null;
@@ -128,20 +138,38 @@ public class CustomDeadzonesWindow : EditorWindow
         EditorGUILayout.Space();
 
         float margin = 5f; // magic value
-        radius = (window.position.width / 4) - 2 * margin;
-        Vector3[] vertices;
+        radius = (window.position.width / 8) - 2 * margin;
 
-        groundDeadzonePosition = new Vector3(rect.position.x + rect.width / 4 + margin, radius + rect.height);
-        aerialDeadzonePosition = new Vector3(rect.position.x + 3 * rect.width / 4, radius + rect.height);
+        // Top row left to right
+        groundDeadzonePosition = new Vector3(rect.position.x + rect.width / 8 + margin, radius + rect.height);
+        aerialDeadzonePosition = new Vector3(rect.position.x + 3 * rect.width / 8 + margin, radius + rect.height);
+        universalDeadzonePosition = new Vector3(rect.position.x + rect.width - (rect.width / 8) + margin, radius + rect.height);
+        attackDeadzonePosition = new Vector3(rect.position.x + rect.width - (3*rect.width / 8) + margin, radius + rect.height);
+
+        // Bottom row left to right
+        RAWMovementDeadzonePosition = new Vector3(rect.position.x + rect.width / 8 + margin, window.position.height - radius - margin);
+        RAWAttackDeadzonePosition = new Vector3(rect.position.x + 3 * rect.width / 8 + margin, window.position.height - radius - margin);
+        //aerialDeadzonePosition = new Vector3(rect.position.x + rect.width - (rect.width / 8) + margin, window.position.height - radius - margin);
+        //aerialDeadzonePosition = new Vector3(rect.position.x + rect.width - (3 * rect.width / 8) + margin, window.position.height - radius - margin);
+
+        DrawDeadzones();
+
+    }
+
+    void DrawDeadzones()
+    {
+        Vector3[] vertices;
 
         if (universalFixedMaxDeadzone != 1f)
         {
             Handles.color = Color.red;
             Handles.DrawSolidDisc(groundDeadzonePosition, new Vector3(0, 0, 1), radius);
             Handles.DrawSolidDisc(aerialDeadzonePosition, new Vector3(0, 0, 1), radius);
+            Handles.DrawSolidDisc(universalDeadzonePosition, new Vector3(0, 0, 1), radius);
+            Handles.DrawSolidDisc(attackDeadzonePosition, new Vector3(0, 0, 1), radius);
         }
 
-        /* Grounded deadzones visualiser */
+        /* TOP ROW Grounded deadzone visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(groundDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -175,8 +203,11 @@ public class CustomDeadzonesWindow : EditorWindow
             Handles.DrawSolidRectangleWithOutline(vertices, Color.red, Color.red);
         }
 
+        Handles.Label(groundDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "Grounded Deadzone");
 
-        /* Aerial deadzones visualiser */
+
+
+        /* TOP ROW Aerial deadzones visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(aerialDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -210,15 +241,62 @@ public class CustomDeadzonesWindow : EditorWindow
             Handles.DrawSolidRectangleWithOutline(vertices, Color.red, Color.red);
         }
 
+        Handles.Label(aerialDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "Aerial Deadzone");
 
 
 
-        /* Drawing movement direction visualiser */
+
+        /* TOP ROW Universal deadzone visualiser */
+
+        Handles.color = Color.white;
+        Handles.DrawSolidDisc(universalDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
+
+        Handles.color = Color.red;
+        Handles.DrawSolidDisc(universalDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMinDeadzone);
+
+        Handles.Label(universalDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "Universal Deadzone");
+
+
+
+        /* TOP ROW Attack deadzone visualiser */
+
+        Handles.color = Color.white;
+        Handles.DrawSolidDisc(attackDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
+
+        Handles.color = Color.red;
+        Handles.DrawSolidDisc(attackDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMinDeadzone);
+
+        Handles.Label(attackDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "Attack Deadzone");
+
+
+
+
+        /* BOTTOM ROW RAW movement visualiser */
+
+        Handles.color = Color.white;
+        Handles.DrawSolidDisc(RAWMovementDeadzonePosition, new Vector3(0, 0, 1), radius);
+
+        Handles.Label(RAWMovementDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "RAW Movement");
+
+
+
+
+        /* BOTTOM ROW RAW movement visualiser */
+
+        Handles.color = Color.white;
+        Handles.DrawSolidDisc(RAWAttackDeadzonePosition, new Vector3(0, 0, 1), radius);
+
+        Handles.color = Color.magenta;
+        Handles.Label(RAWAttackDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "RAW Attack");
+
         UpdateMovementGUIPosition();
         Handles.color = Color.cyan;
         Handles.DrawSolidDisc(groundMovementGUIPosition, new Vector3(0, 0, 1), radius / 10);
         Handles.DrawSolidDisc(aerialMovementGUIPosition, new Vector3(0, 0, 1), radius / 10);
-
+        Handles.DrawSolidDisc(universalDeadzoneGUIPosition, new Vector3(0, 0, 1), radius / 10);
+        Handles.DrawSolidDisc(attackDeadzoneGUIPosition, new Vector3(0, 0, 1), radius / 10);
+        Handles.DrawSolidDisc(RAWMovementDeadzoneGUIPosition, new Vector3(0, 0, 1), radius / 10);
+        Handles.DrawSolidDisc(RAWAttackDeadzoneGUIPosition, new Vector3(0, 0, 1), radius / 10);
     }
 
     void LoadDeadzones()
@@ -262,7 +340,19 @@ public class CustomDeadzonesWindow : EditorWindow
             new Vector3(playerInputHandler.groundMovementDirection.x, -playerInputHandler.groundMovementDirection.y) * radius;
 
         aerialMovementGUIPosition = aerialDeadzonePosition +
+            new Vector3(playerInputHandler.aerialMovementDirection.x, -playerInputHandler.aerialMovementDirection.y) * radius;
+
+        universalDeadzoneGUIPosition = universalDeadzonePosition +
+            new Vector3(playerInputHandler.universalMovementDirection.x, -playerInputHandler.universalMovementDirection.y) * radius;
+
+        attackDeadzoneGUIPosition = attackDeadzonePosition +
+            new Vector3(playerInputHandler.groundAttackDirection.x, -playerInputHandler.aerialAttackDirection.y) * radius;
+
+        RAWMovementDeadzoneGUIPosition = RAWMovementDeadzonePosition +
             new Vector3(playerInputHandler.RAWmovementDirection.x, -playerInputHandler.RAWmovementDirection.y) * radius;
+
+        RAWAttackDeadzoneGUIPosition = RAWAttackDeadzonePosition +
+            new Vector3(playerInputHandler.RAWattackDirection.x, -playerInputHandler.RAWattackDirection.y) * radius;
     }
 
 }

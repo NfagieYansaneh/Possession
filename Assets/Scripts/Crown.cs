@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+
 using UnityEditor;
 
 public class Crown : MonoBehaviour
@@ -22,7 +23,7 @@ public class Crown : MonoBehaviour
     public LayerMask layerGroundMaskCollision;
     public LayerMask layerCharacterMaskCollision;
     [HideInInspector]
-    public Collider2D possessedPlayersCollider;
+    //public Collider2D possessedPlayersCollider;
 
     [Header("Character Seeking & PN")]
     public bool enablePN = true;
@@ -68,7 +69,7 @@ public class Crown : MonoBehaviour
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        possessedPlayersCollider = playerInputHandler.GetComponent<Collider2D>();
+        //possessedPlayersCollider = playerInputHandler.GetComponent<Collider2D>();
         //gameObject.SetActive(false);
     }
 
@@ -95,7 +96,9 @@ public class Crown : MonoBehaviour
         if (enablePN) ApplyPorportionalNavigation();
     }
 
+
     // purely for debugging in order for me to visualise the process of seeking and tracking down characters so possession takes place
+    #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -131,6 +134,7 @@ public class Crown : MonoBehaviour
             Gizmos.DrawLine(transform.position, seekedCharacters[i].transform.position);
         }
     }
+    #endif
 
     // throws crown
     public void ThrowMe(Vector2 desiredDirection, Collider2D newCollider)
@@ -146,7 +150,7 @@ public class Crown : MonoBehaviour
         }
 
         else direction = desiredDirection;
-        possessedPlayersCollider = newCollider;
+        //possessedPlayersCollider = newCollider;
 
         rb.velocity = velocity = direction * throwSpeed;
     }
@@ -289,7 +293,7 @@ public class Crown : MonoBehaviour
     public void HandleDeflectionResponse(Collider2D collider)
     {
         // I should be using Physics2D.IgnoreCollision so I will implement that later
-        if (collider == possessedPlayersCollider)
+        if (collider.gameObject == playerInputHandler.possessedCharacter.gameObject)
         {
             return;
         }

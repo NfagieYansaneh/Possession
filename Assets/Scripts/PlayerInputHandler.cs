@@ -20,6 +20,7 @@ public class PlayerInputHandler : MonoBehaviour
     public float aerialVerticalDeadzone = 0.2f;
 
     [HideInInspector] public Vector2 RAWmovementDirection     = Vector2.zero;
+    [HideInInspector] public Vector2 universalMovementDirection = Vector2.zero;
     [HideInInspector] public Vector2 groundMovementDirection  = Vector2.zero;
     [HideInInspector] public Vector2 aerialMovementDirection  = Vector2.zero;
     [HideInInspector] public Vector2 dashingMovementDirection = Vector2.zero;
@@ -27,6 +28,8 @@ public class PlayerInputHandler : MonoBehaviour
     [HideInInspector] public Vector2 RAWattackDirection       = Vector2.zero;
     [HideInInspector] public Vector2 groundAttackDirection    = Vector2.zero;
     [HideInInspector] public Vector2 aerialAttackDirection    = Vector2.zero;
+
+    [HideInInspector] public bool spaceKeyHeld = false;
 
     public BaseCharacterController possessedCharacter;
 
@@ -39,7 +42,9 @@ public class PlayerInputHandler : MonoBehaviour
         input.Player.Movement.performed += OnMovementPerformed;
         input.Player.Movement.canceled += OnMovementPerformed;
 
+        input.Player.Jump.started += ctx => spaceKeyHeld = true;
         input.Player.Jump.performed+= OnJumpPerformed; // when the jump keys are performed, call "OnJumpPerformed" function
+        input.Player.Jump.canceled += ctx => spaceKeyHeld = false;
 
         input.Player.Dodge.performed += OnDodgePerformed; // when the dodge keys are performed, call "OnDodgePerformed" function
 
@@ -59,9 +64,11 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (RAWmovementDirection.magnitude <= universalFixedMinDeadzone)
         {
-            groundMovementDirection = aerialMovementDirection = Vector2.zero;
+            groundMovementDirection = aerialMovementDirection = universalMovementDirection = Vector2.zero;
             return;
         }
+
+        universalMovementDirection = RAWmovementDirection;
 
         // Refining groundMovementDirection that only handles horizontal ground movement
         if (RAWmovementDirection.x > groundHorizontalDeadzone || RAWmovementDirection.x < -groundHorizontalDeadzone)
@@ -69,14 +76,9 @@ public class PlayerInputHandler : MonoBehaviour
         else groundMovementDirection.x = 0f;
 
         // Aerial
-        if (RAWmovementDirection.x > aerialHorizontalDeadzone)
+        if (RAWmovementDirection.y > aerialVerticalDeadzone || RAWmovementDirection.y < -aerialVerticalDeadzone)
         {
-            aerialMovementDirection.x = RAWmovementDirection.x;
-        }
-
-        if (RAWmovementDirection.y > aerialVerticalDeadzone)
-        {
-            aerialMovementDirection.y = RAWmovementDirection.y;
+            aerialMovementDirection.y = (RAWmovementDirection.y > 0f) ? 1f : -1f;
         }
     }
 

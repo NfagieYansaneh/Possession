@@ -25,10 +25,12 @@ public class Rin_CharacterController : BaseCharacterController
         base.RunAtFixedUpdate();
     }
 
+    Vector2 oldGroundMovementDirection = Vector2.zero; // quick fix
     public override void PerformMovement(InputAction.CallbackContext context)
     {
         //movementDirection = context.ReadValue<Vector2>();
         movementDirection = playerInputHandler.groundMovementDirection;
+        if (oldGroundMovementDirection == movementDirection) return;
 
         if (movementDirection.magnitude <= playerInputHandler.universalFixedMinDeadzone)
         {
@@ -43,27 +45,30 @@ public class Rin_CharacterController : BaseCharacterController
 
         // calculates our velocity, but leaves the character current vertical velocity alone
         targetVelocity = new Vector2(movementSpeed * movementDirection.x, curVerticalVelocity);
-
-        SetVelocity(targetVelocity);
+        SetVelocity(targetVelocity); // u can speed boost if you spam S or W while moving. Fix this bug (applied a quick fix)
 
         // flips player based on movement keys
         if (movementDirection.x < -0.2 && facingRight == true)
         {
+            dodgeCarryingMomentum = false;
             facingRight = false;
 
             transform.localScale = new Vector3(-1, 1, 1);
         }
         else if (movementDirection.x > 0.2 && facingRight == false)
         {
+            dodgeCarryingMomentum = false;
             facingRight = true;
 
             transform.localScale = new Vector3(1, 1, 1);
         }
+
+        oldGroundMovementDirection = movementDirection;
     }
 
     public override void PerformJump(InputAction.CallbackContext context)
     {
-        if (jumpIndex <= maxJumps)
+        if (jumpIndex <= maxJumps - 1)
         {
             float targetVerticalVelocity;
             isFalling = false;
