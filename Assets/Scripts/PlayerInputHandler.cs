@@ -79,6 +79,9 @@ public class PlayerInputHandler : MonoBehaviour
         if (RAWmovementDirection.y > aerialVerticalDeadzone || RAWmovementDirection.y < -aerialVerticalDeadzone)
         {
             aerialMovementDirection.y = (RAWmovementDirection.y > 0f) ? 1f : -1f;
+        } else
+        {
+            aerialMovementDirection.y = 0f;
         }
     }
 
