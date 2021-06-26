@@ -134,6 +134,10 @@ public class BaseCharacterController : MonoBehaviour
     public PlayerInputHandler playerInputHandler;
     public Vector2 movementDirection = Vector2.zero;
 
+    [Header("Diegetic Ui")]
+    public GameObject basicOutline;
+    public GameObject shadow;
+    public GameObject crown;
 
     void Awake()
     {
@@ -152,6 +156,8 @@ public class BaseCharacterController : MonoBehaviour
         groundCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
         ceilingCheckBoxSize = new Vector3(myCollider.bounds.size.x - 0.05f, 0.55f);
         jumpIndex = 0;
+
+        RunAtStart();
     }
 
     private void OnEnable()
@@ -253,6 +259,8 @@ public class BaseCharacterController : MonoBehaviour
             dodgeBoxPosition = new Vector2(transform.position.x + dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
         else
             dodgeBoxPosition = new Vector2(transform.position.x - dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
+
+        RunAtUpdate();
     }
 
     // FixedUpdate is called every 'x' seconds
@@ -683,6 +691,9 @@ public class BaseCharacterController : MonoBehaviour
 
         playerInputHandler.possessedCharacter.OnPossessionLeave(); // calls the 'leave' function on previous possession
         playerInputHandler.possessedCharacter = this;
+        playerInputHandler.possessedCharacter.shadow.SetActive(true);
+        playerInputHandler.possessedCharacter.crown.SetActive(true);
+        playerInputHandler.possessedCharacter.shadow.GetComponent<SpriteRenderer>().color = playerInputHandler.playerColor;
     }
 
     public virtual void OnPossessionLeave()
@@ -690,9 +701,21 @@ public class BaseCharacterController : MonoBehaviour
         // not typically meant to be overwritten
         movementDirection = Vector2.zero;
         targetVelocity = Vector2.zero;
+        shadow.SetActive(false);
+        crown.SetActive(false);
     }
 
     public virtual void RunAtFixedUpdate()
+    {
+        // meant to be overwritten
+    }
+
+    public virtual void RunAtStart()
+    {
+        // meant to be overwritten
+    }
+
+    public virtual void RunAtUpdate()
     {
         // meant to be overwritten
     }

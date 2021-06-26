@@ -10,6 +10,8 @@ public class PlayerInputHandler : MonoBehaviour
     // Variable stores an instance of the InputMaster, which holds all of our input actions for input processing
     InputMaster input;
 
+    public Color playerColor;
+
     public float universalFixedMinDeadzone = 0.125f;
     public float universalFixedMaxDeadzone = 0.925f;
 
