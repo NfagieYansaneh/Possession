@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: 3d52303e53b3a6445a81bf88448d7c7d
+guid: ee88d26b069f56b4181e4da08ee261b2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6751553334252897513
-    second: ForwardLightExperiment_01_26June_0
+      213: -1002171584860460644
+    second: ForwardLightExperiment_02_27June_0
   - first:
-      213: 757580090132979452
-    second: ForwardLightExperiment_01_26June_1
+      213: -5616339521049610382
+    second: ForwardLightExperiment_02_27June_1
   - first:
-      213: 5583651862791770929
-    second: ForwardLightExperiment_01_26June_2
+      213: -8530464170959674071
+    second: ForwardLightExperiment_02_27June_2
   - first:
-      213: 935332116074008030
-    second: ForwardLightExperiment_01_26June_3
+      213: 615071574634657954
+    second: ForwardLightExperiment_02_27June_3
   - first:
-      213: -5413894100773777715
-    second: ForwardLightExperiment_01_26June_4
+      213: 444271840671152144
+    second: ForwardLightExperiment_02_27June_4
   - first:
-      213: 8617100878486605262
-    second: ForwardLightExperiment_01_26June_5
+      213: 749883953879760378
+    second: ForwardLightExperiment_02_27June_5
   - first:
-      213: -3271800746286912841
-    second: ForwardLightExperiment_01_26June_6
+      213: -3014714380873295122
+    second: ForwardLightExperiment_02_27June_6
   - first:
-      213: 5370787247679775657
-    second: ForwardLightExperiment_01_26June_7
+      213: 5130629099491940534
+    second: ForwardLightExperiment_02_27June_7
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -151,169 +151,169 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_0
+      name: ForwardLightExperiment_02_27June_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.40494773, y: 0.45931658}
+      pivot: {x: 0.3756294, y: 0.3839811}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 71b70c5830aad42a0800000000000000
-      internalID: -6751553334252897513
+      spriteID: c99e668d0429712f0800000000000000
+      internalID: -1002171584860460644
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_1
+      name: ForwardLightExperiment_02_27June_1
       rect:
         serializedVersion: 2
-        x: 163
+        x: 169
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.4388249, y: 0.46751666}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cfed8410417738a00800000000000000
-      internalID: 757580090132979452
+      spriteID: 277b9d556f0ce02b0800000000000000
+      internalID: -5616339521049610382
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_2
+      name: ForwardLightExperiment_02_27June_2
       rect:
         serializedVersion: 2
-        x: 326
+        x: 338
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.49079752, y: 0.4698795}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 133d62729cd1d7d40800000000000000
-      internalID: 5583651862791770929
+      spriteID: 92560c86804bd9980800000000000000
+      internalID: -8530464170959674071
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_3
+      name: ForwardLightExperiment_02_27June_3
       rect:
         serializedVersion: 2
-        x: 489
+        x: 507
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.5398773, y: 0.56626505}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: edd0b9d9a97fafc00800000000000000
-      internalID: 935332116074008030
+      spriteID: 2a8f98d965c298800800000000000000
+      internalID: 615071574634657954
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_4
+      name: ForwardLightExperiment_02_27June_4
       rect:
         serializedVersion: 2
-        x: 652
+        x: 676
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.40490797, y: 0.6385542}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: dcecbc7dffbfdd4b0800000000000000
-      internalID: -5413894100773777715
+      spriteID: 018b9ee92ee5a2600800000000000000
+      internalID: 444271840671152144
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_5
+      name: ForwardLightExperiment_02_27June_5
       rect:
         serializedVersion: 2
-        x: 815
+        x: 845
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.37423313, y: 0.4819277}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ecd86e7f797169770800000000000000
-      internalID: 8617100878486605262
+      spriteID: afdb4c5ab7f186a00800000000000000
+      internalID: 749883953879760378
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_6
+      name: ForwardLightExperiment_02_27June_6
       rect:
         serializedVersion: 2
-        x: 978
+        x: 1014
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.36196318, y: 0.36144578}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7bae5b55e8a3892d0800000000000000
-      internalID: -3271800746286912841
+      spriteID: eea19c44e359926d0800000000000000
+      internalID: -3014714380873295122
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ForwardLightExperiment_01_26June_7
+      name: ForwardLightExperiment_02_27June_7
       rect:
         serializedVersion: 2
-        x: 1141
+        x: 1183
         y: 0
-        width: 163
-        height: 83
+        width: 169
+        height: 95
       alignment: 9
-      pivot: {x: 0.36196318, y: 0.38554215}
+      pivot: {x: 0.3756294, y: 0.3843777}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9a3a62ecb8ed88a40800000000000000
-      internalID: 5370787247679775657
+      spriteID: 6b8df759bf7a33740800000000000000
+      internalID: 5130629099491940534
       vertices: []
       indices: 
       edges: []
@@ -321,7 +321,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 95935f4a4f58d4942b1b23282e346896
+    spriteID: b6a248aea0e043c4b85508b8ad034827
     internalID: 0
     vertices: []
     indices: 
