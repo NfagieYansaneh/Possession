@@ -68,6 +68,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press"
+                },
+                {
+                    "name": "Mouse Position",
+                    "type": "Value",
+                    "id": "cb80e2bd-7f27-4201-a2cc-77f6a7d36ce8",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "Press"
                 }
             ],
             "bindings": [
@@ -282,6 +290,17 @@
                 },
                 {
                     "name": "",
+                    "id": "2cf233b1-7255-46a7-9040-251bc88a0d47",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Light Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d0191f0b-2ce5-4374-80ed-bd276f77a290",
                     "path": "<Keyboard>/j",
                     "interactions": "Press",
@@ -387,6 +406,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Crown Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "13e11c14-6e83-406d-a018-197f19822079",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Mouse Position",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
