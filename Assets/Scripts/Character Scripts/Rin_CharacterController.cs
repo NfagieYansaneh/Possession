@@ -187,6 +187,7 @@ public class Rin_CharacterController : BaseCharacterController
                 break;
 
             case (int)attackDirection.UP:
+                anim.SetTrigger(Animator.StringToHash("Up Light"));
                 break;
         }
         //anim.SetTrigger(Animator.StringToHash("Forward Light"));

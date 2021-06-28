@@ -62,7 +62,7 @@ public class PlayerInputHandler : MonoBehaviour
         input.Player.Movement.canceled += OnMovementPerformed;
 
         input.Player.Jump.started += ctx => spaceKeyHeld = true;
-        input.Player.Jump.performed+= OnJumpPerformed; // when the jump keys are performed, call "OnJumpPerformed" function
+        input.Player.Jump.performed += OnJumpPerformed; // when the jump keys are performed, call "OnJumpPerformed" function
         input.Player.Jump.canceled += ctx => spaceKeyHeld = false;
 
         input.Player.Dodge.performed += OnDodgePerformed; // when the dodge keys are performed, call "OnDodgePerformed" function
