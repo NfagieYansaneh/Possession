@@ -80,7 +80,7 @@ public class PlayerInputHandler : MonoBehaviour
         //input.Player.MousePosition.started += OnMousePositionPerformed;
         //input.Player.MousePosition.performed += OnMousePositionPerformed;
         //input.Player.MousePosition.canceled += OnMousePositionPerformed;
-
+        
     }
 
     public void Update()
@@ -88,7 +88,6 @@ public class PlayerInputHandler : MonoBehaviour
         mousePosition = Camera.main.ScreenToWorldPoint(input.Player.MousePosition.ReadValue<Vector2>());
         Vector2 directionRelativeToPlayer = new Vector3(mousePosition.x, mousePosition.y) - possessedCharacter.transform.position;
         mouseNormalized = directionRelativeToPlayer.normalized;
-        Debug.Log(mousePosition);
         RefineAttack();
         //Vector2 mousePositon = mainCam.ScreenToWorldPoint(Mouse.current.position);
     }

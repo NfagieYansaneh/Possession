@@ -173,7 +173,23 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformLightAttack(InputAction.CallbackContext context)
     {
-        anim.SetTrigger(Animator.StringToHash("Light Attack"));
+        switch (playerInputHandler.playerAttackDirection)
+        {
+            case (int)attackDirection.FORWARD:
+                anim.SetTrigger(Animator.StringToHash("Forward Light"));
+                break;
+
+            case (int)attackDirection.DOWN:
+                anim.SetTrigger(Animator.StringToHash("Down Light"));
+                break;
+
+            case (int)attackDirection.NEUTRAL:
+                break;
+
+            case (int)attackDirection.UP:
+                break;
+        }
+        //anim.SetTrigger(Animator.StringToHash("Forward Light"));
         overrideJumpAnim = true;
         Debug.LogWarning("Light Attack performed");
     }
@@ -185,6 +201,25 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformHeavyAttack(InputAction.CallbackContext context)
     {
+        switch (playerInputHandler.playerAttackDirection)
+        {
+            case (int)attackDirection.FORWARD:
+                anim.SetTrigger(Animator.StringToHash("Forward Heavy"));
+                break;
+
+            case (int)attackDirection.DOWN:
+                anim.SetTrigger(Animator.StringToHash("Down Heavy"));
+                break;
+
+            case (int)attackDirection.NEUTRAL:
+                break;
+
+            case (int)attackDirection.UP:
+                anim.SetTrigger(Animator.StringToHash("Up Heavy"));
+                break;
+        }
+
+        overrideJumpAnim = true;
         Debug.LogWarning("Heavy Attack performed");
     }
 

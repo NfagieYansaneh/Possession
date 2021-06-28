@@ -294,7 +294,7 @@
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Keyboard and mouse",
                     "action": "Light Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -317,6 +317,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
+                    "action": "Heavy Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3aae25fc-b8a1-4ead-b866-eb9155e1e15b",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
                     "action": "Heavy Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
