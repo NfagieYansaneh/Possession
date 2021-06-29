@@ -5,8 +5,34 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System; // rid of this later
 
+// Jessy from & RazaTech https://forum.unity.com/threads/re-map-a-number-from-one-range-to-another.119437/
+public static class ExtensionMethods
+{
+
+    public static float Remap(this float from, float fromMin, float fromMax, float toMin, float toMax)
+    {
+        var fromAbs = from - fromMin;
+        var fromMaxAbs = fromMax - fromMin;
+
+        var normal = fromAbs / fromMaxAbs;
+
+        var toMaxAbs = toMax - toMin;
+        var toAbs = toMaxAbs * normal;
+
+        var to = toAbs + toMin;
+
+        return to;
+    }
+
+}
+
+
 public class Rin_CharacterController : BaseCharacterController
 {
+    [Header("Animation - Override")]
+    public Animator anim;
+    bool overrideJumpAnim = false;
+
     // Vector2 movementDirection = Vector2.zero; // already defined in BaseCharacterController.cs
 
     /* The variables & functions you have access too on baseCharacterController is...
@@ -19,6 +45,54 @@ public class Rin_CharacterController : BaseCharacterController
      * 
      * 
      */
+
+    float oldAnimSpeed = 0f;
+    bool playingJumpAnimation = false;
+    public override void RunAtUpdate()
+    {
+        base.RunAtUpdate();
+
+        if (!overrideJumpAnim)
+        {
+            if (!isGrounded || isGrounded && curVerticalVelocity > 0f)
+            {
+                playingJumpAnimation = true;
+                int airIndex;
+                float peakRisingVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
+                float peakFallingVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
+                airIndex = (int)Mathf.Clamp(ExtensionMethods.Remap(curVerticalVelocity, peakRisingVelocity, -1 / 2f * peakFallingVelocity, 0f, 7f), 0, 7);
+                if (oldAnimSpeed != anim.speed)
+                {
+                    oldAnimSpeed = anim.speed;
+                }
+                anim.speed = 0f;
+                anim.Play("Rin_Jump", 0, (1f / 8) * airIndex);
+            }
+            else
+            {
+                if (playingJumpAnimation)
+                {
+                    Debug.Log("Landed");
+                    anim.SetTrigger(Animator.StringToHash("Landed"));
+                    playingJumpAnimation = false;
+                    anim.speed = 1f;
+                }
+
+                playingJumpAnimation = false;
+            }
+        }
+        else
+        {
+            anim.speed = 1f;
+        }
+    }
+
+    public override void RunAtStart()
+    {
+        base.RunAtStart();
+
+        oldAnimSpeed = anim.speed;
+    }
 
     public override void RunAtFixedUpdate()
     {
@@ -36,8 +110,10 @@ public class Rin_CharacterController : BaseCharacterController
         {
             // Debug.LogWarning("IN DEADZONE");
             movementDirection = Vector2.zero;
+            anim.SetBool(Animator.StringToHash("Running"), false);
         } else
         {
+            anim.SetBool(Animator.StringToHash("Running"), true);
             // Debug.Log(movementDirection.magnitude + " : " + playerInputHandler.universalFixedMinDeadzone);
         }
 
@@ -97,11 +173,73 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformLightAttack(InputAction.CallbackContext context)
     {
+        switch (playerInputHandler.playerAttackDirection)
+        {
+            case (int)attackDirection.FORWARD:
+                anim.SetTrigger(Animator.StringToHash("Forward Light"));
+                break;
+
+            case (int)attackDirection.DOWN:
+                anim.SetTrigger(Animator.StringToHash("Down Light"));
+                break;
+
+            case (int)attackDirection.NEUTRAL:
+                break;
+
+            case (int)attackDirection.UP:
+                anim.SetTrigger(Animator.StringToHash("Up Light"));
+                break;
+        }
+        //anim.SetTrigger(Animator.StringToHash("Forward Light"));
+        overrideJumpAnim = true;
         Debug.LogWarning("Light Attack performed");
+    }
+
+    // please shift these to base character controller script when creating more characters
+    public void ResetOverrideJumpAnim()
+    {
+        overrideJumpAnim = false;
+        if (!isGrounded)
+        {
+            EnableShadowCrownDebug();
+        }
+    }
+
+    // Quick Debugging tools
+    public void DisableShadowCrownDebug()
+    {
+        shadow.SetActive(false);
+        crown.SetActive(false);
+        //basicOutline.SetActive(false);
+    }
+    public void EnableShadowCrownDebug()
+    {
+        shadow.SetActive(true);
+        crown.SetActive(true);
+        //basicOutline.SetActive(true);
     }
 
     public override void PerformHeavyAttack(InputAction.CallbackContext context)
     {
+        switch (playerInputHandler.playerAttackDirection)
+        {
+            case (int)attackDirection.FORWARD:
+                anim.SetTrigger(Animator.StringToHash("Forward Heavy"));
+                break;
+
+            case (int)attackDirection.DOWN:
+                anim.SetTrigger(Animator.StringToHash("Down Heavy"));
+                break;
+
+            case (int)attackDirection.NEUTRAL:
+                break;
+
+            case (int)attackDirection.UP:
+                anim.SetTrigger(Animator.StringToHash("Up Heavy"));
+                break;
+        }
+
+        overrideJumpAnim = true;
         Debug.LogWarning("Heavy Attack performed");
     }
 

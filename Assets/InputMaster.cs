@@ -81,6 +81,14 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Mouse Position"",
+                    ""type"": ""Value"",
+                    ""id"": ""cb80e2bd-7f27-4201-a2cc-77f6a7d36ce8"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -295,6 +303,17 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""2cf233b1-7255-46a7-9040-251bc88a0d47"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and mouse"",
+                    ""action"": ""Light Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""d0191f0b-2ce5-4374-80ed-bd276f77a290"",
                     ""path"": ""<Keyboard>/j"",
                     ""interactions"": ""Press"",
@@ -311,6 +330,17 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3aae25fc-b8a1-4ead-b866-eb9155e1e15b"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and mouse"",
                     ""action"": ""Heavy Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -402,6 +432,17 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""action"": ""Crown Throw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""13e11c14-6e83-406d-a018-197f19822079"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Mouse Position"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -446,6 +487,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         m_Player_BasicAbility = m_Player.FindAction("Basic Ability", throwIfNotFound: true);
         m_Player_UltimateAbility = m_Player.FindAction("Ultimate Ability", throwIfNotFound: true);
         m_Player_CrownThrow = m_Player.FindAction("Crown Throw", throwIfNotFound: true);
+        m_Player_MousePosition = m_Player.FindAction("Mouse Position", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -503,6 +545,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_BasicAbility;
     private readonly InputAction m_Player_UltimateAbility;
     private readonly InputAction m_Player_CrownThrow;
+    private readonly InputAction m_Player_MousePosition;
     public struct PlayerActions
     {
         private @InputMaster m_Wrapper;
@@ -515,6 +558,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         public InputAction @BasicAbility => m_Wrapper.m_Player_BasicAbility;
         public InputAction @UltimateAbility => m_Wrapper.m_Player_UltimateAbility;
         public InputAction @CrownThrow => m_Wrapper.m_Player_CrownThrow;
+        public InputAction @MousePosition => m_Wrapper.m_Player_MousePosition;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -548,6 +592,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @CrownThrow.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
                 @CrownThrow.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
                 @CrownThrow.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrownThrow;
+                @MousePosition.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMousePosition;
+                @MousePosition.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMousePosition;
+                @MousePosition.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMousePosition;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -576,6 +623,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @CrownThrow.started += instance.OnCrownThrow;
                 @CrownThrow.performed += instance.OnCrownThrow;
                 @CrownThrow.canceled += instance.OnCrownThrow;
+                @MousePosition.started += instance.OnMousePosition;
+                @MousePosition.performed += instance.OnMousePosition;
+                @MousePosition.canceled += instance.OnMousePosition;
             }
         }
     }
@@ -608,5 +658,6 @@ public class @InputMaster : IInputActionCollection, IDisposable
         void OnBasicAbility(InputAction.CallbackContext context);
         void OnUltimateAbility(InputAction.CallbackContext context);
         void OnCrownThrow(InputAction.CallbackContext context);
+        void OnMousePosition(InputAction.CallbackContext context);
     }
 }
