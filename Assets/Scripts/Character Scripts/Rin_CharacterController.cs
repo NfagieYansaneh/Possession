@@ -195,9 +195,28 @@ public class Rin_CharacterController : BaseCharacterController
         Debug.LogWarning("Light Attack performed");
     }
 
+    // please shift these to base character controller script when creating more characters
     public void ResetOverrideJumpAnim()
     {
         overrideJumpAnim = false;
+        if (!isGrounded)
+        {
+            EnableShadowCrownDebug();
+        }
+    }
+
+    // Quick Debugging tools
+    public void DisableShadowCrownDebug()
+    {
+        shadow.SetActive(false);
+        crown.SetActive(false);
+        //basicOutline.SetActive(false);
+    }
+    public void EnableShadowCrownDebug()
+    {
+        shadow.SetActive(true);
+        crown.SetActive(true);
+        //basicOutline.SetActive(true);
     }
 
     public override void PerformHeavyAttack(InputAction.CallbackContext context)
