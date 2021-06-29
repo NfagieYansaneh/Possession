@@ -139,6 +139,9 @@ public class BaseCharacterController : MonoBehaviour
     public GameObject shadow;
     public GameObject crown;
 
+    [Header("Health Handling")]
+    public HealthHandler healthHandler;
+
     void Awake()
     {
         input = new InputMaster();
