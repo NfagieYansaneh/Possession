@@ -29,10 +29,6 @@ public static class ExtensionMethods
 
 public class Rin_CharacterController : BaseCharacterController
 {
-    [Header("Animation - Override")]
-    public Animator anim;
-    bool overrideJumpAnim = false;
-
     // Vector2 movementDirection = Vector2.zero; // already defined in BaseCharacterController.cs
 
     /* The variables & functions you have access too on baseCharacterController is...
@@ -52,7 +48,7 @@ public class Rin_CharacterController : BaseCharacterController
     {
         base.RunAtUpdate();
 
-        if (!overrideJumpAnim)
+        if (!overrideJumpAnim && !hitStopActive)
         {
             if (!isGrounded || isGrounded && curVerticalVelocity > 0f)
             {
@@ -80,8 +76,8 @@ public class Rin_CharacterController : BaseCharacterController
 
                 playingJumpAnimation = false;
             }
-        }
-        else
+        } 
+        else if (!hitStopActive)
         {
             anim.speed = 1f;
         }

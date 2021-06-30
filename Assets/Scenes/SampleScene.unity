@@ -812,9 +812,10 @@ GameObject:
   m_Component:
   - component: {fileID: 84297094}
   - component: {fileID: 84297095}
+  - component: {fileID: 84297096}
   m_Layer: 6
   m_Name: HitBox_2
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -849,6 +850,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &84297096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 84297093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 181289301}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &85459228
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,9 +876,10 @@ GameObject:
   m_Component:
   - component: {fileID: 85459229}
   - component: {fileID: 85459230}
+  - component: {fileID: 85459231}
   m_Layer: 6
   m_Name: HitBox_0
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -896,6 +914,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &85459231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85459228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 181289301}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &90329117
 GameObject:
   m_ObjectHideFlags: 0
@@ -6127,11 +6161,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!1 &151648871
 GameObject:
   m_ObjectHideFlags: 0
@@ -6232,9 +6276,10 @@ GameObject:
   m_Component:
   - component: {fileID: 168934755}
   - component: {fileID: 168934756}
+  - component: {fileID: 168934757}
   m_Layer: 6
   m_Name: HurtBox_Head
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6269,6 +6314,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &168934757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168934754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 223946161}
+  hurtbox: {fileID: 0}
 --- !u!1 &177106778
 GameObject:
   m_ObjectHideFlags: 0
@@ -6279,9 +6338,10 @@ GameObject:
   m_Component:
   - component: {fileID: 177106779}
   - component: {fileID: 177106780}
+  - component: {fileID: 177106781}
   m_Layer: 6
   m_Name: HitBox_2
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6316,6 +6376,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &177106781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177106778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 223946161}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &178993135
 GameObject:
   m_ObjectHideFlags: 0
@@ -6377,7 +6453,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181289296}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.8, y: -2.32, z: 0}
+  m_LocalPosition: {x: -10.1, y: 3.76, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 773460607}
@@ -6618,7 +6694,7 @@ MonoBehaviour:
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
   dodgeBoxSize: {x: 0.1, y: 1.14}
-  dodgeBoxPosition: {x: -6.4100003, y: -2.59}
+  dodgeBoxPosition: {x: -9.71, y: 3.49}
   dodgeBoxOffset: {x: 0.39, y: -0.27}
   whatIsGround:
     serializedVersion: 2
@@ -6648,11 +6724,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 181289302}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 773460606}
   shadow: {fileID: 1750160773}
   crown: {fileID: 15457873}
   healthHandler: {fileID: 181289303}
-  anim: {fileID: 181289302}
+  damageTiers: 06000000090000001100000023000000
+  hitStopTiers:
+  - 0
+  - 0.04
+  - 0.07
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!95 &181289302
 Animator:
   serializedVersion: 3
@@ -7385,11 +7471,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 223946162}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 1692494622}
   shadow: {fileID: 412868604}
   crown: {fileID: 1610526175}
   healthHandler: {fileID: 223946164}
-  anim: {fileID: 223946162}
+  damageTiers: 06000000090000001100000023000000
+  hitStopTiers:
+  - 0
+  - 0.04
+  - 0.07
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!95 &223946162
 Animator:
   serializedVersion: 3
@@ -7669,9 +7765,10 @@ GameObject:
   m_Component:
   - component: {fileID: 244460028}
   - component: {fileID: 244460029}
+  - component: {fileID: 244460030}
   m_Layer: 6
   m_Name: HitBox_2
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7706,6 +7803,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &244460030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 244460027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 892147507}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &248990221
 GameObject:
   m_ObjectHideFlags: 0
@@ -7828,9 +7941,10 @@ GameObject:
   m_Component:
   - component: {fileID: 307451153}
   - component: {fileID: 307451154}
+  - component: {fileID: 307451155}
   m_Layer: 6
   m_Name: HitBox_1
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7865,6 +7979,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &307451155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307451152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 223946161}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &335915581
 GameObject:
   m_ObjectHideFlags: 0
@@ -8127,11 +8257,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!212 &335915585
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -8225,9 +8365,10 @@ GameObject:
   m_Component:
   - component: {fileID: 345414625}
   - component: {fileID: 345414626}
+  - component: {fileID: 345414627}
   m_Layer: 6
   m_Name: HurtBox_Head
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8262,6 +8403,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &345414627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345414624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 574087286}
+  hurtbox: {fileID: 0}
 --- !u!1 &367601271
 GameObject:
   m_ObjectHideFlags: 0
@@ -8272,9 +8427,10 @@ GameObject:
   m_Component:
   - component: {fileID: 367601272}
   - component: {fileID: 367601273}
+  - component: {fileID: 367601274}
   m_Layer: 6
   m_Name: HurtBox_Body
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8309,6 +8465,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &367601274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 367601271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 892147507}
+  hurtbox: {fileID: 0}
 --- !u!1 &403713988
 GameObject:
   m_ObjectHideFlags: 0
@@ -9806,9 +9976,10 @@ GameObject:
   m_Component:
   - component: {fileID: 481061957}
   - component: {fileID: 481061958}
+  - component: {fileID: 481061959}
   m_Layer: 6
   m_Name: HitBox_1
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9843,6 +10014,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &481061959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481061956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 892147507}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &499875704
 GameObject:
   m_ObjectHideFlags: 0
@@ -10492,11 +10679,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 574087287}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 73883999}
   shadow: {fileID: 1775464781}
   crown: {fileID: 1702313394}
   healthHandler: {fileID: 574087289}
-  anim: {fileID: 574087287}
+  damageTiers: 06000000090000001100000023000000
+  hitStopTiers:
+  - 0
+  - 0.04
+  - 0.07
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!95 &574087287
 Animator:
   serializedVersion: 3
@@ -11146,9 +11343,10 @@ GameObject:
   m_Component:
   - component: {fileID: 699996990}
   - component: {fileID: 699996991}
+  - component: {fileID: 699996992}
   m_Layer: 6
   m_Name: HurtBox_Body
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11183,6 +11381,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &699996992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699996989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 181289301}
+  hurtbox: {fileID: 0}
 --- !u!1 &703262709
 GameObject:
   m_ObjectHideFlags: 0
@@ -11193,9 +11405,10 @@ GameObject:
   m_Component:
   - component: {fileID: 703262710}
   - component: {fileID: 703262711}
+  - component: {fileID: 703262712}
   m_Layer: 6
   m_Name: HitBox_0
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11230,6 +11443,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &703262712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703262709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 223946161}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &729725580
 GameObject:
   m_ObjectHideFlags: 0
@@ -11334,9 +11563,10 @@ GameObject:
   m_Component:
   - component: {fileID: 752139328}
   - component: {fileID: 752139329}
+  - component: {fileID: 752139330}
   m_Layer: 6
   m_Name: HurtBox_Body
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11371,6 +11601,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &752139330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752139327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 223946161}
+  hurtbox: {fileID: 0}
 --- !u!1 &757983738
 GameObject:
   m_ObjectHideFlags: 0
@@ -11708,9 +11952,10 @@ GameObject:
   m_Component:
   - component: {fileID: 788430074}
   - component: {fileID: 788430075}
+  - component: {fileID: 788430076}
   m_Layer: 6
   m_Name: HurtBox_Body
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11745,6 +11990,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &788430076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 788430073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 574087286}
+  hurtbox: {fileID: 0}
 --- !u!1 &844609953
 GameObject:
   m_ObjectHideFlags: 0
@@ -11970,8 +12229,8 @@ BoxCollider2D:
   m_Offset: {x: 0.00796321, y: 0.22}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.4533685, y: 0.554562}
-    oldSize: {x: 4.03125, y: 4.59375}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 2, y: 2}
     newSize: {x: 2, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -12174,11 +12433,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 892147503}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 1420876223}
   shadow: {fileID: 1185603306}
   crown: {fileID: 1161565132}
   healthHandler: {fileID: 892147502}
-  anim: {fileID: 892147503}
+  damageTiers: 06000000090000001100000023000000
+  hitStopTiers:
+  - 0
+  - 0.04
+  - 0.07
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!1 &909998897
 GameObject:
   m_ObjectHideFlags: 0
@@ -12246,9 +12515,10 @@ GameObject:
   m_Component:
   - component: {fileID: 915125855}
   - component: {fileID: 915125856}
+  - component: {fileID: 915125857}
   m_Layer: 6
   m_Name: HitBox_1
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12283,6 +12553,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &915125857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 915125854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 181289301}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &942712972
 GameObject:
   m_ObjectHideFlags: 0
@@ -12754,11 +13040,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 892147503}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 892147503}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!95 &962515801
 Animator:
   serializedVersion: 3
@@ -12931,9 +13227,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1043501022}
   - component: {fileID: 1043501023}
+  - component: {fileID: 1043501024}
   m_Layer: 6
   m_Name: HitBox_1
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12968,6 +13265,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1043501024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043501021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 574087286}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &1103352485
 GameObject:
   m_ObjectHideFlags: 0
@@ -13037,9 +13350,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1128489141}
   - component: {fileID: 1128489142}
+  - component: {fileID: 1128489143}
   m_Layer: 6
   m_Name: HurtBox_Head
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13074,6 +13388,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1128489143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1128489140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 181289301}
+  hurtbox: {fileID: 0}
 --- !u!1 &1145688987
 GameObject:
   m_ObjectHideFlags: 0
@@ -13084,9 +13412,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1145688988}
   - component: {fileID: 1145688989}
+  - component: {fileID: 1145688990}
   m_Layer: 6
   m_Name: HitBox_0
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13121,6 +13450,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1145688990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1145688987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 892147507}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &1150836340
 GameObject:
   m_ObjectHideFlags: 0
@@ -13459,11 +13804,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!95 &1175180005
 Animator:
   serializedVersion: 3
@@ -14686,11 +15041,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!212 &1459144756
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -15387,9 +15752,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1621870080}
   - component: {fileID: 1621870081}
+  - component: {fileID: 1621870082}
   m_Layer: 6
   m_Name: HitBox_0
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15424,6 +15790,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1621870082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621870079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 574087286}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &1684454752
 GameObject:
   m_ObjectHideFlags: 0
@@ -15434,9 +15816,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1684454753}
   - component: {fileID: 1684454754}
+  - component: {fileID: 1684454755}
   m_Layer: 6
   m_Name: HurtBox_Head
-  m_TagString: Untagged
+  m_TagString: Hurtbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15471,6 +15854,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1684454755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1684454752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bec7c614a6b7947b335ac1faa60369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 892147507}
+  hurtbox: {fileID: 0}
 --- !u!1 &1692494622
 GameObject:
   m_ObjectHideFlags: 0
@@ -20393,9 +20790,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1792088266}
   - component: {fileID: 1792088267}
+  - component: {fileID: 1792088268}
   m_Layer: 6
   m_Name: HitBox_2
-  m_TagString: Untagged
+  m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20430,6 +20828,22 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.5, y: 1}
   m_Direction: 0
+--- !u!114 &1792088268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792088265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6406669537f41384293cb0d90a23f9f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseCharacterController: {fileID: 574087286}
+  hitbox: {fileID: 0}
+  recentlyHitCharacters: []
+  recentlyHitCharacterTimestamps: []
 --- !u!1 &1821118981
 GameObject:
   m_ObjectHideFlags: 0
@@ -20692,11 +21106,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!212 &1821118985
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -21124,11 +21548,21 @@ MonoBehaviour:
   crownScript: {fileID: 1487752143}
   playerInputHandler: {fileID: 1450726900}
   movementDirection: {x: 0, y: 0}
+  anim: {fileID: 0}
+  overrideJumpAnim: 0
+  hitStopActive: 0
   basicOutline: {fileID: 0}
   shadow: {fileID: 0}
   crown: {fileID: 0}
   healthHandler: {fileID: 0}
-  anim: {fileID: 0}
+  damageTiers: 070000000a0000001300000023000000
+  hitStopTiers:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  damageMultiplier: 1
+  damagePointer: 0
 --- !u!212 &1894952959
 SpriteRenderer:
   m_ObjectHideFlags: 0

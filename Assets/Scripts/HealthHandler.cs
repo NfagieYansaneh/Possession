@@ -30,7 +30,7 @@ public class HealthHandler : MonoBehaviour
 
     void Start()
     {
-        buttonPos = new Rect(10.0f, 10.0f, 150.0f, 50.0f);
+        buttonPos = new Rect(20.0f, 20.0f, 150.0f, 40.0f);
 
         // get rid of magic value
         if (!coroutineRunning)
@@ -80,7 +80,7 @@ public class HealthHandler : MonoBehaviour
             }
         }
 
-        bool toggleRecv = GUI.Toggle(new Rect(160f, 10f, 150f, 50f), forceDisplayHealth, new GUIContent("Force Display Health"));
+        bool toggleRecv = GUI.Toggle(new Rect(180f, 20f, 150f, 50f), forceDisplayHealth, new GUIContent("Force Display Health"));
         if (forceDisplayHealth != toggleRecv)
         {
             foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
@@ -92,16 +92,26 @@ public class HealthHandler : MonoBehaviour
                 }
             }
         }
+
+        if (GUI.Button(new Rect(20f, 70f, 150f, 40f), new GUIContent("Replenish Health"))) {
+            foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
+            {
+                if (baseCharacterController.healthHandler != null)
+                {
+                    baseCharacterController.healthHandler.ReplenishHealth();
+                }
+            }
+        }
     }
 
-    void RefreshHealth()
+    public void ReplenishHealth()
     {
         currentHealth = maxHealth;
         healthStatus = (int)healthStates.HEALTH_NORMAL;
     }
 
     int previousHealthStatus = (int)healthStates.HEALTH_EXPOSED;
-    void UpdateHealth(int delta)
+    public void UpdateHealth(int delta)
     {
         if (delta != 0)
         {

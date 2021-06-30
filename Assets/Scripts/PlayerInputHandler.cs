@@ -92,6 +92,13 @@ public class PlayerInputHandler : MonoBehaviour
         //Vector2 mousePositon = mainCam.ScreenToWorldPoint(Mouse.current.position);
     }
 
+    public void OnGUI()
+    {
+        GUI.Label(new Rect(20f, 120f, 150f, 40f), new GUIContent("Current Health "));
+        possessedCharacter.healthHandler.currentHealth =
+            (int)GUI.HorizontalSlider(new Rect(20f, 140f, 150f, 40f), possessedCharacter.healthHandler.currentHealth, 0f, possessedCharacter.healthHandler.maxHealth);
+    }
+
 #if UNITY_EDITOR
     public void OnDrawGizmosSelected()
     {

@@ -134,6 +134,11 @@ public class BaseCharacterController : MonoBehaviour
     public PlayerInputHandler playerInputHandler;
     public Vector2 movementDirection = Vector2.zero;
 
+    [Header("Animation - Override")]
+    public Animator anim;
+    public bool overrideJumpAnim = false;
+    public bool hitStopActive = false;
+
     [Header("Diegetic Ui")]
     public GameObject basicOutline;
     public GameObject shadow;
@@ -141,6 +146,14 @@ public class BaseCharacterController : MonoBehaviour
 
     [Header("Health Handling")]
     public HealthHandler healthHandler;
+
+    [Header("Damage Handling")]
+    public int[] damageTiers = { 7, 10, 19, 35 };
+    public float[] hitStopTiers = { 0.1f, 0.2f, 0.3f, 0.5f };
+
+    public float damageMultiplier = 1;
+    public int damagePointer = 0;
+
 
     void Awake()
     {
@@ -235,43 +248,50 @@ public class BaseCharacterController : MonoBehaviour
 
     void Update()
     {
-        // Handling timers and shiz
-        if(Time.time > dodgeTimestamp && dodging)
+        if (!hitStopActive)
         {
-            dodgeMomentumFallofCurveTimestamp = Time.time + dodgeMomentumFallofCurve.keys[dodgeMomentumFallofCurve.length - 1].time;
-            dodgeCarryingMomentum = true;
-            dodging = false;
-            gravityEnabled = true;
-            // Do some end dodging shiz
+            // Handling timers and shiz
+            if (Time.time > dodgeTimestamp && dodging)
+            {
+                dodgeMomentumFallofCurveTimestamp = Time.time + dodgeMomentumFallofCurve.keys[dodgeMomentumFallofCurve.length - 1].time;
+                dodgeCarryingMomentum = true;
+                dodging = false;
+                gravityEnabled = true;
+                // Do some end dodging shiz
+            }
+
+            if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
+            {
+                dodgeCarryingMomentum = false;
+            }
+
+            if (Time.time > ceilingTimestamp && ceilingTimerActive)
+            {
+                ceilingTimerActive = false;
+                curVerticalVelocity = -1f;
+            }
+
+            ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
+            groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
+            if (facingRight)
+                dodgeBoxPosition = new Vector2(transform.position.x + dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
+            else
+                dodgeBoxPosition = new Vector2(transform.position.x - dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
+
+            RunAtUpdate();
         }
-
-        if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
-        {
-            dodgeCarryingMomentum = false;
-        }
-
-        if(Time.time > ceilingTimestamp && ceilingTimerActive)
-        {
-            ceilingTimerActive = false;
-            curVerticalVelocity = -1f;
-        }
-
-        ceilingCheckBoxPosition = ceilingCheck.position + Vector3.up * ceilingCheckBoxSize.y / 2;
-        groundCheckBoxPosition = groundCheck.position + Vector3.up * groundCheckBoxSize.y / 2;
-        if(facingRight)
-            dodgeBoxPosition = new Vector2(transform.position.x + dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
-        else
-            dodgeBoxPosition = new Vector2(transform.position.x - dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
-
-        RunAtUpdate();
     }
 
     // FixedUpdate is called every 'x' seconds
     void FixedUpdate()
     {
 
-        HandleCollisionsAndSnapping();
-        HandleMovement();
+        if (!hitStopActive)
+        {
+            HandleCollisionsAndSnapping();
+            HandleMovement();
+        }
+
         RunAtFixedUpdate();
     }
 
@@ -599,6 +619,54 @@ public class BaseCharacterController : MonoBehaviour
         t_startMovementCurveTimestamp = Time.time;
         targetVelocity = newVelocity;
     }
+
+    public void SetDamagePointerTo(int point)
+    {
+        damagePointer = point;
+        damagePointer = Mathf.Clamp(damagePointer, 0, damageTiers.Length - 1);
+    }
+
+    Vector2 previousRbVelocity;
+    float previousCurVerticalVelocity;
+
+    bool previousDodgeMomentumState;
+    bool previousDodgeState;
+    public void HitStop(float duration)
+    {
+        previousDodgeState = dodging;
+        previousDodgeMomentumState = dodgeCarryingMomentum;
+
+        previousRbVelocity = rb.velocity;
+        previousCurVerticalVelocity = curVerticalVelocity;
+
+        dodging = false;
+        dodgeCarryingMomentum = false;
+        hitStopActive = true;
+        anim.speed = 0f;
+        rb.velocity = Vector2.zero;
+
+        StartCoroutine(HitStopEnumerator(duration)); 
+    }
+
+    IEnumerator HitStopEnumerator(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        if (previousDodgeState)
+        {
+            dodgeTimestamp += duration + Time.deltaTime;
+            dodging = true;
+        } else if (previousDodgeMomentumState)
+        {
+            dodgeMomentumFallofCurveTimestamp += duration + Time.deltaTime;
+            dodgeCarryingMomentum = true;
+        }
+
+        rb.velocity = previousRbVelocity;
+        curVerticalVelocity = previousCurVerticalVelocity;
+        hitStopActive = false;
+        anim.speed = 1f;
+    }
+
 
     // functions that can be overwritten depending on each characters needs
 
