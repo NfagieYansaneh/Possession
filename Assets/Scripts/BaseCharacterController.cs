@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
+public enum animationCurves { LINEAR, CONSTANT, EXPONENTIAL, EXPONENTIAL_DECAY };
+
 public class BaseCharacterController : MonoBehaviour
 {
     // Character controller : https://github.com/Brackeys/2D-Character-Controller/blob/master/CharacterController2D.cs
@@ -25,6 +27,16 @@ public class BaseCharacterController : MonoBehaviour
     [HideInInspector] public float t_startMovementCurveTimestamp;
     [HideInInspector] public float t_endMovementCurveTimestamp;
 
+    [Header("Background Velocities")]
+    private bool backgroundVelocitiesCurrentlyActive = false;
+    public List<Vector2> backgroundVelocities;
+    public List<float> backgroundVelocityTimestamps;
+    public List<float> backgroundVelocityDurations;
+    public List<AnimationCurve> backgroundVelocityCurves;
+
+    public AnimationCurve exponentialCurve;
+    public AnimationCurve exponentialDecayCurve;
+    
     [Header("Gravity & Jumps")]
     public bool airControl = true;              // Whether you can steer while jumping
     public float jumpHeight = 1;
@@ -149,10 +161,18 @@ public class BaseCharacterController : MonoBehaviour
 
     [Header("Damage Handling")]
     public int[] damageTiers = { 7, 10, 19, 35 };
+
     public float[] hitStopTiers = { 0.1f, 0.2f, 0.3f, 0.5f };
+
+    public bool canRecvieceKnockback = true;
+    public float[] knockbackMagnitudeTiers = { 1, 2, 4, 5 };
+    public float[] knockbackDurationTiers = { 0.1f, 0.2f, 0.3f, 0.5f };
+    public float knockbackAirborneMagnitudeMultiplier = 1.2f;
+    
 
     public float damageMultiplier = 1;
     public int damagePointer = 0;
+
 
 
     void Awake()
@@ -459,6 +479,8 @@ public class BaseCharacterController : MonoBehaviour
 
 
     bool slowing = false; // rename this variable
+
+    // I should revamp the entire HandleMovement(); function by just implementing the now better backgroundVelocity option
     public void HandleMovement()
     {
         Vector2 velocity;
@@ -526,6 +548,8 @@ public class BaseCharacterController : MonoBehaviour
             }
         }
 
+        Vector2 backgroundVelocity = GetBackgroundVelocities();
+
         // Handles Gravity to calculate curVerticalVelocity
         if (!isGrounded && gravityEnabled || isSliding && gravityEnabled)
         {
@@ -571,8 +595,12 @@ public class BaseCharacterController : MonoBehaviour
             curVerticalVelocity = 0f;
         }
 
+        curVerticalVelocity += backgroundVelocity.y;
+
         // Debug.DrawRay(transform.position, rb.velocity.normalized, Color.blue);
         // Debug.DrawRay(groundHit.point, Vector3.down, Color.cyan);
+
+        // Applying velocity parrallel to the ground if grounded
 
         // Sliding and grounded
         if(isSliding && isGrounded)
@@ -580,20 +608,26 @@ public class BaseCharacterController : MonoBehaviour
             if (Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection) > 0f)
             {
                 curVerticalVelocity = 0f;
-                rb.velocity = new Vector2(velocity.x, 0f);
-                return;
+                rb.velocity = new Vector2(velocity.x + backgroundVelocity.x, 0f );
             }
             else
             {
                 rb.velocity = Vector2.Perpendicular(groundHit.normal) * -curVerticalVelocity * Vector2.Dot(Vector2.up, -Vector2.Perpendicular(groundHit.normal));
-                return;
             }
+
+            return;
         }
 
         // Not sliding and grounded
         else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope)
         {
-            rb.velocity = -Vector2.Perpendicular(groundHit.normal) * velocity.x;
+            rb.velocity = -Vector2.Perpendicular(groundHit.normal) * (velocity.x + backgroundVelocity.x);
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + backgroundVelocity.y);
+            return;
+        } 
+        else if (backgroundVelocitiesCurrentlyActive && isGrounded && !willIgnoreSteepSlope && Vector2.Dot(groundHit.normal, backgroundVelocity.normalized) < 0)
+        {
+            rb.velocity = -Vector2.Perpendicular(groundHit.normal) * backgroundVelocity.magnitude;
             return;
         }
 
@@ -601,9 +635,11 @@ public class BaseCharacterController : MonoBehaviour
 
         // does this even work as intended?
         if (gravityEnabled)
-            rb.velocity = new Vector2(velocity.x, curVerticalVelocity);
+            rb.velocity = new Vector2(velocity.x + backgroundVelocity.x, curVerticalVelocity);
         else
-            rb.velocity = velocity;
+            rb.velocity = velocity + backgroundVelocity;
+
+        // ApplyBackgroundVelocities();
     }
 
     public void SetVelocity(Vector2 newVelocity)
@@ -618,6 +654,106 @@ public class BaseCharacterController : MonoBehaviour
         slowing = false;
         t_startMovementCurveTimestamp = Time.time;
         targetVelocity = newVelocity;
+    }
+
+    public Vector2 GetBackgroundVelocities()
+    {
+        CheckBackgroundVelocities();
+
+        int index = 0;
+        Vector2 temp = Vector2.zero;
+
+        backgroundVelocitiesCurrentlyActive = false;
+        foreach (Vector2 velocity in backgroundVelocities)
+        {
+            backgroundVelocitiesCurrentlyActive = true;
+
+            temp += velocity * backgroundVelocityCurves[index].Evaluate(
+                (Time.time + backgroundVelocityDurations[index]) - backgroundVelocityTimestamps[index] / backgroundVelocityDurations[index]);
+
+            index++;
+        }
+
+
+        return temp;
+
+    }
+
+    List<int> indexesMarked = new List<int>(0);
+    public void CheckBackgroundVelocities()
+    {
+        int numOfItemsRemoved = 0;
+        int index = 0;
+
+        foreach (float backgroundVelocityTimestamp in backgroundVelocityTimestamps)
+        {
+            if (backgroundVelocityTimestamp < Time.time)
+                indexesMarked.Add(index);
+
+            index++;
+        }
+
+        foreach (int i in indexesMarked)
+        {
+            RemoveBackgroundVelocityAt(i - numOfItemsRemoved);
+
+            numOfItemsRemoved++;
+        }
+
+        if (indexesMarked.Count > 0)
+            indexesMarked.Clear();
+    }
+
+    public void SetNewBackgroundVelocity(Vector2 newBackgroundVelocity, float magnitude, float duration, animationCurves animationCurveType = animationCurves.EXPONENTIAL_DECAY)
+    {
+        Debug.Log("Set new background velocities");
+        backgroundVelocities.Add(newBackgroundVelocity);
+        backgroundVelocityTimestamps.Add(Time.time + duration + Time.deltaTime);
+        backgroundVelocityDurations.Add(duration);
+
+        switch (animationCurveType)
+        {
+            case animationCurves.CONSTANT:
+                backgroundVelocityCurves.Add(AnimationCurve.Constant(Time.time + Time.deltaTime, Time.time + Time.deltaTime + duration, 1f));
+                break;
+
+            case animationCurves.LINEAR:
+                backgroundVelocityCurves.Add(AnimationCurve.Linear(Time.time + Time.deltaTime, 1f, Time.time + Time.deltaTime + duration, 0f));
+                break;
+
+            case animationCurves.EXPONENTIAL:
+                backgroundVelocityCurves.Add(exponentialCurve);
+                break;
+
+            case animationCurves.EXPONENTIAL_DECAY:
+                backgroundVelocityCurves.Add(exponentialDecayCurve);
+                break;
+        }
+    }
+
+    public bool RemoveBackgroundVelocityAt(int index)
+    {
+        if (backgroundVelocities.Count >= (index) && backgroundVelocityCurves.Count >= (index)
+            && backgroundVelocityDurations.Count >= (index) && backgroundVelocityTimestamps.Count >= (index))
+        {
+            backgroundVelocities.RemoveAt(index);
+            backgroundVelocityCurves.RemoveAt(index);
+            backgroundVelocityDurations.RemoveAt(index);
+            backgroundVelocityTimestamps.RemoveAt(index);
+
+            return true;
+        }
+        else
+            return false;
+        // ... 
+    }
+
+    public void ClearAllBackgroundVelocities()
+    {
+        backgroundVelocities.Clear();
+        backgroundVelocityTimestamps.Clear();
+        backgroundVelocityDurations.Clear();
+        backgroundVelocityCurves.Clear();
     }
 
     public void SetDamagePointerTo(int point)
@@ -638,6 +774,13 @@ public class BaseCharacterController : MonoBehaviour
 
         previousRbVelocity = rb.velocity;
         previousCurVerticalVelocity = curVerticalVelocity;
+
+        int index = 0;
+        foreach(float timestamp in backgroundVelocityTimestamps)
+        {
+            backgroundVelocityTimestamps[index] = timestamp + duration + Time.deltaTime;
+            index++;
+        }
 
         dodging = false;
         dodgeCarryingMomentum = false;
@@ -667,7 +810,148 @@ public class BaseCharacterController : MonoBehaviour
         anim.speed = 1f;
     }
 
+    public void ApplyKnockback(knockbackDirection direction, bool attackerFacingRight, float magnitude, float duration, animationCurves animationCurveType = animationCurves.EXPONENTIAL_DECAY)
+    {
+        Vector2 directionCalculated;
+        Vector2 temp;
 
+        switch (direction)
+        {
+            case knockbackDirection.UP:
+                directionCalculated = Vector2.up;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_FORWARD60:
+                temp = Vector2.up;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 30, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 30, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_FORWARD45:
+                temp = Vector2.up + (Vector2.right * ((attackerFacingRight) ? 1 : -1));
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_FORWARD30:
+                temp = Vector2.up;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 60, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 60, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.FORWARD:
+                directionCalculated = (Vector2.right * ((attackerFacingRight) ? 1 : -1));
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_FORWARD30:
+                temp = Vector2.down;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 60, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 60, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_FORWARD45:
+                temp = Vector2.down + (Vector2.right * ((attackerFacingRight) ? 1 : -1));
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_FORWARD60:
+                temp = Vector2.down;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 30, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 30, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN:
+                directionCalculated = Vector2.down;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_BACK60:
+                temp = Vector2.up;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 30, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 30, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_BACK45:
+                temp = Vector2.up + (Vector2.right * ((attackerFacingRight) ? -1 : 1));
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.UP_BACK30:
+                temp = Vector2.up;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 60, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 60, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.BACK:
+                directionCalculated = (Vector2.right * ((attackerFacingRight) ? -1 : 1));
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_BACK30:
+                temp = Vector2.down;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 60, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 60, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_BACK45:
+                temp = Vector2.down + (Vector2.right * ((attackerFacingRight) ? -1 : 1));
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+
+            case knockbackDirection.DOWN_BACK60:
+                temp = Vector2.down;
+                if (attackerFacingRight)
+                    temp = Vector3.RotateTowards(temp, Vector2.left, Mathf.Deg2Rad * 30, 0);
+                else
+                    temp = Vector3.RotateTowards(temp, Vector2.right, Mathf.Deg2Rad * 30, 0);
+
+                directionCalculated = temp.normalized;
+                SetNewBackgroundVelocity(directionCalculated, magnitude, duration, animationCurveType);
+                break;
+        }
+    }
     // functions that can be overwritten depending on each characters needs
 
     public virtual void PerformMovement(InputAction.CallbackContext context)

@@ -19,6 +19,28 @@ public class HurtboxHandler : MonoBehaviour
         // ...
     }
 
+    // 4-directional knockback
+    /*
+    void HandleKnockback(attackDirection directionalAttack, bool attackedFromTheRight)
+    {
+        switch (directionalAttack)
+        {
+            case attackDirection.UP:
+                break;
+
+            case attackDirection.DOWN:
+                break;
+
+            case attackDirection.FORWARD:
+                if (attackedFromTheRight)
+                {
+                    baseCharacterController.ApplyKnockback(Vector2.rig)
+                }
+                break;
+        }
+    }
+    */
+    
     private void OnTriggerEnter2D(Collider2D collision)
     {
         HandleTrigger(collision);
