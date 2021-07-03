@@ -5,27 +5,6 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System; // rid of this later
 
-// Jessy from & RazaTech https://forum.unity.com/threads/re-map-a-number-from-one-range-to-another.119437/
-public static class ExtensionMethods
-{
-
-    public static float Remap(this float from, float fromMin, float fromMax, float toMin, float toMax)
-    {
-        var fromAbs = from - fromMin;
-        var fromMaxAbs = fromMax - fromMin;
-
-        var normal = fromAbs / fromMaxAbs;
-
-        var toMaxAbs = toMax - toMin;
-        var toAbs = toMaxAbs * normal;
-
-        var to = toAbs + toMin;
-
-        return to;
-    }
-
-}
-
 
 public class Rin_CharacterController : BaseCharacterController
 {
@@ -56,7 +35,7 @@ public class Rin_CharacterController : BaseCharacterController
                 int airIndex;
                 float peakRisingVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
                 float peakFallingVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
-                airIndex = (int)Mathf.Clamp(ExtensionMethods.Remap(curVerticalVelocity, peakRisingVelocity, -1 / 2f * peakFallingVelocity, 0f, 7f), 0, 7);
+                airIndex = (int)Mathf.Clamp(Helper.Remap(curVerticalVelocity, peakRisingVelocity, -1 / 2f * peakFallingVelocity, 0f, 7f), 0, 7);
                 if (oldAnimSpeed != anim.speed)
                 {
                     oldAnimSpeed = anim.speed;
@@ -194,6 +173,8 @@ public class Rin_CharacterController : BaseCharacterController
     // please shift these to base character controller script when creating more characters
     public void ResetOverrideJumpAnim()
     {
+        HITBOXES_ClearOnetimeIDs();
+
         overrideJumpAnim = false;
         if (!isGrounded)
         {

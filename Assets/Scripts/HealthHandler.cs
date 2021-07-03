@@ -46,64 +46,6 @@ public class HealthHandler : MonoBehaviour
             UpdateHealth(0);
     }
 
-    // GUI is actually called 4 times over and the GUI pieces overlap. I have to seperate this into a seperate file so it can only be called once.
-
-    void OnGUI()
-    {
-        if (GUI.Button(buttonPos, "Next Health Stage"))
-        {
-            foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
-            {
-                if (baseCharacterController.healthHandler != null)
-                {
-                    if (baseCharacterController.healthHandler.healthStatus == (int)healthStates.HEALTH_EXPOSED)
-                        baseCharacterController.healthHandler.healthStatus = (int)healthStates.HEALTH_NORMAL;
-                    else baseCharacterController.healthHandler.healthStatus += 1;
-
-                    switch (baseCharacterController.healthHandler.healthStatus)
-                    {
-                        case (int)healthStates.HEALTH_NORMAL:
-                            baseCharacterController.healthHandler.currentHealth = maxHealth;
-                            break;
-
-                        case (int)healthStates.HEALTH_INJURED:
-                            baseCharacterController.healthHandler.currentHealth = injuredThreshold;
-                            break;
-
-                        case (int)healthStates.HEALTH_EXPOSED:
-                            baseCharacterController.healthHandler.currentHealth = exposedThreshold;
-                            break;
-                    }
-
-                    baseCharacterController.healthHandler.UpdateHealth(0);
-                }
-            }
-        }
-
-        bool toggleRecv = GUI.Toggle(new Rect(180f, 20f, 150f, 50f), forceDisplayHealth, new GUIContent("Force Display Health"));
-        if (forceDisplayHealth != toggleRecv)
-        {
-            foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
-            {
-                if (baseCharacterController.healthHandler != null)
-                {
-                    baseCharacterController.healthHandler.forceDisplayHealth = toggleRecv;
-                    baseCharacterController.healthHandler.UpdateGUI();
-                }
-            }
-        }
-
-        if (GUI.Button(new Rect(20f, 70f, 150f, 40f), new GUIContent("Replenish Health"))) {
-            foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
-            {
-                if (baseCharacterController.healthHandler != null)
-                {
-                    baseCharacterController.healthHandler.ReplenishHealth();
-                }
-            }
-        }
-    }
-
     public void ReplenishHealth()
     {
         currentHealth = maxHealth;
@@ -130,7 +72,7 @@ public class HealthHandler : MonoBehaviour
         }
     }
 
-    void UpdateGUI()
+    public void UpdateGUI()
     {
         switch (healthStatus)
         {

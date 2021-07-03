@@ -40,7 +40,23 @@ public class HurtboxHandler : MonoBehaviour
         }
     }
     */
-    
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (baseCharacterController.showHitboxes)
+        {
+            Vector2 position = hurtbox.bounds.center;
+            Vector2 directionCalculated = Vector2.zero;
+            Color color = Color.cyan;
+            bool attackerFacingRight = baseCharacterController.facingRight;
+            // calculate radius and height
+            Helper.DrawCapsule.DrawWireCapsule(position, transform.rotation, hurtbox.size.x / 2, hurtbox.size.y, Color.blue);
+
+        }
+    }
+#endif
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         HandleTrigger(collision);
