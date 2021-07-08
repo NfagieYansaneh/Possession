@@ -188,6 +188,12 @@ public class BaseCharacterController : MonoBehaviour
     public ImpulseHandler impulseHandler;
 
 
+    [Header("Ai Movement")]
+    [HideInInspector]
+    public Vector2 Ai_movementDirection = Vector2.zero;
+    public bool Ai_holdDownKey = false;
+    public bool Ai_holdSpaceKey = false;
+
     void Awake()
     {
         input = new InputMaster();
@@ -421,9 +427,11 @@ public class BaseCharacterController : MonoBehaviour
                         Vector2 directionOfRaycast = (facingRight) ? Vector2.left : Vector2.right;
                         RaycastHit2D hit = Physics2D.Raycast(groundCheckBoxPosition, directionOfRaycast, 1f, whatIsGround);
 
-                        if(playerInputHandler.groundMovementDirection.x != 0f 
+                        if((playerInputHandler.groundMovementDirection.x != 0f 
                             && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f
-                            && hit.normal != groundHit.normal)
+                            && hit.normal != groundHit.normal && currentlyPossessed) || (currentlyPossessed && Ai_movementDirection.x != 0f && 
+                            Vector2.Dot(groundHit.normal.normalized, Ai_movementDirection.normalized) > 0f && 
+                            hit.normal != groundHit.normal)) // Ai compliant
                         {
                             Debug.Log("TRIGGERED");
                             willIgnoreSteepSlope = true;
@@ -575,7 +583,8 @@ public class BaseCharacterController : MonoBehaviour
             {
                 // Debug.LogWarning("Gravity Activated AMP");
                 // applies fallingGravityMultiplier if we are falling
-                if (playerInputHandler.aerialMovementDirection.y < 0f)
+                if ((playerInputHandler.aerialMovementDirection.y < 0f && currentlyPossessed) || (!currentlyPossessed && 
+                    Ai_holdDownKey)) // Ai compliant
                 {
                     // get rid of magic number
                     curVerticalVelocity -= gravity * gravityMultiplier * fallingGravityMultiplier * 2f * Time.deltaTime;
@@ -592,12 +601,14 @@ public class BaseCharacterController : MonoBehaviour
             {
                 // Debug.LogWarning("Gravity Activated");
                 // else apply typical gravity
-                if (playerInputHandler.spaceKeyHeld && !isSliding)
+                if ((playerInputHandler.spaceKeyHeld && !isSliding && currentlyPossessed) || (!currentlyPossessed && Ai_holdSpaceKey && !isSliding)) // Ai compliant
                 {
                     // get rid of magic number
                     curVerticalVelocity -= gravity * gravityMultiplier * 0.8f * Time.deltaTime;
                 }
-                else if (Vector2.Dot(playerInputHandler.groundMovementDirection, groundHit.normal) < 0f && isSliding)
+                else if (
+                    (Vector2.Dot(playerInputHandler.groundMovementDirection, groundHit.normal) < 0f && isSliding && currentlyPossessed) || ( !currentlyPossessed &&
+                    Vector2.Dot(Ai_movementDirection, groundHit.normal)< 0f ) && isSliding) // Ai compliant
                 {
                     // get rid of magic number
                     curVerticalVelocity -= gravity * gravityMultiplier * 0.3f * Time.deltaTime;
@@ -624,11 +635,12 @@ public class BaseCharacterController : MonoBehaviour
         if (isSliding && isGrounded)
         {
             // Depending on the current user input direction and if the player is trying to move away from the slide
-            if (Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection) > 0f)
+            if ((Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection) > 0f && currentlyPossessed) ||
+                (!currentlyPossessed && Vector2.Dot(groundHit.normal.normalized, Ai_movementDirection) > 0f)) // Ai compliant
             {
                 curVerticalVelocity = 0f;
                 rb.velocity = new Vector2(velocity.x + backgroundVelocity.x, 0f);
-                
+
             }
             else
             {
@@ -636,12 +648,19 @@ public class BaseCharacterController : MonoBehaviour
                 rb.velocity = Vector2.Perpendicular(groundHit.normal) * -curVerticalVelocity * Vector2.Dot(Vector2.up, -Vector2.Perpendicular(groundHit.normal));
             }
 
+            //Debug.Log("Sliding : " + Time.frameCount);
             //ApplyBackgroundVelocity(backgroundVelocity, applyBackgroundVelocityPerpendicular);
             return;
+        } 
+        else
+        {
+            Debug.Log("isSliding : " + isSliding);
+            Debug.Log("isGrounded : " + isGrounded);
         }
 
         // Handles ground movement when not sliding & grounded
-        else if (playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope && currentlyPossessed)
+        if ((playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope && currentlyPossessed) || (!currentlyPossessed && 
+            Ai_movementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope)) // Ai compliant
         {
             rb.velocity = -Vector2.Perpendicular(groundHit.normal) * (velocity.x);
             rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
@@ -948,6 +967,11 @@ public class BaseCharacterController : MonoBehaviour
     }
 
     public virtual void PerformMovement(InputAction.CallbackContext context)
+    {
+        // meant to be overwritten
+    }
+
+    public virtual void PerformMovementAi(Vector2 direction)
     {
         // meant to be overwritten
     }

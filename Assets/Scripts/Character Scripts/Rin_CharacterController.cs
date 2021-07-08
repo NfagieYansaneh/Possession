@@ -117,6 +117,45 @@ public class Rin_CharacterController : BaseCharacterController
         oldGroundMovementDirection = movementDirection;
     }
 
+    public override void PerformMovementAi(Vector2 direction)
+    {
+        if (direction == Vector2.zero)
+        {
+            // Debug.LogWarning("IN DEADZONE");
+            // movementDirection = Vector2.zero;
+            anim.SetBool(Animator.StringToHash("Running"), false);
+        }
+        else
+        {
+            anim.SetBool(Animator.StringToHash("Running"), true);
+            // Debug.Log(movementDirection.magnitude + " : " + playerInputHandler.universalFixedMinDeadzone);
+        }
+
+        Ai_movementDirection = direction;
+        Vector2 targetVelocity;
+
+        // calculates our velocity, but leaves the character current vertical velocity alone
+        targetVelocity = new Vector2(movementSpeed * direction.x, curVerticalVelocity);
+        SetVelocity(targetVelocity); // u can speed boost if you spam S or W while moving. Fix this bug (applied a quick fix)
+
+        // flips player based on movement keys
+        if (direction.x < -0.2 && facingRight == true)
+        {
+            dodgeCarryingMomentum = false;
+            facingRight = false;
+
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        else if (direction.x > 0.2 && facingRight == false)
+        {
+            dodgeCarryingMomentum = false;
+            facingRight = true;
+
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+
+    }
+
     public override void PerformJump(InputAction.CallbackContext context)
     {
         if (jumpIndex <= maxJumps - 1)
