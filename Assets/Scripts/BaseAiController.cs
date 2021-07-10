@@ -13,8 +13,13 @@ public class BaseAiController : MonoBehaviour
     bool calculatePathing = false;
     Path path;
     int currentWaypoint = 0;
+
     bool reachedEndOfPath = false;
-    float nextWaypointDistance = 6;
+    bool pathComplete = false;
+
+    float nextWaypointDistance = 2;
+    float pathCompleteDistance = 1.9f;
+    float pathLeftDistance = 2.5f;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +28,7 @@ public class BaseAiController : MonoBehaviour
         baseCharacterController = GetComponent<BaseCharacterController>();
 
         // baseCharacterController.PerformMovementAi(Vector2.left);
-        InvokeRepeating("StartNewPath", 0f, 0.5f);
+        InvokeRepeating("StartNewPath", 1f, 0.15f);
     }
 
     private void OnDrawGizmos()
@@ -33,7 +38,8 @@ public class BaseAiController : MonoBehaviour
     }
 
     private void FixedUpdate()
-    { 
+    {
+        // baseCharacterController.PerformMovementAi(Vector2.);
         /* if (calculatePathing)
         {
             // seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
@@ -43,7 +49,7 @@ public class BaseAiController : MonoBehaviour
 
     public void StartNewPath()
     {
-        seeker.StartPath(transform.position, targetPosition.position);
+        seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
     }
 
     // Update is called once per frame
@@ -59,10 +65,22 @@ public class BaseAiController : MonoBehaviour
 
     public void OnPathComplete(Path p)
     {
-        Debug.Log("Yay, we got a path back. Did it have an error? " + p.error);
+        //Debug.Log("Yay, we got a path back. Did it have an error? " + p.error);
         if(!p.error)
         {
+            //pathComplete = false;
             path = p;
+
+            /*
+            if (path.duration < Time.fixedDeltaTime)
+            {
+                Debug.Log(Time.fixedDeltaTime + " : " + path.duration + " diff : " + (Time.fixedDeltaTime - path.duration));
+            } else
+            {
+                Debug.LogWarning(Time.fixedDeltaTime + " : " + path.duration + " diff : " + (Time.fixedDeltaTime - path.duration));
+            }
+            */
+
             currentWaypoint = 0;
         }
     }
@@ -73,6 +91,14 @@ public class BaseAiController : MonoBehaviour
         {
             // No path to follow yet
             return;
+        }
+
+        if(Vector2.Distance(transform.position, targetPosition.position) <= pathCompleteDistance)
+        {
+            pathComplete = true;
+        } else if (pathComplete && Vector2.Distance(transform.position, targetPosition.position) >= pathLeftDistance)
+        {
+            pathComplete = false;
         }
 
         reachedEndOfPath = false;
@@ -101,7 +127,7 @@ public class BaseAiController : MonoBehaviour
             }
         }
 
-        if (!reachedEndOfPath)
+        if (!reachedEndOfPath && !pathComplete)
         {
             if ((baseCharacterController.Ai_movementDirection == Vector2.right || baseCharacterController.Ai_movementDirection == Vector2.zero)
                 && (path.vectorPath[currentWaypoint] - transform.position).x < 0f)
@@ -113,6 +139,10 @@ public class BaseAiController : MonoBehaviour
             {
                 baseCharacterController.PerformMovementAi(Vector2.right);
             }
+        } 
+        else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero)
+        {
+            baseCharacterController.PerformMovementAi(Vector2.zero);
         }
 
         /* if (!reachedEndOfPath)

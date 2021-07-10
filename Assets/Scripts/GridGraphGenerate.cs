@@ -8,8 +8,8 @@ public class GridGraphGenerate : MonoBehaviour
     bool drawForLowPenalty = false;
     List<GraphNode> lowPenaltyNodes = new List<GraphNode>();
 
-    public uint lowPenalty = 0;
-    public uint highPenalty = 3750;
+    public const uint lowPenalty = 0;
+    public const uint highPenalty = 3750;
 
     GridGraph gg;
 

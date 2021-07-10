@@ -427,6 +427,8 @@ public class BaseCharacterController : MonoBehaviour
                         Vector2 directionOfRaycast = (facingRight) ? Vector2.left : Vector2.right;
                         RaycastHit2D hit = Physics2D.Raycast(groundCheckBoxPosition, directionOfRaycast, 1f, whatIsGround);
 
+                        // The reasoning for such a long if statement is the encompass the requirements needed for a player controlling a possessed character
+                        // and the requirements for an Ai controlling an unpossessed character
                         if((playerInputHandler.groundMovementDirection.x != 0f 
                             && Vector2.Dot(groundHit.normal.normalized, playerInputHandler.groundMovementDirection.normalized) > 0f
                             && hit.normal != groundHit.normal && currentlyPossessed) || (currentlyPossessed && Ai_movementDirection.x != 0f && 
@@ -651,16 +653,11 @@ public class BaseCharacterController : MonoBehaviour
             //Debug.Log("Sliding : " + Time.frameCount);
             //ApplyBackgroundVelocity(backgroundVelocity, applyBackgroundVelocityPerpendicular);
             return;
-        } 
-        else
-        {
-            Debug.Log("isSliding : " + isSliding);
-            Debug.Log("isGrounded : " + isGrounded);
         }
 
         // Handles ground movement when not sliding & grounded
-        if ((playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope && currentlyPossessed) || (!currentlyPossessed && 
-            Ai_movementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope)) // Ai compliant
+        if ((playerInputHandler.groundMovementDirection.x != 0f && isGrounded && !willIgnoreSteepSlope && currentlyPossessed) || (!currentlyPossessed 
+            && isGrounded && !willIgnoreSteepSlope)) // Ai compliant
         {
             rb.velocity = -Vector2.Perpendicular(groundHit.normal) * (velocity.x);
             rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
