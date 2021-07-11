@@ -62,21 +62,32 @@ public class BaseAiPathModifier : MonoModifier
         // throw new System.NotImplementedException();
     }
 
+    float t_rise;
+    float t_fall;
+    float gravityRise;
+    float gravityFall;
+    float Vx;
+    float jumpHeight;
+    float Vyi;
+
     public Vector2 CalculateSxSy(Vector3 jumpEndNodePosition, GraphNode node)
     {
-        float Vx = 8.5f;
-        float jumpHeight = baseCharacterController.jumpHeight;
+        Vx = 8.5f;
+        jumpHeight = baseCharacterController.jumpHeight;
 
         Vector3 jumpNodePosition = (Vector3)node.position;
 
-        float Sy = jumpEndNodePosition.y - jumpNodePosition.y;
-        float gravityRise = baseCharacterController.gravity * baseCharacterController.gravityMultiplier;
-        float gravityFall = baseCharacterController.gravity * baseCharacterController.gravityMultiplier * baseCharacterController.fallingGravityMultiplier;
-        float Vyi = Mathf.Sqrt(2 * gravityRise * jumpHeight);
+        float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
+        gravityRise = baseCharacterController.gravity * baseCharacterController.gravityMultiplier;
+        gravityFall = baseCharacterController.gravity * baseCharacterController.gravityMultiplier * baseCharacterController.fallingGravityMultiplier;
+        Vyi = Mathf.Sqrt(2 * gravityRise * jumpHeight);
 
-        float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy / gravityFall));
+        t_rise = (2 * jumpHeight / Vyi);
+        t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
 
-        return new Vector2(Sx, Sy);
+        float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall));
+
+        return new Vector2(Sx, Sy_fall);
     }
 
     private void OnDrawGizmos()
@@ -96,8 +107,9 @@ public class BaseAiPathModifier : MonoModifier
 
             Vector3 jumpEndNodePosition = (Vector3)jumpEndNodes[i].position;
             Vector3 jumpNodePosition = (Vector3)jumpNodes[i].position;
-            jumpNodePosition.y += 0.5f * 3;
+            // jumpNodePosition.y += 0.5f * 3;
 
+            /*
             float Sy = jumpEndNodePosition.y - jumpNodePosition.y;
             float gravityRise = baseCharacterController.gravity * baseCharacterController.gravityMultiplier;
             float gravityFall = baseCharacterController.gravity * baseCharacterController.gravityMultiplier * baseCharacterController.fallingGravityMultiplier;
@@ -106,16 +118,17 @@ public class BaseAiPathModifier : MonoModifier
             float t_rise = (2 * jumpHeight / Vyi);
             float t_fall = Mathf.Sqrt(2 * Sy / gravityFall);
             float Sx = Vx * (t_rise + t_fall);
-
+            */
 
             GraphNode jumpAtThisNode;
+            Vector2 SxSy = Vector2.zero;
 
             for (int j = 0; j < jumpNodeStartAndEndIDs[1 + (2 * i)] ; j++){
 
                 int index = jumpNodeStartAndEndIDs[1 + (2 * i)] - j;
                 if (originalNodes[index].Penalty == GridGraphGenerate.highPenalty) continue;
 
-                Vector2 SxSy = CalculateSxSy(jumpEndNodePosition, originalNodes[index]);
+                SxSy = CalculateSxSy(jumpEndNodePosition, originalNodes[index]);
                 Vector3 nodePosition = (Vector3)originalNodes[index].position;
                 // Gizmos.color = Color.black;
 
@@ -131,6 +144,11 @@ public class BaseAiPathModifier : MonoModifier
                     Gizmos.color = Color.cyan;
                     Gizmos.DrawCube((Vector3)originalNodes[index].position, new Vector3(0.5f, 0.5f));
                     // Debug.Log(nodePosition.x + " : " + nodePosition.y + " : " + (SxSy.x + jumpEndNodePosition.x) + " : " + SxSy.y);
+
+                    Gizmos.color = Color.gray;
+
+                    Gizmos.DrawCube((Vector3)jumpEndNodes[i].position, new Vector3(0.5f, 0.5f));
+                    Gizmos.DrawRay((Vector3)jumpEndNodes[i].position, new Vector3(SxSy.x, 0f));
 
                     jumpAtThisNode = originalNodes[index];
                     Vector2 oldPosition = Vector2.zero;
@@ -177,7 +195,6 @@ public class BaseAiPathModifier : MonoModifier
                 // Debug.Break();
             }
 
-            Gizmos.color = Color.gray;
             // float horizontalDisplacementIncrement = Sx / resolution;
 
             /* for(int j=0; j<resolution; j++)
@@ -199,11 +216,15 @@ public class BaseAiPathModifier : MonoModifier
             // Debug.Log("Sy = " + Sy + "m");
             // Debug.Log("Sx = " + Sx + "m");
 
-            Gizmos.DrawCube((Vector3)jumpEndNodes[i].position, new Vector3(0.5f, 0.5f));
-            Gizmos.DrawRay((Vector3)jumpEndNodes[i].position, new Vector3(Sx, 0f));
+            // Gizmos.color = Color.gray;
+            // Gizmos.DrawCube((Vector3)jumpEndNodes[i].position, new Vector3(0.5f, 0.5f));
+            // Gizmos.DrawRay((Vector3)jumpEndNodes[i].position, new Vector3(Sx, 0f));
 
 #if UNITY_EDITOR
-            Handles.Label((Vector3)jumpEndNodes[i].position + Vector3.up * 1f, new GUIContent("Pre-determined Jump"));
+            Handles.Label((Vector3)jumpEndNodes[i].position + Vector3.up * 1f + Vector3.right * 0.5f, 
+                new GUIContent("Sx : Sy [" + SxSy.x + ", " + SxSy.y + "]"));
+            Handles.Label((Vector3)jumpEndNodes[i].position + Vector3.up * 0.5f + Vector3.right * 0.5f,
+                new GUIContent("Diff in X = " + Mathf.Abs(jumpEndNodePosition.x - jumpNodePosition.x)));
 #endif
         }
     }

@@ -16,6 +16,17 @@ public class GridGraphGenerate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Scan();
+
+        /* gg.GetNodes(node => {
+            Debug.Log((Vector3)node.position);
+            node.Penalty = (uint)Mathf.Log(node.position.y + 5 * node.position.y);
+        }); */
+
+    }
+
+    private void Scan()
+    {
         AstarPath.FindAstarPath();
         AstarPath.active.Scan();
 
@@ -28,9 +39,9 @@ public class GridGraphGenerate : MonoBehaviour
         List<GraphNode> nodes = new List<GraphNode>();
         gg.GetNodes((System.Action<GraphNode>)nodes.Add);
 
-        for(int x=0; x<gg.width-1; x++)
+        for (int x = 0; x < gg.width - 1; x++)
         {
-            for(int z=0; z<gg.depth-1; z++)
+            for (int z = 0; z < gg.depth - 1; z++)
             {
                 GraphNode currentNode = gg.nodes[z * gg.width + x];
                 if (currentNode != null && currentNode.Walkable)
@@ -47,17 +58,15 @@ public class GridGraphGenerate : MonoBehaviour
                 }
             }
         }
-
-        /* gg.GetNodes(node => {
-            Debug.Log((Vector3)node.position);
-            node.Penalty = (uint)Mathf.Log(node.position.y + 5 * node.position.y);
-        }); */
-
     }
 
     private void OnGUI()
     {
-        drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 140, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
+        drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
+        if(GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
+        {
+            Scan();
+        }
     }
 
     private void OnDrawGizmos()
