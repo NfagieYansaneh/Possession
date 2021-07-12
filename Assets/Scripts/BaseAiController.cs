@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
+using UnityEngine.Events;
 
 // help from https://arongranberg.com/astar/docs/custom_movement_script.html
+
+public enum typeofWaypoint { RUN, JUMP, DODGE, NEUTRAL_DODGE };
 
 public class BaseAiController : MonoBehaviour
 {
@@ -21,6 +24,12 @@ public class BaseAiController : MonoBehaviour
     float pathCompleteDistance = 1.9f;
     float pathLeftDistance = 2.5f;
 
+    bool specialWaypointUpcoming = false;
+    typeofWaypoint currentTypeofWaypoint = typeofWaypoint.RUN;
+
+    public List<GraphNode> specialWaypoints = new List<GraphNode>();
+    public List<typeofWaypoint> specialWaypointTypes = new List<typeofWaypoint>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,7 +37,10 @@ public class BaseAiController : MonoBehaviour
         baseCharacterController = GetComponent<BaseCharacterController>();
 
         // baseCharacterController.PerformMovementAi(Vector2.left);
-        InvokeRepeating("StartNewPath", 1f, 0.15f);
+        // InvokeRepeating("StartNewPath", 2f, 3456f);
+        // InvokeRepeating("HandleAiLogic", 1f, 0.16f);
+
+        // StartNewPath();
     }
 
     private void OnDrawGizmos()
@@ -85,7 +97,13 @@ public class BaseAiController : MonoBehaviour
         }
     }
 
+    // GET THIS OUT OF UPDATE
     public void Update()
+    {
+        HandleAiLogic();
+    }
+
+    public void HandleAiLogic()
     {
         if (path == null)
         {
@@ -93,38 +111,65 @@ public class BaseAiController : MonoBehaviour
             return;
         }
 
-        if(Vector2.Distance(transform.position, targetPosition.position) <= pathCompleteDistance)
+        // can be optimised
+        if (Vector2.Distance(transform.position, targetPosition.position) <= pathCompleteDistance)
         {
             pathComplete = true;
-        } else if (pathComplete && Vector2.Distance(transform.position, targetPosition.position) >= pathLeftDistance)
+        }
+        else if (pathComplete && Vector2.Distance(transform.position, targetPosition.position) >= pathLeftDistance)
         {
             pathComplete = false;
         }
 
+        // for maximum perforance, you can just check the squard distance
+        float distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
         reachedEndOfPath = false;
-        float distanceToWaypoint;
-        while (true)
+
+        bool issueOutSpecialCommand = false;
+        currentTypeofWaypoint = typeofWaypoint.RUN;
+
+        for (int i=0; i < specialWaypoints.Count; i++)
+        {
+            if (specialWaypoints[i] == null) continue;
+
+            if(path.path[currentWaypoint] == specialWaypoints[i])
+            {
+                specialWaypointUpcoming = true;
+                if(distanceToWaypoint < 0.1f)
+                {
+                    specialWaypointUpcoming = false;
+                    currentTypeofWaypoint = specialWaypointTypes[i];
+                    reachedEndOfPath = true;
+                    issueOutSpecialCommand = true;
+                    currentWaypoint++;
+                }
+            }
+        }
+
+        while (!specialWaypointUpcoming)
         {
             // for maximum perforance, you can just check the squard distance
-            distanceToWaypoint = Vector2.Distance(transform.position, path.vectorPath[currentWaypoint]);
 
-            if(distanceToWaypoint < nextWaypointDistance)
+            if (distanceToWaypoint < nextWaypointDistance)
             {
                 // we have reached the way point
+
                 if (currentWaypoint + 1 < path.vectorPath.Count)
                 {
                     currentWaypoint++;
-                } 
+                }
                 else
                 {
                     reachedEndOfPath = true;
                     break;
                 }
-            } 
+            }
             else
             {
                 break;
             }
+
+            distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
         }
 
         if (!reachedEndOfPath && !pathComplete)
@@ -139,27 +184,31 @@ public class BaseAiController : MonoBehaviour
             {
                 baseCharacterController.PerformMovementAi(Vector2.right);
             }
-        } 
-        else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero)
+        }
+        else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero && currentTypeofWaypoint == typeofWaypoint.RUN)
         {
             baseCharacterController.PerformMovementAi(Vector2.zero);
         }
 
-        /* if (!reachedEndOfPath)
+        if (issueOutSpecialCommand && reachedEndOfPath)
         {
-            Vector2 dir = (path.vectorPath[currentWaypoint] - transform.position).normalized;
-            Debug.DrawRay(new Vector3(0, 9), dir, Color.magenta);
+            switch (currentTypeofWaypoint)
+            {
+                case typeofWaypoint.RUN:
+                    break;
 
-            // Debug.Log(dir);
-            baseCharacterController.PerformMovementAi(((path.vectorPath[currentWaypoint] - transform.position).x > 0f)? Vector2.right : Vector2.left);
-            //baseCharacterController.PerformMovementAi(Vector2.left);
-            Debug.Log(baseCharacterController.rb.velocity);
-        } else
-        {
-            //baseCharacterController.PerformMovementAi(Vector2.zero);
-        } */
+                case typeofWaypoint.JUMP:
+                    baseCharacterController.PerformJumpAi();
+                    break;
+
+                case typeofWaypoint.DODGE:
+                    break;
+
+                case typeofWaypoint.NEUTRAL_DODGE:
+                    break;
+            }
+        }
     }
-
 }
 
 

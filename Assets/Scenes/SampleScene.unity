@@ -651,7 +651,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28526
+  m_Name: pb_Mesh28524
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1395,7 +1395,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181289296}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.1, y: 3.76, z: 0}
+  m_LocalPosition: {x: -10.46875, y: 4.96875, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 773460607}
@@ -1690,7 +1690,7 @@ MonoBehaviour:
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
   dodgeBoxSize: {x: 0.1, y: 1.14}
-  dodgeBoxPosition: {x: -9.71, y: 12.49}
+  dodgeBoxPosition: {x: -10.07875, y: 13.69875}
   dodgeBoxOffset: {x: 0.39, y: -0.27}
   whatIsGround:
     serializedVersion: 2
@@ -2321,7 +2321,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSmoothing: 0
   applySmoothing: 1
-  movementSpeed: 0
+  movementSpeed: 8.5
   facingRight: 1
   startMovementCurve:
     serializedVersion: 2
@@ -2788,8 +2788,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  drawGizmos: 1
-  detailedGizmos: 1
+  drawGizmos: 0
+  detailedGizmos: 0
   startEndModifier:
     addPoints: 0
     exactStartPoint: 3
@@ -2830,8 +2830,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
+  newVectorPath: []
   jumpNodeStartAndEndIDs: 
+  gizmoJumping_SxSy: {x: 0, y: 0}
   baseCharacterController: {fileID: 0}
+  baseAiController: {fileID: 0}
   resolution: 10
 --- !u!1 &229829333
 GameObject:
@@ -4762,7 +4765,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &412868605
 Transform:
   m_ObjectHideFlags: 0
@@ -8414,7 +8417,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &918442988
 Transform:
   m_ObjectHideFlags: 0
@@ -9486,7 +9489,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1143544536}
   m_LocalRotation: {x: 0, y: 0.7071068, z: -0.7071068, w: 0}
-  m_LocalPosition: {x: -2.5779464, y: 2.2144322, z: 0}
+  m_LocalPosition: {x: -2.5779464, y: 2.183182, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 606059136}
@@ -11666,7 +11669,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28296
+  m_Name: pb_Mesh28294
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -11871,7 +11874,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1610526176
 Transform:
   m_ObjectHideFlags: 0
@@ -12387,7 +12390,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28142
+  m_Name: pb_Mesh28140
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -18002,7 +18005,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28498
+  m_Name: pb_Mesh28496
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -18875,7 +18878,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1908082133}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1, y: 3, z: 0}
+  m_LocalPosition: {x: -1, y: 2.9687498, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1629280044}
@@ -20663,7 +20666,7 @@ MonoBehaviour:
   manualDebugFloorRoof: 0
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
-  logPathResults: 1
+  logPathResults: 0
   maxNearestNodeDistance: 100
   scanOnStartup: 1
   fullGetNearestSearch: 0
@@ -20722,7 +20725,7 @@ MonoBehaviour:
     seed: 0
     pivotPointRoot: {fileID: 0}
     spreadOutCount: 1
-  showGraphs: 1
+  showGraphs: 0
 --- !u!114 &2113311140
 MonoBehaviour:
   m_ObjectHideFlags: 0

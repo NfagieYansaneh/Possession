@@ -180,6 +180,32 @@ public class Rin_CharacterController : BaseCharacterController
         }
     }
 
+    public override void PerformJumpAi()
+    {
+        if (jumpIndex <= maxJumps - 1)
+        {
+            float targetVerticalVelocity;
+            isFalling = false;
+
+            if (isGrounded)
+            {
+                // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
+                targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
+            }
+            else
+            {
+                float currentHeightReduction = Mathf.Pow(successiveJumpHeightReduction, airJumpsPerformed);
+                targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * airborneJumpHeight * currentHeightReduction);
+                airJumpsPerformed++;
+            }
+            isGrounded = false;
+
+            curVerticalVelocity = targetVerticalVelocity;
+            rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
+            jumpIndex++;
+        }
+    }
+
     public override void PerformDodge(InputAction.CallbackContext context)
     {
         base.PerformDodge(context);

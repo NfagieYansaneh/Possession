@@ -978,6 +978,11 @@ public class BaseCharacterController : MonoBehaviour
         // meant to be overwritten
     }
 
+    public virtual void PerformJumpAi()
+    {
+        // meant to be overwritten
+    }
+
     float calculatedDodgeSpeed = 0f; 
     public virtual void PerformDodge(InputAction.CallbackContext context)
     {
