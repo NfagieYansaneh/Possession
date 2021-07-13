@@ -34,15 +34,17 @@ public class BaseAiController : MonoBehaviour
 
         public GraphNode node;
         public readonly Vector3 nodePosition { get { return (Vector3)node.position; } }
+        public bool facingRight;
 
         public typeofWaypoint waypointType;
         public UnityEvent events;
 
-        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action)
+        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false)
         {
             active = true;
             node = targetNode;
             waypointType = type;
+            facingRight = waypointFacingRight;
 
             events = new UnityEvent();
             events.AddListener(action);
@@ -58,6 +60,11 @@ public class BaseAiController : MonoBehaviour
         {
             myStruct.events.RemoveListener(action);
             return myStruct;
+        }
+
+        public void isActive (bool state)
+        {
+            active = state;
         }
 
         public string nodePositionToString() { return $"{nodePosition.x} : {nodePosition.y}"; }
@@ -83,7 +90,7 @@ public class BaseAiController : MonoBehaviour
                     break;
             }
 
-            return $"waypointType : {str}";
+            return $"waypointType : {str} & dir : {((facingRight==true)? "facingRight" : "facingLeft")}";
         }
     }
 
@@ -196,13 +203,19 @@ public class BaseAiController : MonoBehaviour
             if(path.path[currentWaypoint] == specialWaypoints[i].node)
             {
                 specialWaypointUpcoming = true;
-                if(distanceToWaypoint < 0.1f)
+
+                // Magic value!
+                if(distanceToWaypoint < 0.15f)
                 {
                     specialWaypointUpcoming = false;
                     currentTypeofWaypoint = specialWaypoints[i].waypointType;
                     specialWaypoints[i].events.Invoke();
                     reachedEndOfPath = true;
                     currentWaypoint++;
+
+                    Debug.Log(specialWaypoints[i].waypointTypeToString());
+
+                    specialWaypoints[i].isActive(false);
                 }
             }
         }

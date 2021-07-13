@@ -129,7 +129,7 @@ public class BaseAiPathModifier : MonoModifier
         specialWaypoints.Clear();
     }
 
-    public Vector2 CalculateSxSy(Vector3 jumpEndNodePosition, GraphNode node)
+    public Vector2 CalculateSxSy(Vector3 jumpEndNodePosition, GraphNode node, bool waypointFacingRight)
     {
         Vx = 8.5f;
         jumpHeight = baseCharacterController.jumpHeight;
@@ -144,7 +144,7 @@ public class BaseAiPathModifier : MonoModifier
         t_rise = (2 * jumpHeight / Vyi);
         t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
 
-        float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall));
+        float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((waypointFacingRight == false) ? 1 : -1) ;
 
         return new Vector2(Sx, Sy_fall);
     }
@@ -158,7 +158,13 @@ public class BaseAiPathModifier : MonoModifier
             // float jumpHeight = baseCharacterController.jumpHeight;
 
             Vector3 jumpEndNodePosition = (Vector3)jumpEndNodes[i].position;
-            // Vector3 jumpNodePosition = (Vector3)jumpNodes[i].position;
+            Vector3 jumpNodePosition = (Vector3)jumpNodes[i].position;
+            bool waypointFacingRight = false;
+
+            if(jumpEndNodePosition.x > jumpNodePosition.x)
+            {
+                waypointFacingRight = true;
+            }
 
             GraphNode jumpAtThisNode;
             Vector2 SxSy;
@@ -169,10 +175,11 @@ public class BaseAiPathModifier : MonoModifier
                 int index = jumpNodeStartAndEndIDs[1 + (2 * i)] - j;
                 if (originalNodes[index].Penalty == GridGraphGenerate.highPenalty) continue;
 
-                SxSy = CalculateSxSy(jumpEndNodePosition, originalNodes[index]);
+                SxSy = CalculateSxSy(jumpEndNodePosition, originalNodes[index], waypointFacingRight);
                 Vector3 nodePosition = (Vector3)originalNodes[index].position;
 
-                if (SxSy.x + jumpEndNodePosition.x > nodePosition.x + 0.25f)
+                if ((SxSy.x + jumpEndNodePosition.x > nodePosition.x + 0.25f && !waypointFacingRight) ||
+                    (SxSy.x + jumpEndNodePosition.x < nodePosition.x - 0.25f && waypointFacingRight))
                 {
                     // newNodes.Remove(originalNodes[index]);
                     if (!ignoreNodes.Contains(originalNodes[index]))
@@ -189,11 +196,12 @@ public class BaseAiPathModifier : MonoModifier
                     }
 
                     BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                        typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI);
+                        typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight);
 
                     if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
                     {
                         baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                        specialWaypoints.Add(newSpecialWaypoint);
                         // specialNodeCorrespFunction.Add(jumpEndNodes[i]);
                     }
 
@@ -231,50 +239,66 @@ public class BaseAiPathModifier : MonoModifier
                 new GUIContent("Diff in X = " + Mathf.Abs(nodePosition.x - nodePosition.x)));
         }
 
+        // Drawing unique special waypoint gizmos
+        foreach (BaseAiController.specialWaypoint specialWaypoint in specialWaypoints)
         {
-            Vector2 oldPosition = Vector2.zero;
-            foreach (GraphNode node in jumpNodesFinal)
+            switch (specialWaypoint.waypointType)
             {
-                Gizmos.color = Color.cyan;
-                Gizmos.DrawCube((Vector3)node.position, new Vector3(0.5f, 0.5f));
+                case typeofWaypoint.RUN:
+                    break;
 
-                for (int k = 0; k < resolution; k++)
-                {
-                    float curSx = (gizmoJumping_SxSy.x / resolution) * k;
-                    float curSy = 0f;
-                    float elaspedTime = curSx / Vx;
-                    if (elaspedTime < t_rise)
+                case typeofWaypoint.JUMP:
+                    Vector2 oldPosition = Vector2.zero;
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawCube(specialWaypoint.nodePosition, new Vector3(0.5f, 0.5f));
+
+                    // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
+                    for (int k = 0; k < resolution; k++)
                     {
-                        curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
+                        float curSx = (gizmoJumping_SxSy.x / resolution) * k;
+                        float curSy = 0f;
+                        float elaspedTime = ((specialWaypoint.facingRight)? -curSx : curSx) / Vx;
+                        if (elaspedTime < t_rise)
+                        {
+                            curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
+                        }
+                        else
+                        {
+                            curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                            // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
+                        }
+
+                        Vector3 jumpPos = specialWaypoint.nodePosition;
+                        Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                        if (oldPosition != Vector2.zero)
+                        {
+                            Gizmos.color = Color.cyan;
+                            Gizmos.DrawLine(newPosition, oldPosition);
+                        }
+
+                        oldPosition = newPosition;
+
+                        if (k == resolution - 1)
+                        {
+                            curSx = gizmoJumping_SxSy.x;
+                            elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
+                            curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                            newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                            Gizmos.color = Color.cyan;
+                            Gizmos.DrawLine(oldPosition, newPosition);
+                        }
                     }
-                    else
-                    {
-                        curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
-                        // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
-                    }
 
-                    Vector3 jumpPos = (Vector3)node.position;
-                    Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+                    break;
 
-                    if (oldPosition != Vector2.zero)
-                    {
-                        Gizmos.color = Color.cyan;
-                        Gizmos.DrawLine(newPosition, oldPosition);
-                    }
+                case typeofWaypoint.DODGE:
+                    break;
 
-                    oldPosition = newPosition;
-
-                    if (k == resolution - 1)
-                    {
-                        curSx = gizmoJumping_SxSy.x;
-                        elaspedTime = curSx / Vx;
-                        curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
-                        newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
-
-                        Gizmos.color = Color.cyan;
-                        Gizmos.DrawLine(oldPosition, newPosition);
-                    }
-                }
+                default:
+                    // typeofWaypoint.NEUTRAL_DODGE
+                    break;
             }
         }
 
