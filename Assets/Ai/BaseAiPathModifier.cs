@@ -25,8 +25,7 @@ public class BaseAiPathModifier : MonoModifier
     public BaseCharacterController baseCharacterController;
     public BaseAiController baseAiController;
 
-    public List<GraphNode> specialNodes = new List<GraphNode>();
-    public List<typeofWaypoint> specialNodeTypes = new List<typeofWaypoint>();
+    public List<BaseAiController.specialWaypoint> specialWaypoints = new List<BaseAiController.specialWaypoint>();
 
     // For curves
     public int resolution = 6;
@@ -127,7 +126,7 @@ public class BaseAiPathModifier : MonoModifier
         jumpNodeStartAndEndIDs.Clear();
         jumpNodesFinal.Clear();
         ignoreNodes.Clear();
-        specialNodes.Clear();
+        specialWaypoints.Clear();
     }
 
     public Vector2 CalculateSxSy(Vector3 jumpEndNodePosition, GraphNode node)
@@ -189,18 +188,13 @@ public class BaseAiPathModifier : MonoModifier
                         jumpNodesFinal.Add(jumpAtThisNode);
                     }
 
-                    if (!specialNodes.Contains(jumpAtThisNode) && !specialNodes.Contains(jumpEndNodes[i]))
-                    {
-                        specialNodes.Add(jumpAtThisNode);
-                        specialNodeTypes.Add(typeofWaypoint.JUMP);
-                        // specialNodeCorrespFunction.Add(jumpEndNodes[i]);
-                    }
+                    BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
+                        typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI);
 
-                    // Add jumpNodes for the baseAiController in a queue-esque manner
-                    if (!baseAiController.specialWaypoints.Contains(jumpAtThisNode))
+                    if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
                     {
-                        baseAiController.specialWaypoints = specialNodes;
-                        baseAiController.specialWaypointTypes = specialNodeTypes;
+                        baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                        // specialNodeCorrespFunction.Add(jumpEndNodes[i]);
                     }
 
                     // for gizmos sake

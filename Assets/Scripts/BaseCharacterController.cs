@@ -1056,6 +1056,7 @@ public class BaseCharacterController : MonoBehaviour
 
             transform.localScale = new Vector3(-1, 1, 1);
         }
+
         else if (playerInputHandler.groundMovementDirection.x > 0.2 && facingRight == false)
         {
             dodgeCarryingMomentum = false;
@@ -1079,6 +1080,18 @@ public class BaseCharacterController : MonoBehaviour
         shadow.SetActive(false);
         crown.SetActive(false);
         currentlyPossessed = false;
+    }
+
+    // Ai Virtual
+
+    public virtual void JumpWaypointAI()
+    {
+        PerformJumpAi();
+    }
+
+    public virtual void DodgeWaypointAI(Vector2 direction)
+    {
+        // meant to be overwritten
     }
 
     public virtual void RunAtFixedUpdate()

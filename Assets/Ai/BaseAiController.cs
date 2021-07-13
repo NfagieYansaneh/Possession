@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 using UnityEngine.Events;
+using System;
 
 // help from https://arongranberg.com/astar/docs/custom_movement_script.html
 
@@ -27,8 +28,69 @@ public class BaseAiController : MonoBehaviour
     bool specialWaypointUpcoming = false;
     typeofWaypoint currentTypeofWaypoint = typeofWaypoint.RUN;
 
-    public List<GraphNode> specialWaypoints = new List<GraphNode>();
-    public List<typeofWaypoint> specialWaypointTypes = new List<typeofWaypoint>();
+    public struct specialWaypoint 
+    {
+        public bool active;
+
+        public GraphNode node;
+        public readonly Vector3 nodePosition { get { return (Vector3)node.position; } }
+
+        public typeofWaypoint waypointType;
+        public UnityEvent events;
+
+        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action)
+        {
+            active = true;
+            node = targetNode;
+            waypointType = type;
+
+            events = new UnityEvent();
+            events.AddListener(action);
+        }
+
+        static public specialWaypoint operator +(specialWaypoint myStruct, UnityAction action)
+        {
+            myStruct.events.AddListener(action);
+            return myStruct;
+        }
+
+        static public specialWaypoint operator -(specialWaypoint myStruct, UnityAction action)
+        {
+            myStruct.events.RemoveListener(action);
+            return myStruct;
+        }
+
+        public string nodePositionToString() { return $"{nodePosition.x} : {nodePosition.y}"; }
+        public string waypointTypeToString() {
+            string str;
+            switch (waypointType)
+            {
+                case typeofWaypoint.RUN:
+                    str = "RUN";
+                    break;
+
+                case typeofWaypoint.JUMP:
+                    str = "JUMP";
+                    break;
+
+                case typeofWaypoint.DODGE:
+                    str = "DODGE";
+                    break;
+
+                default:
+                    // typeofWaypoint.NEUTRAL_DODGE
+                    str = "NEUTRAL_DODGE";
+                    break;
+            }
+
+            return $"waypointType : {str}";
+        }
+    }
+
+    public List<specialWaypoint> specialWaypoints = new List<specialWaypoint>();
+
+    // public List<GraphNode> specialWaypoints = new List<GraphNode>();
+    // public List<typeofWaypoint> specialWaypointTypes = new List<typeofWaypoint>();
 
     // Start is called before the first frame update
     void Start()
@@ -125,22 +187,21 @@ public class BaseAiController : MonoBehaviour
         float distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
         reachedEndOfPath = false;
 
-        bool issueOutSpecialCommand = false;
         currentTypeofWaypoint = typeofWaypoint.RUN;
 
         for (int i=0; i < specialWaypoints.Count; i++)
         {
-            if (specialWaypoints[i] == null) continue;
+            if (specialWaypoints[i].active == false) continue;
 
-            if(path.path[currentWaypoint] == specialWaypoints[i])
+            if(path.path[currentWaypoint] == specialWaypoints[i].node)
             {
                 specialWaypointUpcoming = true;
                 if(distanceToWaypoint < 0.1f)
                 {
                     specialWaypointUpcoming = false;
-                    currentTypeofWaypoint = specialWaypointTypes[i];
+                    currentTypeofWaypoint = specialWaypoints[i].waypointType;
+                    specialWaypoints[i].events.Invoke();
                     reachedEndOfPath = true;
-                    issueOutSpecialCommand = true;
                     currentWaypoint++;
                 }
             }
@@ -188,25 +249,6 @@ public class BaseAiController : MonoBehaviour
         else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero && currentTypeofWaypoint == typeofWaypoint.RUN)
         {
             baseCharacterController.PerformMovementAi(Vector2.zero);
-        }
-
-        if (issueOutSpecialCommand && reachedEndOfPath)
-        {
-            switch (currentTypeofWaypoint)
-            {
-                case typeofWaypoint.RUN:
-                    break;
-
-                case typeofWaypoint.JUMP:
-                    baseCharacterController.PerformJumpAi();
-                    break;
-
-                case typeofWaypoint.DODGE:
-                    break;
-
-                case typeofWaypoint.NEUTRAL_DODGE:
-                    break;
-            }
         }
     }
 }
