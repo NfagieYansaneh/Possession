@@ -41,7 +41,7 @@ public class GridGraphGenerate : MonoBehaviour
 
         for (int x = 0; x < gg.width - 1; x++)
         {
-            for (int z = 0; z < gg.depth - 1; z++)
+            for (int z = 1; z < gg.depth - 1; z++)
             {
                 GraphNode currentNode = gg.nodes[z * gg.width + x];
                 if (currentNode != null && currentNode.Walkable)

@@ -149,6 +149,15 @@ public class BaseAiPathModifier : MonoModifier
         return new Vector2(Sx, Sy_fall);
     }
 
+    private void CalculateDropdown()
+    {
+
+    }
+
+    private void CalculateDoubleJump()
+    {
+
+    }
     private void CalculateSingleJump()
     {
         for (int i = 0; i < jumpEndNodes.Count; i++)

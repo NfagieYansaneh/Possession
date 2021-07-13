@@ -203,9 +203,8 @@ public class BaseAiController : MonoBehaviour
             if(path.path[currentWaypoint] == specialWaypoints[i].node)
             {
                 specialWaypointUpcoming = true;
-
                 // Magic value!
-                if(distanceToWaypoint < 0.15f)
+                if (distanceToWaypoint < 0.25f)
                 {
                     specialWaypointUpcoming = false;
                     currentTypeofWaypoint = specialWaypoints[i].waypointType;
@@ -223,6 +222,14 @@ public class BaseAiController : MonoBehaviour
         while (!specialWaypointUpcoming)
         {
             // for maximum perforance, you can just check the squard distance
+
+            bool willBreak = false;
+            foreach(specialWaypoint sWaypoint in specialWaypoints)
+            {
+                if (sWaypoint.node == path.path[currentWaypoint]) willBreak = true;
+            }
+
+            if (willBreak) break;
 
             if (distanceToWaypoint < nextWaypointDistance)
             {
