@@ -11,7 +11,7 @@ public class GridGraphGenerate : MonoBehaviour
     public const uint lowPenalty = 0;
     public const uint highPenalty = 3750;
 
-    GridGraph gg;
+    public static GridGraph gg;
 
     // Start is called before the first frame update
     void Start()
