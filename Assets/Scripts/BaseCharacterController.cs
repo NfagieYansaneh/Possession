@@ -1089,6 +1089,11 @@ public class BaseCharacterController : MonoBehaviour
         PerformJumpAi();
     }
 
+    public virtual void RunWaypointAI(Vector2 direction)
+    {
+        PerformMovementAi(direction);
+    }
+
     public virtual void DodgeWaypointAI(Vector2 direction)
     {
         // meant to be overwritten

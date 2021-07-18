@@ -38,13 +38,15 @@ public class BaseAiController : MonoBehaviour
 
         public typeofWaypoint waypointType;
         public UnityEvent events;
+        public float activationRange;
 
-        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false)
+        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false, float activateRange = 0.25f)
         {
             active = true;
             node = targetNode;
             waypointType = type;
             facingRight = waypointFacingRight;
+            activationRange = activateRange;
 
             events = new UnityEvent();
             events.AddListener(action);
@@ -204,7 +206,7 @@ public class BaseAiController : MonoBehaviour
             {
                 specialWaypointUpcoming = true;
                 // Magic value!
-                if (distanceToWaypoint < 0.25f)
+                if (distanceToWaypoint <= specialWaypoints[i].activationRange)
                 {
                     specialWaypointUpcoming = false;
                     currentTypeofWaypoint = specialWaypoints[i].waypointType;

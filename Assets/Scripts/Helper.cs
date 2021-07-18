@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pathfinding;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,6 +23,48 @@ public static class Helper
         var to = toAbs + toMin;
 
         return to;
+    }
+
+    public static Vector2 TurnPositionIntoPointOnGridGraph(GridGraph gg, Vector3 position)
+    {
+        int x = (int)Helper.Remap(position.x,
+            -gg.width * 0.5f * gg.nodeSize + gg.center.x,
+            gg.width * 0.5f * gg.nodeSize + gg.center.x,
+            0,
+            gg.width);
+
+        int depth = (int)Helper.Remap(
+            position.y,
+            -gg.depth * 0.5f * gg.nodeSize + gg.center.y,
+            gg.depth * 0.5f * gg.nodeSize + gg.center.y,
+            gg.depth,
+            0);
+
+        Vector2 vector = new Vector2(x, depth);
+
+        return vector;
+    }
+
+    public static Vector2 TurnPositionIntoPointOnGridGraph(GridGraph gg, GraphNode node)
+    {
+        Vector3 position = (Vector3)node.position;
+
+        int x = (int)Helper.Remap(position.x, 
+            -gg.width * 0.5f * gg.nodeSize + gg.center.x, 
+            gg.width * 0.5f * gg.nodeSize + gg.center.x, 
+            0, 
+            gg.width);
+
+        int depth = (int)Helper.Remap(
+            position.y, 
+            -gg.depth * 0.5f * gg.nodeSize + gg.center.y,
+            gg.depth * 0.5f * gg.nodeSize + gg.center.y, 
+            0, 
+            gg.depth);
+
+        Vector2 vector = new Vector2(x, depth);
+
+        return vector;
     }
 
     // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
@@ -73,6 +116,25 @@ public static class Helper
                 Debug.DrawRay(pos + direction, up * arrowHeadLength, color);
                 Debug.DrawRay(pos + direction, down * arrowHeadLength, color);
             }
+        }
+
+        public static void ForDebugTimed(Vector3 pos, Vector3 direction, Color color, float time = 0.5f, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+        {
+            Debug.DrawRay(pos, direction, color, time);
+            DrawArrowEndTimed(false, pos, direction, color, time, arrowHeadLength, arrowHeadAngle);
+        }
+
+        private static void DrawArrowEndTimed(bool gizmos, Vector3 pos, Vector3 direction, Color color, float time = 0.5f, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+        {
+            Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(arrowHeadAngle, 0, 0) * Vector3.back;
+            Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(-arrowHeadAngle, 0, 0) * Vector3.back;
+            Vector3 up = Quaternion.LookRotation(direction) * Quaternion.Euler(0, arrowHeadAngle, 0) * Vector3.back;
+            Vector3 down = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -arrowHeadAngle, 0) * Vector3.back;
+
+            Debug.DrawRay(pos + direction, right * arrowHeadLength, color, time);
+            Debug.DrawRay(pos + direction, left * arrowHeadLength, color, time);
+            Debug.DrawRay(pos + direction, up * arrowHeadLength, color, time);
+            Debug.DrawRay(pos + direction, down * arrowHeadLength, color, time);
         }
     }
 

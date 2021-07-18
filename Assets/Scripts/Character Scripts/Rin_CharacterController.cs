@@ -119,6 +119,9 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformMovementAi(Vector2 direction)
     {
+        // do a better check
+        // if (rb.velocity.normalized != direction.normalized) return;
+
         if (direction == Vector2.zero)
         {
             // Debug.LogWarning("IN DEADZONE");

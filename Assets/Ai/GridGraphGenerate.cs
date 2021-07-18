@@ -39,11 +39,17 @@ public class GridGraphGenerate : MonoBehaviour
         List<GraphNode> nodes = new List<GraphNode>();
         gg.GetNodes((System.Action<GraphNode>)nodes.Add);
 
-        for (int x = 0; x < gg.width - 1; x++)
+        for (int x = 0; x < gg.width; x++)
         {
-            for (int z = 1; z < gg.depth - 1; z++)
+            for (int z = 0; z < gg.depth; z++)
             {
                 GraphNode currentNode = gg.nodes[z * gg.width + x];
+                if (z == 0)
+                {
+                    currentNode.Penalty = highPenalty;
+                    continue;
+                }
+
                 if (currentNode != null && currentNode.Walkable)
                 {
                     GraphNode nodeBelow = gg.nodes[(z - 1) * gg.width + x];
