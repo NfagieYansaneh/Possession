@@ -194,6 +194,8 @@ public class BaseCharacterController : MonoBehaviour
     public bool Ai_holdDownKey = false;
     public bool Ai_holdSpaceKey = false;
 
+    // come on, use the struct for background velocity
+
     void Awake()
     {
         input = new InputMaster();

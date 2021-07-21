@@ -217,6 +217,7 @@ public class BaseAiController : MonoBehaviour
                     Debug.Log(specialWaypoints[i].waypointTypeToString());
 
                     specialWaypoints[i].isActive(false);
+                    break;
                 }
             }
         }
