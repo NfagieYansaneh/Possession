@@ -7,7 +7,7 @@ using System;
 
 // help from https://arongranberg.com/astar/docs/custom_movement_script.html
 
-public enum typeofWaypoint { RUN, JUMP, DODGE, NEUTRAL_DODGE };
+public enum typeofWaypoint { RUN, JUMP, AIRBORNE_JUMP, DODGE, NEUTRAL_DODGE };
 
 public class BaseAiController : MonoBehaviour
 {
@@ -40,13 +40,21 @@ public class BaseAiController : MonoBehaviour
         public UnityEvent events;
         public float activationRange;
 
-        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false, float activateRange = 0.25f)
+        public GraphNode contextJumpNode;
+        public GraphNode contextJumpEndNode;
+
+        public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false, float activateRange = 0.25f,
+            GraphNode newContextJumpNode = null, GraphNode newContextJumpEndNode = null)
         {
             active = true;
             node = targetNode;
             waypointType = type;
+
             facingRight = waypointFacingRight;
             activationRange = activateRange;
+
+            contextJumpNode = newContextJumpNode;
+            contextJumpEndNode = newContextJumpEndNode;
 
             events = new UnityEvent();
             events.AddListener(action);

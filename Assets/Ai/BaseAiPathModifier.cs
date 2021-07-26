@@ -49,10 +49,44 @@ public class BaseAiPathModifier : MonoModifier
     // For curves
     public int resolution = 6;
 
+    float t_rise;
+
+    float gravityRise;
+    float gravityFall;
+    float Vx;
+
+    float jumpHeight;
+    float airborneJumpHeight;
+
+    float Vyi;
+
     public void Start()
     {
         baseCharacterController = GetComponent<BaseCharacterController>();
         baseAiController = GetComponent<BaseAiController>();
+
+        Vx = baseCharacterController.movementSpeed;
+        jumpHeight = baseCharacterController.jumpHeight;
+        airborneJumpHeight = baseCharacterController.airborneJumpHeight;
+
+        gravityRise = baseCharacterController.gravity * baseCharacterController.gravityMultiplier;
+        gravityFall = baseCharacterController.gravity * baseCharacterController.gravityMultiplier * baseCharacterController.fallingGravityMultiplier;
+
+        Vyi = Mathf.Sqrt(2 * gravityRise * jumpHeight);
+
+        t_rise = (2 * jumpHeight / Vyi);
+    }
+
+    public float GetAirborneVyi (int jumps = 0)
+    {
+        return Mathf.Sqrt(
+            2 * baseCharacterController.gravity * baseCharacterController.gravityMultiplier * GetAirborneJumpHeight(jumps) *
+            Mathf.Pow(baseCharacterController.successiveJumpHeightReduction, baseCharacterController.airJumpsPerformed));
+    }
+
+    public float GetAirborneJumpHeight(int jumps = 0)
+    {
+        return airborneJumpHeight * Mathf.Pow(baseCharacterController.successiveJumpHeightReduction, jumps);
     }
 
     public override int Order { get { return 60; } }
@@ -131,14 +165,6 @@ public class BaseAiPathModifier : MonoModifier
         // throw new System.NotImplementedException();
     }
 
-    float t_rise;
-    float t_fall;
-    float gravityRise;
-    float gravityFall;
-    float Vx;
-    float jumpHeight;
-    float Vyi;
-
     public Vector2 GetDirectionOfNode(GraphNode from, GraphNode to)
     {
         Vector3 fromPositon = (Vector3)from.position;
@@ -181,27 +207,8 @@ public class BaseAiPathModifier : MonoModifier
         waypointInserts.Clear();
     }
 
-    public Vector2 CalculateSxSy(Vector3 jumpEndNodePosition, GraphNode node, bool waypointFacingRight)
-    {
-        Vx = 8.5f;
-        jumpHeight = baseCharacterController.jumpHeight;
-
-        Vector3 jumpNodePosition = (Vector3)node.position;
-
-        float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
-        gravityRise = baseCharacterController.gravity * baseCharacterController.gravityMultiplier;
-        gravityFall = baseCharacterController.gravity * baseCharacterController.gravityMultiplier * baseCharacterController.fallingGravityMultiplier;
-        Vyi = Mathf.Sqrt(2 * gravityRise * jumpHeight);
-
-        t_rise = (2 * jumpHeight / Vyi);
-        t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
-
-        float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((waypointFacingRight == false) ? 1 : -1) ;
-
-        return new Vector2(Sx, Sy_fall);
-    }
-
-    private List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes)
+    enum AdjNodeSearchDirection { LEFT, RIGHT, BOTH }
+    private List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes, AdjNodeSearchDirection searchDirection)
     {
         List<GraphNode> adjNodes = new List<GraphNode>();
         if (node.Penalty == GridGraphGenerate.highPenalty)
@@ -218,6 +225,7 @@ public class BaseAiPathModifier : MonoModifier
         Vector2 scanNodePoint = temp;
 
         // checking for adj nodes on the left
+        if (searchDirection == AdjNodeSearchDirection.LEFT || searchDirection == AdjNodeSearchDirection.BOTH)
         while (!stopCurrentScan)
         {
 
@@ -267,6 +275,7 @@ public class BaseAiPathModifier : MonoModifier
         stopCurrentScan = false;
         scanNodePoint = temp;
 
+        if (searchDirection == AdjNodeSearchDirection.RIGHT || searchDirection == AdjNodeSearchDirection.BOTH)
         while (!stopCurrentScan)
         {
 
@@ -358,7 +367,7 @@ public class BaseAiPathModifier : MonoModifier
         if (jumpNodePosition.y <= jumpEndNodePosition.y) return false;
 
         bool foundAdjNodes = false;
-        List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes);
+        List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         if (foundAdjNodes == false) return false;
 
         // dropdown
@@ -418,18 +427,15 @@ public class BaseAiPathModifier : MonoModifier
 
         Sy = jumpEndNodePosition.y - jumpNodePosition.y; // This is bound to be a negative number
 
-        float airborneJumpHeight = baseCharacterController.airborneJumpHeight;
-        float airborneVyi = Mathf.Sqrt(
-            2 * baseCharacterController.gravity * baseCharacterController.gravityMultiplier * airborneJumpHeight * 
-            Mathf.Pow(baseCharacterController.successiveJumpHeightReduction, baseCharacterController.airJumpsPerformed));
+        float airborneVyi = GetAirborneVyi();
 
         float Sz = 3f; // magic value
-        float Sb = airborneJumpHeight - Sy - Sz;
+        float Sb = GetAirborneJumpHeight() - Sy - Sz;
 
         float t_dropdown = Mathf.Sqrt(2 * Sb / gravityFall);
-        float t_rise = 2 * airborneJumpHeight / airborneVyi;
+        float t_rise = 2 * GetAirborneJumpHeight() / airborneVyi;
         t_fall = Mathf.Sqrt(2 * Sz / gravityFall);
-        float t_total = t_dropdown+ t_rise;
+        float t_total = t_dropdown + t_rise;
 
         Sx = t_total * Vx;
 
@@ -465,7 +471,8 @@ public class BaseAiPathModifier : MonoModifier
 
             // Adding JUMP special waypoint
             newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.6f);
+                typeofWaypoint.AIRBORNE_JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.6f,
+                jumpNode, jumpEndNode);
 
             if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
             {
@@ -504,18 +511,15 @@ public class BaseAiPathModifier : MonoModifier
 
         bool foundAdjNodes = false;
 
-        GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNode, ref foundAdjNodes));
+        GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
         Vector3 closestNodePosition = (Vector3)closestNode.position;
-        List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNode, ref foundAdjNodes);
+        List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         adjNodesAtJump.Add(jumpNode);
 
-        float airborneJumpHeight = baseCharacterController.airborneJumpHeight;
-        float airborneVyi = Mathf.Sqrt(
-            2 * baseCharacterController.gravity * baseCharacterController.gravityMultiplier * airborneJumpHeight *
-            Mathf.Pow(baseCharacterController.successiveJumpHeightReduction, baseCharacterController.airJumpsPerformed));
+        float airborneVyi = GetAirborneVyi();
 
-        float t_rise1 = 2 * jumpHeight / Vyi;
-        float t_rise2 = 2 * airborneJumpHeight / airborneVyi;
+        float t_rise1 = t_rise;
+        float t_rise2 = 2 * GetAirborneJumpHeight() / airborneVyi;
         float Sy;
         float Sz;
         float t_fall1;
@@ -608,7 +612,8 @@ public class BaseAiPathModifier : MonoModifier
             {
                 jumpNodesFinal.Add(jumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight);
+                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f, 
+                jumpNode, jumpEndNode);
 
                 if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
                 {
@@ -623,7 +628,8 @@ public class BaseAiPathModifier : MonoModifier
             {
                 jumpNodesFinal.Add(secondJumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, secondJumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight);
+                typeofWaypoint.JUMP, secondJumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f,
+                jumpNode, jumpEndNode);
 
                 waypointInsertStruct newInsert = new waypointInsertStruct(newSpecialWaypoint.node, jumpAtThisNode);
                 waypointInserts.Add(newInsert);
@@ -659,9 +665,9 @@ public class BaseAiPathModifier : MonoModifier
 
             bool foundAdjNodes = false;
 
-            GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNodes[i], ref foundAdjNodes));
+            GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNodes[i], ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
             Vector3 closestNodePosition = (Vector3)closestNode.position;
-            List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNodes[i], ref foundAdjNodes);
+            List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNodes[i], ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
             adjNodesAtJump.Add(jumpNodes[i]);
 
             float SxDash = baseCharacterController.dodgeDistance;
@@ -742,7 +748,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 jumpNodesFinal.Add(jumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight);
+                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f);
 
                 if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
                 {
@@ -805,67 +811,6 @@ public class BaseAiPathModifier : MonoModifier
 
     }
 
-    /*
-    private void InsertWaypointAtPosition(Vector2 position, GraphNode node, bool useNewPath)
-    {
-        GraphNode closestNode = null;
-        float closestDistance = 0f;
-        float previousDistance = 0f;
-
-        if (useNewPath)
-        {
-            for (int i = 0; i < newNodes.Count; i++)
-            {
-                float currentDistance = Vector2.Distance(position, newVectorPath[i]);
-
-                if (previousDistance > currentDistance)
-                {
-                    closestNode = newNodes[i];
-                    previousDistance = currentDistance;
-                }
-                else if (previousDistance == 0f)
-                {
-                    closestNode = newNodes[i];
-                    previousDistance = currentDistance;
-                }
-            }
-        } else
-        {
-            for (int i = 0; i < originalNodes.Count; i++)
-            {
-                float currentDistance = Vector2.Distance(position, originalVectorPath[i]);
-
-                if (previousDistance > currentDistance)
-                {
-                    closestNode = originalNodes[i];
-                    previousDistance = currentDistance;
-                }
-                else if (previousDistance == 0f)
-                {
-                    closestNode = originalNodes[i];
-                    previousDistance = currentDistance;
-                }
-            }
-        }
-
-        closestDistance = previousDistance;
-
-        if (useNewPath)
-        {
-            int index = newNodes.FindIndex(d => d == closestNode);
-            newNodes.Insert(index, node);
-            newVectorPath.Insert(index, position);
-        }
-        else
-        {
-            int index = originalNodes.FindIndex(d => d == closestNode);
-            originalNodes.Insert(index, node);
-            originalVectorPath.Insert(index, position);
-        }
-
-    }
-    */
-
     // Apart of interception
     private void CalculateWaitingWaypoint()
     {
@@ -881,7 +826,7 @@ public class BaseAiPathModifier : MonoModifier
     private List<GraphNode> FindVaccantOverheadForOvershoot(GraphNode scanNodePoint)
     {
         bool foundAdjNodes = false;
-        List<GraphNode> adjNodesToTarget = FindAdjacentNodes(scanNodePoint, ref foundAdjNodes);
+        List<GraphNode> adjNodesToTarget = FindAdjacentNodes(scanNodePoint, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         GraphNode currentNodeBeingVetted;
         List<GraphNode> vaccantNodes = new List<GraphNode>(); // Ranges from 0 to 2
 
@@ -936,36 +881,48 @@ public class BaseAiPathModifier : MonoModifier
         }
 
         GraphNode jumpAtThisNode;
-        Vector2 SxSy;
 
-        for (int j = 1; j < jumpNodeStartAndEndIDs[1 + (2 * i)]; j++)
+        List<GraphNode> adjNodes = new List<GraphNode>();
+        
+        bool foundAdjNodes = false;
+
+        if (waypointFacingRight)
+            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
+        else adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
+
+        adjNodes.Insert(0, jumpNode); // just for convenicene when using foreach loop
+
+        foreach(GraphNode node in adjNodes)
         {
 
-            int index = jumpNodeStartAndEndIDs[1 + (2 * i)] - j;
-            if (originalNodes[index].Penalty == GridGraphGenerate.highPenalty) continue;
+            float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
+            float t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
+            float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((waypointFacingRight == false) ? 1 : -1);
 
-            SxSy = CalculateSxSy(jumpEndNodePosition, originalNodes[index], waypointFacingRight);
-            Vector3 nodePosition = (Vector3)originalNodes[index].position;
+            Vector3 nodePosition = (Vector3)node.position;
 
-            if ((SxSy.x + jumpEndNodePosition.x > nodePosition.x + 0.25f && !waypointFacingRight) ||
-                (SxSy.x + jumpEndNodePosition.x < nodePosition.x - 0.25f && waypointFacingRight))
+            if ((Sx + jumpEndNodePosition.x > nodePosition.x + 0.25f && !waypointFacingRight) ||
+                (Sx + jumpEndNodePosition.x < nodePosition.x - 0.25f && waypointFacingRight))
             {
-                // newNodes.Remove(originalNodes[index]);
-                if (!ignoreNodes.Contains(originalNodes[index]))
+                // newNodes.Remove(node);
+                if (!ignoreNodes.Contains(node))
                 {
-                    ignoreNodes.Add(originalNodes[index]);
+                    ignoreNodes.Add(node);
                 }
             }
-            else
-            {
-                jumpAtThisNode = originalNodes[index];
+            else 
+            if ((Sx + jumpEndNodePosition.x > nodePosition.x - 0.25f && !waypointFacingRight) ||
+                    (Sx + jumpEndNodePosition.x < nodePosition.x + 0.25f && waypointFacingRight))
+            { 
+                jumpAtThisNode = node;
                 if (!jumpNodesFinal.Contains(jumpAtThisNode))
                 {
                     jumpNodesFinal.Add(jumpAtThisNode);
                 }
 
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                    typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight);
+                    typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f,
+                    jumpNode, jumpEndNode);
 
                 if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
                 {
@@ -973,9 +930,6 @@ public class BaseAiPathModifier : MonoModifier
                     specialWaypoints.Add(newSpecialWaypoint);
                     // specialNodeCorrespFunction.Add(jumpEndNode);
                 }
-
-                // for gizmos sake
-                gizmoJumping_SxSy = SxSy;
 
                 return true;
             }
@@ -1003,11 +957,6 @@ public class BaseAiPathModifier : MonoModifier
         {
             Gizmos.DrawCube((Vector3)node.position, new Vector3(0.5f, 0.5f));
             Vector3 nodePosition = (Vector3)node.position;
-
-            Handles.Label((Vector3)node.position + Vector3.up * 1f + Vector3.right * 0.5f,
-                new GUIContent("Sx : Sy [" + gizmoJumping_SxSy.x + ", " + gizmoJumping_SxSy.y + "]"));
-            Handles.Label((Vector3)node.position + Vector3.up * 0.5f + Vector3.right * 0.5f,
-                new GUIContent("Diff in X = " + Mathf.Abs(nodePosition.x - nodePosition.x)));
         }
 
         // Drawing unique special waypoint gizmos
@@ -1025,10 +974,16 @@ public class BaseAiPathModifier : MonoModifier
                     Gizmos.color = Color.cyan;
                     Gizmos.DrawCube(specialWaypoint.nodePosition, new Vector3(0.5f, 0.5f));
 
+                    Vector3 jumpNodePosition = (Vector3)specialWaypoint.contextJumpNode.position;
+                    Vector3 jumpEndNodePosition = (Vector3)specialWaypoint.contextJumpEndNode.position;
+
+                    float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
+                    float x = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((specialWaypoint.facingRight == false) ? 1 : -1);
+
                     // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
                     for (int k = 0; k < resolution; k++)
                     {
-                        float curSx = (gizmoJumping_SxSy.x / resolution) * k;
+                        float curSx = (x / resolution) * k;
                         float curSy = 0f;
                         float elaspedTime = ((specialWaypoint.facingRight)? -curSx : curSx) / Vx;
                         if (elaspedTime < t_rise)
@@ -1054,9 +1009,63 @@ public class BaseAiPathModifier : MonoModifier
 
                         if (k == resolution - 1)
                         {
-                            curSx = gizmoJumping_SxSy.x;
+                            curSx = x;
                             elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
                             curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                            newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                            Gizmos.color = Color.cyan;
+                            Gizmos.DrawLine(oldPosition, newPosition);
+                        }
+                    }
+
+                    break;
+
+                case typeofWaypoint.AIRBORNE_JUMP:
+                    oldPosition = Vector2.zero;
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawCube(specialWaypoint.nodePosition, new Vector3(0.5f, 0.5f));
+
+                    jumpNodePosition = (Vector3)specialWaypoint.contextJumpNode.position;
+                    jumpEndNodePosition = (Vector3)specialWaypoint.contextJumpEndNode.position;
+
+                    float airborneJumpHeight = GetAirborneJumpHeight(1);
+
+                    Sy_fall = airborneJumpHeight - (jumpEndNodePosition.y - specialWaypoint.nodePosition.y);
+                    x = Vx * ((2 * airborneJumpHeight / GetAirborneVyi(1)) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((specialWaypoint.facingRight == false) ? 1 : -1);
+
+                    // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
+                    for (int k = 0; k < resolution; k++)
+                    {
+                        float curSx = (x / resolution) * k;
+                        float curSy = 0f;
+                        float elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
+                        if (elaspedTime < t_rise)
+                        {
+                            curSy = (GetAirborneVyi(1) * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
+                        }
+                        else
+                        {
+                            curSy = GetAirborneJumpHeight(1) + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                            // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
+                        }
+
+                        Vector3 jumpPos = specialWaypoint.nodePosition;
+                        Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                        if (oldPosition != Vector2.zero)
+                        {
+                            Gizmos.color = Color.cyan;
+                            Gizmos.DrawLine(newPosition, oldPosition);
+                        }
+
+                        oldPosition = newPosition;
+
+                        if (k == resolution - 1)
+                        {
+                            curSx = x;
+                            elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
+                            curSy = GetAirborneJumpHeight(1) + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
                             newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
 
                             Gizmos.color = Color.cyan;
