@@ -125,18 +125,26 @@ public class BaseAiPathModifier : MonoModifier
             }
         }
 
-        // testing prioty
-
         for (int i = 0; i < jumpEndNodes.Count; i++)
         {
-            if (!CalculateDropdown(jumpNodes[i], jumpEndNodes[i]))
+            if (CalculateDropdown(jumpNodes[i], jumpEndNodes[i]))
             {
-                if (!CalculateSingleJump(jumpNodes[i], jumpEndNodes[i], i))
-                {
-                    CalculateDoubleJump(jumpNodes[i], jumpEndNodes[i]);
-                    Debug.Log("Doublle");
-                }
+                Debug.Log("Dropdown Pathing Chosen...");
             }
+            else if (CalculateSingleJump(jumpNodes[i], jumpEndNodes[i]))
+            {
+                Debug.Log("Single Jump Pathing Chosen...");
+            }
+            else if (CalculateSingleJumpDashing(jumpNodes[i], jumpEndNodes[i]))
+            {
+                Debug.Log("Single Jump + Dashing Pathing Chosen...");
+            }
+            else
+            {
+                CalculateDoubleJump(jumpNodes[i], jumpEndNodes[i]);
+                Debug.Log("Double Jump Pathing Chosen...");
+            }
+            
         }
 
         // Node trimming
@@ -471,7 +479,7 @@ public class BaseAiPathModifier : MonoModifier
 
             // Adding JUMP special waypoint
             newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.AIRBORNE_JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.6f,
+                typeofWaypoint.AIRBORNE_JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.6f,
                 jumpNode, jumpEndNode);
 
             if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
@@ -587,7 +595,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 Sz = Sy - ((jumpHeight * 2) - Sz);
             }
-;
+
             t_fall1 = Mathf.Sqrt(2 * (2 * jumpHeight - Sy - Sz) / gravityFall);
             t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall);
             t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
@@ -596,8 +604,8 @@ public class BaseAiPathModifier : MonoModifier
             // Finding the position where we need to jump;
             float Sx_Dropdown = Vx * (t_rise1 + t_fall1) + jumpAtThisNodePosition.x;
 
-            // damn, I need to calculate gravityFall & rise somewhere
             float Sy_Dropdown = (jumpHeight - ((gravityFall * (t_fall1) * (t_fall1)) / 2)) + jumpAtThisNodePosition.y;
+            Sy_Dropdown = jumpHeight - ((gravityFall * t_fall1 * t_fall1) / 2);
 
             // rounding to nearest 0.5f
             // float Sx_DropdownRounded = (int)(Sx_Dropdown * 2) / 2f;
@@ -605,14 +613,14 @@ public class BaseAiPathModifier : MonoModifier
 
             // gg.nodes[(z - 1) * gg.width + x];
             GraphNode secondJumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + Sx_Dropdown +
-            ((waypointFacingRight) ? 1f : -1f), Sy_Dropdown + jumpNodePosition.y)).node;
+            ((waypointFacingRight) ? 1.25f : -1.25f), Sy_Dropdown + jumpAtThisNodePosition.y)).node;
 
             // first jump
             if (!jumpNodesFinal.Contains(jumpAtThisNode))
             {
                 jumpNodesFinal.Add(jumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f, 
+                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f, 
                 jumpNode, jumpEndNode);
 
                 if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
@@ -628,7 +636,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 jumpNodesFinal.Add(secondJumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, secondJumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f,
+                typeofWaypoint.AIRBORNE_JUMP, secondJumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.6f,
                 jumpNode, jumpEndNode);
 
                 waypointInsertStruct newInsert = new waypointInsertStruct(newSpecialWaypoint.node, jumpAtThisNode);
@@ -649,129 +657,140 @@ public class BaseAiPathModifier : MonoModifier
         return false;
     }
 
-    private void CalculateSingleJumpDashing()
+    private bool CalculateSingleJumpDashing(GraphNode jumpNode, GraphNode jumpEndNode)
     {
-        for (int i = 0; i < jumpEndNodes.Count; i++)
+        Vector3 jumpNodePosition = (Vector3)jumpNode.position;
+        Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
+        
+        bool waypointFacingRight = false;
+        
+        if (jumpEndNodePosition.x > jumpNodePosition.x)
         {
-            Vector3 jumpNodePosition = (Vector3)jumpNodes[i].position;
-            Vector3 jumpEndNodePosition = (Vector3)jumpEndNodes[i].position;
-
-            bool waypointFacingRight = false;
-
-            if (jumpEndNodePosition.x > jumpNodePosition.x)
+            waypointFacingRight = true;
+        }
+        
+        bool foundAdjNodes = false;
+        
+        GraphNode closestNode = FindClosestNode(jumpNodePosition, FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
+        Vector3 closestNodePosition = (Vector3)closestNode.position;
+        
+        List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
+        adjNodesAtJump.Insert(0, jumpNode);
+        
+        float SxDash = baseCharacterController.dodgeDistance;
+        float SxRise = t_rise * Vx;
+        
+        List<GraphNode> potentialNodes = new List<GraphNode>();
+        bool foundAnyPotentialNode = false;
+        
+        float Sz;
+        float Sy;
+        float Sb;
+        
+        float t_fall;
+        float t_total;
+        
+        foreach (GraphNode node in adjNodesAtJump)
+        {
+            Vector3 nodePosition = (Vector3)node.position;
+        
+            if ((jumpEndNodePosition.x - nodePosition.x) < SxRise + SxDash)
             {
-                waypointFacingRight = true;
+                // impossible to perform
+                continue;
             }
-
-            bool foundAdjNodes = false;
-
-            GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNodes[i], ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
-            Vector3 closestNodePosition = (Vector3)closestNode.position;
-            List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNodes[i], ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
-            adjNodesAtJump.Add(jumpNodes[i]);
-
-            float SxDash = baseCharacterController.dodgeDistance;
-            float t_rise = 2 * jumpHeight / Vyi;
-
-            float SxRise = t_rise * Vx;
-
-            List<GraphNode> potentialNodes = new List<GraphNode>();
-
-            float Sz;
-            float Sy;
-            float Sb;
-
-
-            float t_fall;
-            float t_total;
-
-            foreach (GraphNode node in adjNodesAtJump)
-            {
-                Vector3 nodePosition = (Vector3)node.position;
-
-                if ((jumpEndNodePosition.x - nodePosition.x) < SxRise + SxDash)
-                {
-                    // impossible to perform
-                    continue;
-                }
-
-                Sz = 1.5f; // magic number
-                Sy = jumpEndNodePosition.y - nodePosition.y;
-                Sb = jumpHeight - Sz - Sy;
-
-                t_fall = Mathf.Sqrt(2 * Sb / gravityFall);
-                t_total = t_rise + baseCharacterController.dodgeTime + t_fall;
-
-                float Sx = t_total * Vx;
-
-                if ((nodePosition.x < Sx + jumpEndNodePosition.x) && waypointFacingRight ||
-                    (nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight)
-                {
-                    potentialNodes.Add(node);
-                    continue;
-                }
-                else
-                {
-                    // ...
-                }
-
-            }
-
-            // if(potentialNodes empty, cycle to adjNodesAtEndJump while using the closest node to jumpEndNode
-
-            // Possible to perform double jump
-            GraphNode jumpAtThisNode = FindClosestNode(jumpNodePosition, potentialNodes);
-            Vector3 jumpAtThisNodePosition = (Vector3)jumpAtThisNode.position;
-
+        
             Sz = 1.5f; // magic number
-            // Sy = jumpEndNodePosition.y - jumpAtThisNode.y;
-            Sb = 0f; //jumpHeight - Sz - Sy;
-
+            Sy = jumpEndNodePosition.y - nodePosition.y;
+            Sb = jumpHeight - Sz - Sy;
+        
             t_fall = Mathf.Sqrt(2 * Sb / gravityFall);
             t_total = t_rise + baseCharacterController.dodgeTime + t_fall;
-
-            // Adding single jump waypoint
-            // Finding the position where we need to jump;
-            float Sx_Dropdown = Vx * (t_rise + t_fall) + jumpAtThisNodePosition.x;
-
-            // damn, I need to calculate gravityFall & rise somewhere
-            float Sy_Dropdown = (jumpHeight - ((gravityFall * (t_fall) * (t_fall)) / 2)) + jumpAtThisNodePosition.y;
-
-            // rounding to nearest 0.5f
-            float Sx_DropdownRounded = (int)(Sx_Dropdown * 2) / 2f;
-            float Sy_DropdownRounded = (int)(Sy_Dropdown * 2) / 2f;
-
-            // gg.nodes[(z - 1) * gg.width + x];
-            GraphNode dodgeAtThisNode = GridGraphGenerate.gg.nodes[((int)(Sy_DropdownRounded / 0.5f) - 1) * GridGraphGenerate.gg.width + (int)(Sx_DropdownRounded / 0.5f)];
-
-            if (!jumpNodesFinal.Contains(jumpAtThisNode))
+        
+            float Sx = t_total * Vx;
+        
+            if ((nodePosition.x < Sx + jumpEndNodePosition.x) && waypointFacingRight ||
+                (nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight)
             {
-                jumpNodesFinal.Add(jumpAtThisNode);
-                BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.PerformJumpAi, waypointFacingRight, 0.25f);
-
-                if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
-                {
-                    baseAiController.specialWaypoints.Add(newSpecialWaypoint);
-                    specialWaypoints.Add(newSpecialWaypoint);
-                    // specialNodeCorrespFunction.Add(jumpEndNodes[i]);
-                }
+                foundAnyPotentialNode = true;
+        
+                // if we want to be more performant. We can just stop our search once we find one node potential node since
+                // FindAdjacentNodes is directional
+        
+                potentialNodes.Add(node);
+                continue;
             }
-
-            if (!jumpNodesFinal.Contains(dodgeAtThisNode))
+            else
             {
-                jumpNodesFinal.Add(dodgeAtThisNode);
-                BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.DODGE, dodgeAtThisNode, null, waypointFacingRight);
+                // ...
+            }
+        
+        }
+        
+        if (!foundAnyPotentialNode) return false;
+        
+        // At this point and onwards, it is possible to perform a single jump + dash
+        
+        GraphNode jumpAtThisNode = FindClosestNode(jumpNodePosition, potentialNodes);
+        Vector3 jumpAtThisNodePosition = (Vector3)jumpAtThisNode.position;
+        
+        Sz = 1.5f; // magic number
+        Sy = jumpEndNodePosition.y - jumpAtThisNodePosition.y;
+        Sb = jumpHeight - Sz - Sy;
+        
+        t_fall = Mathf.Sqrt(2 * Sb / gravityFall);
+        t_total = t_rise + baseCharacterController.dodgeTime + t_fall;
+        
+        // Adding single jump waypoint
+        // Finding the position where we need to jump;
+        float Sx_Dropdown = Vx * (t_rise + t_fall);
+        
+        // damn, I need to calculate gravityFall & rise somewhere
+        float Sy_Dropdown = (jumpHeight - ((gravityFall * (t_fall) * (t_fall)) / 2));
+        
+        // rounding to nearest 0.5f
+        float Sx_DropdownRounded = (int)(Sx_Dropdown * 2) / 2f;
+        float Sy_DropdownRounded = (int)(Sy_Dropdown * 2) / 2f;
+        
+        // gg.nodes[(z - 1) * gg.width + x];
+        GraphNode dodgeAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpAtThisNodePosition.x + Sx_Dropdown, Sy_Dropdown + jumpAtThisNodePosition.y)).node;
+        
+        if (!jumpNodesFinal.Contains(jumpAtThisNode))
+        {
+            jumpNodesFinal.Add(jumpAtThisNode);
 
-                if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
-                {
-                    baseAiController.specialWaypoints.Add(newSpecialWaypoint);
-                    specialWaypoints.Add(newSpecialWaypoint);
-                    // specialNodeCorrespFunction.Add(jumpEndNodes[i]);
-                }
+            BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
+            typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f, jumpNode, jumpEndNode);
+        
+            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
+            {
+                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                specialWaypoints.Add(newSpecialWaypoint);
+                // specialNodeCorrespFunction.Add(jumpEndNode);
             }
         }
+        
+        if (!jumpNodesFinal.Contains(dodgeAtThisNode))
+        {
+            jumpNodesFinal.Add(dodgeAtThisNode);
+
+            Vector2 direction = (waypointFacingRight) ? Vector2.right : Vector2.left;
+
+            BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
+            typeofWaypoint.DODGE, dodgeAtThisNode, () => { baseCharacterController.DodgeWaypointAI(direction); }, waypointFacingRight, 0.6f);
+        
+            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
+            {
+                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                specialWaypoints.Add(newSpecialWaypoint);
+
+                waypointInsertStruct newInsert = new waypointInsertStruct(newSpecialWaypoint.node, jumpAtThisNode);
+                waypointInserts.Add(newInsert);
+                // specialNodeCorrespFunction.Add(jumpEndNode);
+            }
+        }
+        
+        return true;
     }
 
     private void CalculateOvershootWaypoints(GraphNode target, float time)
@@ -864,7 +883,7 @@ public class BaseAiPathModifier : MonoModifier
         return vaccantNodes;
     }
 
-    private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode, int i)
+    private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode)
     {
 
         // float Vx = 8.5f;
@@ -1076,6 +1095,8 @@ public class BaseAiPathModifier : MonoModifier
                     break;
 
                 case typeofWaypoint.DODGE:
+                    Gizmos.color = Color.cyan;
+                    Gizmos.DrawCube(specialWaypoint.nodePosition, new Vector3(0.5f, 0.5f));
                     break;
 
                 default:

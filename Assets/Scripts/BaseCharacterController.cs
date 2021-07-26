@@ -1015,6 +1015,35 @@ public class BaseCharacterController : MonoBehaviour
         if(!isGrounded)dodgeIndex++;
     }
 
+    public virtual void PerformDodgeAi(Vector2 direction)
+    {
+        // not meant to be typically overwritten
+        if (dodgeIndex > maxDodges - 1) return;
+
+        calculatedDodgeSpeed = (dodgeDistance / dodgeTime * (dodgeCurve.keys[2].time - dodgeCurve.keys[1].time));
+        if (direction == Vector2.zero) // make sure to set proper deadzones!
+        {
+            dodgeTimestamp = Time.time + neutralDodgeTime;
+            dodgeVelocity = Vector2.zero;
+        }
+        else
+        {
+            dodgeTimestamp = Time.time + dodgeTime;
+            dodgeVelocity = direction * calculatedDodgeSpeed;
+        }
+
+        dodgeDirection = direction;
+        t_dodgeCurveTimestamp = Time.time;
+        gravityEnabled = false;
+        dodging = true;
+        curVerticalVelocity = 0f;
+
+        // we reset our jumps, however, we remove our ground jump by setting jumpIndex to 1 (which represents our air jump), instead of 0 (which represents our ground jump)
+        if (jumpIndex == maxJumps) jumpIndex -= 1;
+        else jumpIndex -= (maxJumps - jumpIndex);
+        if (!isGrounded) dodgeIndex++;
+    }
+
     public virtual void PerformLightAttack(InputAction.CallbackContext context)
     {
         // meant to be overwritten
@@ -1098,7 +1127,7 @@ public class BaseCharacterController : MonoBehaviour
 
     public virtual void DodgeWaypointAI(Vector2 direction)
     {
-        // meant to be overwritten
+        PerformDodgeAi(direction);
     }
 
     public virtual void RunAtFixedUpdate()
