@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 using UnityEngine.Events;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,6 +25,8 @@ public class BaseAiPathModifier : MonoModifier
 
     public List<GraphNode> ignoreNodes = new List<GraphNode>();
     public List<GraphNode> adjNodesFromOverhead = new List<GraphNode>();
+
+    public List<GraphNode> debugNodes = new List<GraphNode>(); // just to visualise some data quickly
 
     // Queuing waypoint positions to insert
     public struct waypointInsertStruct
@@ -215,6 +218,7 @@ public class BaseAiPathModifier : MonoModifier
                 newNodes.RemoveAt(i - offset);
                 newVectorPath.RemoveAt(i - offset);
             }
+
             else break;
 
             offset++;
@@ -893,6 +897,60 @@ public class BaseAiPathModifier : MonoModifier
         return vaccantNodes;
     }
 
+    /// <summary> 
+    /// Used to detect collisions when simulating our pathing
+    /// </summary>
+    /// 
+    /// <returns>
+    /// Returns true if point node will be in range of a nonwalkable node
+    /// else, it will return false.
+    /// </returns>
+    private bool CheckForCollisions(GraphNode point, int heightInNodes)
+    {
+        if (!point.Walkable) return true;
+        else
+        {
+            GraphNode currentNodeBeingVetted;
+            Vector3 pointPosition = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, point);
+
+            for (int z = 0; z < heightInNodes; z++)
+            {
+                currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)];
+                if (!point.Walkable) return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary> 
+    /// Used to detect collisions when simulating our pathing
+    /// </summary>
+    /// 
+    /// <returns>
+    /// Returns true if point node will be in range of a nonwalkable node
+    /// else, it will return false.
+    /// </returns>
+    private bool CheckForCollisions(Vector3 point, int heightInNodes)
+    {
+        Vector3 pointPosition = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, point);
+        GraphNode node = GridGraphGenerate.gg.nodes[((int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)];
+
+        if (!node.Walkable) return true;
+        else
+        {
+            GraphNode currentNodeBeingVetted;
+
+            for (int z = 0; z < heightInNodes; z++)
+            {
+                currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)];
+                if (!node.Walkable) return true;
+            }
+        }
+
+        return false;
+    }
+
     private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode)
     {
 
@@ -966,6 +1024,27 @@ public class BaseAiPathModifier : MonoModifier
 
         return false;
     }
+
+
+    /// <summary>
+    /// Simulates each point along a single jump with a given resolution and carries
+    /// out a boolean check and events at it simulated point.
+    /// </summary>
+    /// 
+    /// <returns>
+    /// If our simulated single jump passes the test, we return all points along the
+    /// simulation.
+    /// </returns>
+    private List<Vector3> SimulateSingleJump(Func<bool> Check, UnityAction action)
+    {
+        Check();
+        action.Invoke();
+        List<Vector3> points = new List<Vector3>();
+        return points;
+    }
+
+    // later, @v2.0 release, I will go around commenting my functions & variables like this in order to make
+    // it more scalable (https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/recommended-tags)
 
     private void OnDrawGizmos()
     {
