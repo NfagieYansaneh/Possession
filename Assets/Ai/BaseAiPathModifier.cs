@@ -23,7 +23,7 @@ public class BaseAiPathModifier : MonoModifier
     public List<GraphNode> jumpNodesFinal = new List<GraphNode>(); // This contains the list of calculated and processed jump node positions
 
     public List<GraphNode> ignoreNodes = new List<GraphNode>();
-    public Vector2 gizmoJumping_SxSy = Vector2.zero;
+    public List<GraphNode> adjNodesFromOverhead = new List<GraphNode>();
 
     // Queuing waypoint positions to insert
     public struct waypointInsertStruct
@@ -139,10 +139,13 @@ public class BaseAiPathModifier : MonoModifier
             {
                 Debug.Log("Single Jump + Dashing Pathing Chosen...");
             }
-            else
+            else if (CalculateDoubleJump(jumpNodes[i], jumpEndNodes[i]))
             {
-                CalculateDoubleJump(jumpNodes[i], jumpEndNodes[i]);
                 Debug.Log("Double Jump Pathing Chosen...");
+            } else
+            {
+                adjNodesFromOverhead = FindVaccantOverheadForOvershoot(jumpEndNodes[i]);
+                Debug.Log("Overhead");
             }
             
         }
@@ -152,9 +155,10 @@ public class BaseAiPathModifier : MonoModifier
         // GraphNode lastFromNode;
         
         
-        for (int i = 0; i < jumpEndNodes.Count; i++) {
+        for (int i = 0; i < jumpNodesFinal.Count; i++) {
             // Debug.Log(jumpEndNodes.Count);
             // Debug.Log(jumpNodes.Count);
+
             TrimInBetween(jumpNodesFinal[i], jumpEndNodes[i]);
         }
 
@@ -188,18 +192,31 @@ public class BaseAiPathModifier : MonoModifier
         int fromIndex = newNodes.FindIndex(d => d == from);
         int toIndex = newNodes.FindIndex(d => d == to);
 
-        if (fromIndex + 1 == toIndex) return;
+        if (fromIndex + 1 == toIndex || fromIndex == toIndex) return;
+
+        // Debug.Log($"------------");
+        // Debug.Log($"fromIndex : {fromIndex}");
+        // Debug.Log($"toIndex : {toIndex}");
 
         int offset = 0;
         for(int i=fromIndex+1; i<toIndex; i++)
         {
+            // Debug.Log($"i : {i}");
+            // Debug.Log($"offset : {offset}");
+            // Debug.Log("i - offset : " + (i - offset));
+
             /* foreach (BaseAiController.specialWaypoint specialWaypoint in specialWaypoints)
             {
                 if (originalNodes[i] == specialWaypoint.node) continue;
             } */
 
-            newNodes.RemoveAt(i - offset);
-            newVectorPath.RemoveAt(i - offset);
+            if (newNodes[i - offset] != null)
+            {
+                newNodes.RemoveAt(i - offset);
+                newVectorPath.RemoveAt(i - offset);
+            }
+            else break;
+
             offset++;
         }
     }
@@ -213,6 +230,7 @@ public class BaseAiPathModifier : MonoModifier
         ignoreNodes.Clear();
         specialWaypoints.Clear();
         waypointInserts.Clear();
+        adjNodesFromOverhead.Clear();
     }
 
     enum AdjNodeSearchDirection { LEFT, RIGHT, BOTH }
@@ -534,6 +552,7 @@ public class BaseAiPathModifier : MonoModifier
         float t_fall2;
         float t_total;
 
+        bool foundAnyPotentialNodes = false;
         List<GraphNode> potentialNodes = new List<GraphNode>();
 
         foreach (GraphNode node in adjNodesAtJump)
@@ -564,6 +583,7 @@ public class BaseAiPathModifier : MonoModifier
             if ((nodePosition.x < Sx + jumpEndNodePosition.x) && waypointFacingRight ||
                 (nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight)
             {
+                foundAnyPotentialNodes = true;
                 potentialNodes.Add(node);
                 continue;
             }
@@ -574,6 +594,7 @@ public class BaseAiPathModifier : MonoModifier
 
         }
 
+        if (!foundAnyPotentialNodes) return false;
         // if(potentialNodes empty, cycle to adjNodesAtEndJump while using the closest node to jumpEndNode
 
         if (potentialNodes.Count >= 1)
@@ -653,7 +674,6 @@ public class BaseAiPathModifier : MonoModifier
             return true;
         }
 
-
         return false;
     }
 
@@ -682,6 +702,7 @@ public class BaseAiPathModifier : MonoModifier
         
         List<GraphNode> potentialNodes = new List<GraphNode>();
         bool foundAnyPotentialNode = false;
+
         
         float Sz;
         float Sy;
@@ -842,43 +863,32 @@ public class BaseAiPathModifier : MonoModifier
 
     }
 
+    // Add direction control
     private List<GraphNode> FindVaccantOverheadForOvershoot(GraphNode scanNodePoint)
     {
-        bool foundAdjNodes = false;
-        List<GraphNode> adjNodesToTarget = FindAdjacentNodes(scanNodePoint, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         GraphNode currentNodeBeingVetted;
         List<GraphNode> vaccantNodes = new List<GraphNode>(); // Ranges from 0 to 2
 
         // Checking nodes to the left
         bool notVaccant = false;
+        Vector3 scanNodePointPosition = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, scanNodePoint);
+
         for (int z = 0; z < 3; z++) {
-            currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + scanNodePoint.position.z) * GridGraphGenerate.gg.width + (scanNodePoint.position.x - 1)];
-            foreach (GraphNode node in adjNodesToTarget)
-            {
-                if (currentNodeBeingVetted == node)
-                {
-                    notVaccant = true;
-                }
-            }
+            currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x - 1)];
+            if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty) notVaccant = true;
         }
 
-        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[(scanNodePoint.position.z) * GridGraphGenerate.gg.width + (scanNodePoint.position.x - 1)]);
+        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x - 1)]);
 
         // Checking nodes to the right
         notVaccant = false;
         for (int z = 0; z < 3; z++)
         {
-            currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + scanNodePoint.position.z) * GridGraphGenerate.gg.width + (scanNodePoint.position.x + 1)];
-            foreach (GraphNode node in adjNodesToTarget)
-            {
-                if (currentNodeBeingVetted == node)
-                {
-                    notVaccant = true;
-                }
-            }
+            currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x + 1)];
+            if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty) notVaccant = true;
         }
 
-        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[(scanNodePoint.position.z) * GridGraphGenerate.gg.width + (scanNodePoint.position.x - 1)]);
+        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x + 1)]);
 
         return vaccantNodes;
     }
@@ -975,7 +985,12 @@ public class BaseAiPathModifier : MonoModifier
         foreach (GraphNode node in jumpEndNodes)
         {
             Gizmos.DrawCube((Vector3)node.position, new Vector3(0.5f, 0.5f));
-            Vector3 nodePosition = (Vector3)node.position;
+        }
+
+        Gizmos.color = Color.white;
+        foreach (GraphNode node in adjNodesFromOverhead)
+        {
+            Gizmos.DrawCube((Vector3)node.position, new Vector3(0.5f, 0.5f));
         }
 
         // Drawing unique special waypoint gizmos

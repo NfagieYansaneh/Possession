@@ -1614,7 +1614,6 @@ MonoBehaviour:
   originalVectorPath: []
   newVectorPath: []
   jumpNodeStartAndEndIDs: 
-  gizmoJumping_SxSy: {x: 0, y: 0}
   baseCharacterController: {fileID: 0}
   baseAiController: {fileID: 0}
   resolution: 10
@@ -20716,7 +20715,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1399928702}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.192707, y: 0.6737232, z: 0}
+  m_LocalPosition: {x: -7.8072934, y: 5.970598, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1557862172}
@@ -25672,7 +25671,7 @@ MonoBehaviour:
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
   dodgeBoxSize: {x: 0.1, y: 1.14}
-  dodgeBoxPosition: {x: 11.89, y: 11.63625}
+  dodgeBoxPosition: {x: -4.6100006, y: 16.933125}
   dodgeBoxOffset: {x: 0.39, y: -0.27}
   whatIsGround:
     serializedVersion: 2
@@ -25698,8 +25697,8 @@ MonoBehaviour:
       m_Calls: []
   rb: {fileID: 0}
   curVerticalVelocity: 0
-  crownObject: {fileID: 0}
-  crownScript: {fileID: 0}
+  crownObject: {fileID: 1314453555}
+  crownScript: {fileID: 1314453558}
   currentlyPossessed: 1
   playerInputHandler: {fileID: 979204401}
   movementDirection: {x: 0, y: 0}
@@ -25860,7 +25859,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1835812401}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.5, y: 2.9062498, z: 0}
+  m_LocalPosition: {x: -5.0000005, y: 8.203125, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1145572609}
