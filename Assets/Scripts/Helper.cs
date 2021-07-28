@@ -37,8 +37,8 @@ public static class Helper
             position.y,
             -gg.depth * 0.5f * gg.nodeSize + gg.center.y,
             gg.depth * 0.5f * gg.nodeSize + gg.center.y,
-            gg.depth,
-            0);
+            0,
+            gg.depth);
 
         Vector2 vector = new Vector2(x, depth);
 
