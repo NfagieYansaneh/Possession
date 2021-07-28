@@ -147,8 +147,7 @@ public class BaseAiPathModifier : MonoModifier
                 Debug.Log("Double Jump Pathing Chosen...");
             } else
             {
-                //adjNodesFromOverhead = FindVaccantOverheadForOvershoot(jumpEndNodes[i]);
-                Debug.Log("Overhead");
+                adjNodesFromOverhead = FindVaccantOverheadForOvershoot(jumpEndNodes[i]);
             }
             
         }
@@ -541,6 +540,7 @@ public class BaseAiPathModifier : MonoModifier
         Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
 
         bool waypointFacingRight = false;
+        bool isCapableOfOverhead = false;
 
         if (jumpEndNodePosition.x > jumpNodePosition.x)
         {
@@ -591,6 +591,12 @@ public class BaseAiPathModifier : MonoModifier
             t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
 
             float Sx = t_total * Vx;
+
+            if(jumpHeight*2 > Sy && 
+                (((nodePosition.x > Sx + jumpEndNodePosition.x) && waypointFacingRight) ||
+                ((nodePosition.x < Sx + jumpEndNodePosition.x) && !waypointFacingRight))){
+                isCapableOfOverhead = true;
+            }
 
             if ((nodePosition.x < Sx + jumpEndNodePosition.x) && waypointFacingRight ||
                 (nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight)
@@ -684,6 +690,12 @@ public class BaseAiPathModifier : MonoModifier
             }
 
             return true;
+        }
+
+        // Do overhead double jump calculation
+        if(isCapableOfOverhead)
+        {
+            Debug.Log("CapableOfOverhead");
         }
 
         return false;
