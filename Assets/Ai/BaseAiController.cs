@@ -94,6 +94,10 @@ public class BaseAiController : MonoBehaviour
                     str = "DODGE";
                     break;
 
+                case typeofWaypoint.AIRBORNE_JUMP:
+                    str = "AIRBORNE_JUMP";
+                    break;
+
                 default:
                     // typeofWaypoint.NEUTRAL_DODGE
                     str = "NEUTRAL_DODGE";

@@ -414,7 +414,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""5be70062-4f70-4bce-a07a-f90f6485bfaf"",
-                    ""path"": ""<Keyboard>/u"",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard and mouse"",

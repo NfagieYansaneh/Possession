@@ -138,6 +138,7 @@ public static class Helper
         }
     }
 
+    // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
     public static class DrawCapsule
     {
 #if UNITY_EDITOR
