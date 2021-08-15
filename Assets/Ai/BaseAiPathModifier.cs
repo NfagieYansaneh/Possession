@@ -178,7 +178,18 @@ public class BaseAiPathModifier : MonoModifier
 
             // InsertWaypointAtPosition(insert.position, insert.node, true);
         }
-        
+
+        // Quick test
+        // debugNodes = Helper.BresenhamLine(GridGraphGenerate.gg, new Vector2(-1, 11.4f), new Vector2(8, 7));
+        //         Debug.DrawLine(new Vector2(-1, 11.4f), new Vector2(6, 11.4f), Color.red, 10000f);
+        List<Vector2> points = new List<Vector2>();
+        points.Add(new Vector2(-4, 2f));
+        points.Add(new Vector2(2, 13.4f));
+        points.Add(new Vector2(-5, 2f));
+        points.Add(new Vector2(9, 5f));
+        points.Add(new Vector2(-7, 4f));
+        debugNodes = Helper.BresenhamLineLoopThrough(GridGraphGenerate.gg, points);
+
         path.path = newNodes;
         path.vectorPath = newVectorPath;
         // throw new System.NotImplementedException();
@@ -1021,7 +1032,9 @@ public class BaseAiPathModifier : MonoModifier
     private enum TypeofJump { SINGLE, DROPDOWN_SINGLE, SINGLE_DODGE, DOUBLE_JUMP };
     
     // Make sure that distanceFromJumpNode is not too great to the point that distanceFromJumpNode/Vx is less than air time, else overshoot is impossible
-    private void CalculateOvershootWaypoints_S(GraphNode target, GraphNode jumpNode, int distanceFromJumpNode=0, TypeofJump typeofJump=TypeofJump.DOUBLE_JUMP, bool flip_s=false)
+    private void CalculateOvershootWaypoints_S
+        (GraphNode target, GraphNode jumpNode, float Sxa=1.5f, int distanceFromJumpNode=0, 
+        TypeofJump typeofJump=TypeofJump.DOUBLE_JUMP, bool flip_s=false)
     {
         bool directionOfVaccantNodeFR = false; // FL means facing right
         List<GraphNode> vaccantNodes = FindVaccantOverheadForOvershoot(target, ref directionOfVaccantNodeFR); // pointless function
@@ -1080,12 +1093,36 @@ public class BaseAiPathModifier : MonoModifier
                 float Sx = Mathf.Abs(targetPosition.x - newJumpNodePosition.x);
                 float time_sx = Sx / Vx;
 
-                float Sxa = 1.5f; // magic value
                 float time_sxa = Sxa / Vx;
 
                 float time_sxb = time_total - time_sxa - time_sxa - time_sx;
                 Debug.Log("time_sxb= " + time_sxb);
                 float Sxb = (time_sxb / 2) * Vx;
+
+                // Sxa_intrude
+                // Sxb_intrude
+
+                // imagine if I calculated the Sxa_collides distance or the Sxb_collides distance
+                bool Sxa_pathCollided = true;
+                
+                float Sxa_collides = 1f;
+                float time_sxaCollision;
+                if (Sxa_pathCollided)
+                {
+                    // we will use time_sxaCollision to wait for said amount of time
+                    time_sxaCollision = (Sxa - Sxa_collides) / Vx;
+                }
+
+                bool Sxb_pathCollided = true;
+                float Sxb_collides = 6f;
+                float time_sxbCollision;
+                if (Sxb_pathCollided)
+                {
+                    time_sxbCollision = (Sxb - Sxb_collides) / Vx;
+                }
+
+                // now we can locate where these nodes are and wait 'x' amount of time...
+                // but I need to work on using Bresenham's Algorithm to calculate collision
 
                 float airborneJumpTime = GetTimeOfDoubleJumpAirborneJumpTime(Sy);
                 float SxAirborne = 0f;
@@ -1213,6 +1250,7 @@ public class BaseAiPathModifier : MonoModifier
                 break;
         }
     }
+
     // private void CalculateOvershootWaypoints_C(...){...;}
 
     // Apart of interception?

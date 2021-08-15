@@ -67,6 +67,145 @@ public static class Helper
         return vector;
     }
 
+    // http://members.chello.at/easyfilter/bresenham.html
+    // ??? doesn't work and is not as performan as BresenhamLine nor do i need the percesion of this
+    /*public static List<GraphNode> BresenhamBézierCurve(GridGraph gg, Vector2 start, Vector2 end, Vector2 temp, float VyInitial, float VyFinal, float Vx)
+    {
+        List<Vector2> nodePositionsOnGrid = new List<Vector2>();
+        List<GraphNode> nodes = new List<GraphNode>();
+
+        // https://www.math.fsu.edu/~rabert/TeX/parabola/bezier1.gif & https://www.math.fsu.edu/~rabert/TeX/parabola/parabola.html & http://members.chello.at/easyfilter/bresenham.html
+        Vector2 point0 = TurnPositionIntoPointOnGridGraph(gg, start);
+        Vector2 point2 = TurnPositionIntoPointOnGridGraph(gg, end);
+
+        // Vector2 temp = new Vector2(Vx* ((start.y - end.y) / (VyFinal - VyInitial)), VyInitial * ((start.y - end.y)/(VyFinal - VyInitial))+start.y);
+        Vector2 point1 = TurnPositionIntoPointOnGridGraph(gg, temp);
+
+        int Sx = (int)(point2.x - point1.x);
+        int Sy = (int)(point2.y - point1.y);
+
+        int Xx = (int)(point0.x - point1.x);
+        int Yy = (int)(point0.y - point1.y);
+        long Xy;
+
+        double cur = Xx * Sy - Yy * Sx;
+        double dx, dy, err;
+
+        if (Xx * Sx <= 0 && Yy * Sy <= 0)
+        {
+            // Sign of gradient must not change
+            return null;
+        }
+
+        if(Sx * Sx + Sy * Sy > Xx * Xx + Yy * Yy)
+        {
+            point2.x = point0.x;
+            point0.x = Sx + point1.x;
+            point2.y = point0.y;
+            point0.y = Sy + point1.y;
+            cur -= cur;
+        }
+
+        Debug.Log("Processing...");
+        if (cur != 0)
+        {
+            Xx += Sx;
+            Xx *= Sx = (point0.x < point2.x) ? 1 : -1;
+            Yy *= Sy = (point0.y < point2.y) ? 1 : -1;
+
+            Xy = 2 * Xx * Yy;
+            Xx *= Xx;
+            Yy *= Yy;
+            if(cur*Sx*Sy < 0)
+            {
+                Xx = -Xx;
+                Yy = -Yy;
+                Xy = -Xy;
+                cur -= cur;
+            }
+
+            dx = 4.0 * Sy * cur * (point1.x - point0.x) + Xx - Xy;
+            dy = 4.0 * Sx * cur * (point0.y - point1.y) + Yy - Xy;
+            Xx += Xx;
+            Yy += Yy;
+            err = dx + dy + Xy;
+            Debug.Log("Processing again...");
+            do
+            {
+                nodePositionsOnGrid.Add(new Vector2(point0.x, point0.y));
+                if (point0.x == point2.x && point0.y == point2.y) break;
+                // point1.y = 2 * err < dx;
+                if (2*err > dy) { point0.x += Sx; dx -= Xy; err += dy += Yy; }
+                if (2 * err < dx) { point0.y += Sy; dy -= Xy; err += dx += Xx; }
+
+                Debug.Log("More processing...");
+            } while (dy < dx);
+        }
+
+        foreach(Vector2 position in nodePositionsOnGrid)
+        {
+            nodes.Add(gg.nodes[(int)position.y * gg.width + (int)position.x]);
+        }
+
+        return nodes;
+    }
+    */
+
+    // http://members.chello.at/easyfilter/bresenham.html
+    public static List<GraphNode> BresenhamLine(GridGraph gg, Vector2 start, Vector2 end)
+    {
+        List<Vector2> nodePositionsOnGrid = new List<Vector2>();
+        List<GraphNode> nodes = new List<GraphNode>();
+
+        Vector2 point0 = TurnPositionIntoPointOnGridGraph(gg, start);
+        Vector2 point1 = TurnPositionIntoPointOnGridGraph(gg, end);
+
+        int dx = (int)Mathf.Abs(point1.x - point0.x);
+        int Sx = (point0.x < point1.x) ? 1 : -1;
+        int dy = (int)-Mathf.Abs(point1.y - point0.y);
+        int Sy = (point0.y < point1.y) ? 1 : -1;
+
+        int err = dx + dy;
+        int e2;
+
+        for (; ; )
+        {
+            nodePositionsOnGrid.Add(new Vector2(point0.x, point0.y));
+            if (point0.x == point1.x && point0.y == point1.y) break;
+            e2 = 2 * err;
+            if (e2 >= dy) { err += dy; point0.x += Sx; } /* e_xy+e_x > 0 */
+            if (e2 <= dx) { err += dx; point0.y += Sy; } /* e_xy+e_y < 0 */
+        }
+
+        foreach (Vector2 position in nodePositionsOnGrid)
+        {
+            nodes.Add(gg.nodes[(int)position.y * gg.width + (int)position.x]);
+        }
+
+        return nodes;
+    }
+
+    public static List<GraphNode> BresenhamLineLoopThrough(GridGraph gg, List<Vector2> points)
+    {
+        List<GraphNode> nodes = new List<GraphNode>();
+
+        int count = points.Count;
+        if (count < 2) return nodes;
+
+        for(int index=0; index<count-1; index++)
+        {
+            List<GraphNode> temp = BresenhamLine(GridGraphGenerate.gg, points[index], points[index + 1]);
+            Debug.DrawLine(points[index], points[index + 1], Color.red, 1000f);
+            for (int nodeIndex=0; nodeIndex<temp.Count; nodeIndex++)
+            {
+                // hopefully, this isn't a performance intensive process
+                if (!nodes.Contains(temp[nodeIndex])) nodes.Add(temp[nodeIndex]);
+            }
+        }
+
+        return nodes;
+    }
+
     // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
     public static class DrawArrow
     {
