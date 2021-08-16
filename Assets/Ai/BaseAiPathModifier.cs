@@ -637,7 +637,7 @@ public class BaseAiPathModifier : MonoModifier
             if (isCapableOfOverhead)
             {
                 Debug.Log("CapableOfOverhead : 1");
-                CalculateOvershootWaypoints_S(jumpEndNode, jumpNode, 2);
+                CalculateOvershootWaypoints_S(jumpEndNode, jumpNode, 1.5f, 2);
             }
 
             return false;
@@ -1031,7 +1031,11 @@ public class BaseAiPathModifier : MonoModifier
 
     private enum TypeofJump { SINGLE, DROPDOWN_SINGLE, SINGLE_DODGE, DOUBLE_JUMP };
     
-    // Make sure that distanceFromJumpNode is not too great to the point that distanceFromJumpNode/Vx is less than air time, else overshoot is impossible
+    // Make sure that distanceFromJumpNode is not too great to the point that distanceFromJumpNode/Vx is more than air time, else overshoot is impossible
+    // * link helper & simulating
+    // * link collision to overshoot
+    // * make overshoot for every type of jump
+    // * trimming+
     private void CalculateOvershootWaypoints_S
         (GraphNode target, GraphNode jumpNode, float Sxa=1.5f, int distanceFromJumpNode=0, 
         TypeofJump typeofJump=TypeofJump.DOUBLE_JUMP, bool flip_s=false)
@@ -1102,8 +1106,14 @@ public class BaseAiPathModifier : MonoModifier
                 // Sxa_intrude
                 // Sxb_intrude
 
+                // facing right!
+                Vector2 Sxa_point = new Vector2(Sxa + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa) + newJumpNodePosition.y);
+                Vector2 Sxb_point = new Vector2(-Sxb + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa + time_sxb) + newJumpNodePosition.y);
+                // USE BresenhamCollisionDetection here
+
                 // imagine if I calculated the Sxa_collides distance or the Sxb_collides distance
-                bool Sxa_pathCollided = true;
+                GraphNode collisionNode;
+                bool Sxa_pathCollided = BresenhamCollisionDetection(SimulateSingleJump(newJumpNodePosition, Sxa_point, facingRight, 3, Vyi), 3, collisionNode);
                 
                 float Sxa_collides = 1f;
                 float time_sxaCollision;
@@ -1461,21 +1471,36 @@ public class BaseAiPathModifier : MonoModifier
 
     // Help from http://members.chello.at/~easyfilter/bresenham.html
 
-    private List<Vector3> SimulateSingleJump(BaseAiController.specialWaypoint specialWaypoint, int simulationResoultion,
-        int heightInNodes, ref bool passCheck)
+    private bool BresenhamCollisionDetection(List<Vector2> points, int collisionHeightInNodes, ref GraphNode nodeOfCollision)
     {
-        List<Vector3> points = new List<Vector3>();
+        List<GraphNode> nodes = Helper.BresenhamLineLoopThrough(GridGraphGenerate.gg, points);
+        foreach (GraphNode node in nodes)
+        {
+            if (CheckForCollisions(node, collisionHeightInNodes))
+            {
+                nodeOfCollision = node;
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion,
+        int collisionHeightInNodes, ref bool passCheck, ref GraphNode nodeOfCollision)
+    {
+        List<Vector2> points = new List<Vector2>();
 
         Vector2 oldPosition = Vector2.zero;
 
-        Vector3 jumpNodePosition = specialWaypoint.nodePosition;
-        Vector3 jumpEndNodePosition = (Vector3)specialWaypoint.contextJumpEndNode.position;
+        Vector2 jumpNodePosition = position;
+        Vector2 jumpEndNodePosition = (Vector3)endPosition;
         points.Add(jumpNodePosition);
 
-        Debug.DrawLine(jumpNodePosition, Vector3.zero, Color.magenta, 5f);
+        Debug.DrawLine(jumpNodePosition, Vector2.zero, Color.magenta, 5f);
         // Simulating jump points
         float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
-        float x = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((specialWaypoint.facingRight == false) ? 1 : -1);
+        float x = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((facingRight == false) ? 1 : -1);
 
         passCheck = true;
         // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
@@ -1483,7 +1508,7 @@ public class BaseAiPathModifier : MonoModifier
         {
             float curSx = (x / simulationResoultion) * k;
             float curSy = 0f;
-            float elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
+            float elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
             if (elaspedTime < t_rise)
             {
                 curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
@@ -1494,17 +1519,11 @@ public class BaseAiPathModifier : MonoModifier
                 // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
             }
 
-            Vector3 jumpPos = specialWaypoint.nodePosition;
+            Vector3 jumpPos = position;
             Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
 
             if (oldPosition != Vector2.zero)
             {
-                if (CheckForCollisions(newPosition, heightInNodes))
-                {
-                    passCheck = false;
-                    break;
-                }
-
                 points.Add(newPosition);
             }
 
@@ -1513,9 +1532,119 @@ public class BaseAiPathModifier : MonoModifier
             if (k == simulationResoultion - 1)
             {
                 curSx = x;
-                elaspedTime = ((specialWaypoint.facingRight) ? -curSx : curSx) / Vx;
+                elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
                 curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
                 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                if (CheckForCollisions(newPosition, collisionHeightInNodes))
+                {
+                    passCheck = false;
+                    break;
+                }
+
+                points.Add(newPosition);
+            }
+        }
+
+        return (passCheck)? points : null;
+    }*/
+
+    // Simulating jumps and movement
+
+    private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion, float Vyi)
+    {
+        List<Vector2> points = new List<Vector2>();
+
+        Vector2 oldPosition = Vector2.zero;
+
+        Vector2 jumpNodePosition = position;
+        Vector2 jumpEndNodePosition = (Vector3)endPosition;
+        points.Add(jumpNodePosition);
+
+        Debug.DrawLine(jumpNodePosition, Vector2.zero, Color.magenta, 5f);
+        // Simulating jump points
+        float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
+        float x = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((facingRight == false) ? 1 : -1);
+
+        passCheck = true;
+        // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
+        for (int k = 0; k < simulationResoultion; k++)
+        {
+            float curSx = (x / simulationResoultion) * k;
+            float curSy = 0f;
+            float elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
+            if (elaspedTime < t_rise)
+            {
+                curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
+            }
+            else
+            {
+                curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
+            }
+
+            Vector3 jumpPos = position;
+            Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+            /* shift this out */
+            if (oldPosition != Vector2.zero)
+            {
+                points.Add(newPosition);
+            }
+
+            oldPosition = newPosition;
+
+            if (k == simulationResoultion - 1)
+            {
+                curSx = x;
+                elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
+                curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
+
+                if (CheckForCollisions(newPosition, collisionHeightInNodes))
+                {
+                    passCheck = false;
+                    break;
+                }
+
+                points.Add(newPosition);
+            }
+        }
+
+        return (passCheck) ? points : null;
+    }
+
+    private List<Vector2> SimulateDash(Vector2 position, bool facingRight, int simulationResoultion)
+    {
+        List<Vector3> points = new List<Vector3>();
+
+        Vector2 oldPosition = Vector2.zero;
+
+        Vector3 jumpNodePosition = position;
+        Vector3 jumpEndNodePosition = new Vector3(position.x + baseCharacterController.dodgeDistance *
+            ((facingRight) ? 1 : -1), position.y);
+
+
+        points.Add(jumpNodePosition);
+        float x = (facingRight) ? jumpEndNodePosition.x - jumpNodePosition.x : jumpNodePosition.x - jumpEndNodePosition.x;
+        for (int k = 0; k < simulationResoultion; k++)
+        {
+            float curSx = (x / simulationResoultion) * k;
+
+            Vector3 jumpPos = position;
+            Vector2 newPosition = new Vector2((jumpPos.x + curSx), (jumpPos.y));
+
+            if (oldPosition != Vector2.zero)
+            {
+                points.Add(newPosition);
+            }
+
+            oldPosition = newPosition;
+
+            if (k == simulationResoultion - 1)
+            {
+                curSx = x;
+                newPosition = new Vector2((jumpPos.x + curSx), (jumpPos.y));
 
                 if (CheckForCollisions(newPosition, heightInNodes))
                 {
@@ -1527,8 +1656,10 @@ public class BaseAiPathModifier : MonoModifier
             }
         }
 
-        return (passCheck)? points : null;
+        return (passCheck) ? points : null;
     }
+
+    // Simulate Dropdown end position can just use BresenhamCollisionDetection and setting two points
 
     private float GetSingleJumpHeightAtTime (float time)
     {
@@ -1643,58 +1774,6 @@ public class BaseAiPathModifier : MonoModifier
 
     }
     */
-
-    private List<Vector3> SimulateDash(BaseAiController.specialWaypoint specialWaypoint, int simulationResoultion, int heightInNodes,
-        ref bool passCheck)
-    {
-        List<Vector3> points = new List<Vector3>();
-
-        Vector2 oldPosition = Vector2.zero;
-
-        Vector3 jumpNodePosition = specialWaypoint.nodePosition;
-        Vector3 jumpEndNodePosition = new Vector3(specialWaypoint.nodePosition.x + baseCharacterController.dodgeDistance *
-            ((specialWaypoint.facingRight) ? 1 : -1), specialWaypoint.nodePosition.y);
-
-
-        points.Add(jumpNodePosition);
-        float x = (specialWaypoint.facingRight)? jumpEndNodePosition.x - jumpNodePosition.x : jumpNodePosition.x - jumpEndNodePosition.x;
-        for (int k = 0; k < simulationResoultion; k++)
-        {
-            float curSx = (x / simulationResoultion) * k;
-
-            Vector3 jumpPos = specialWaypoint.nodePosition;
-            Vector2 newPosition = new Vector2((jumpPos.x + curSx), (jumpPos.y));
-
-            if (oldPosition != Vector2.zero)
-            {
-                if (CheckForCollisions(newPosition, heightInNodes))
-                {
-                    passCheck = false;
-                    break;
-                }
-
-                points.Add(newPosition);
-            }
-
-            oldPosition = newPosition;
-
-            if (k == simulationResoultion - 1)
-            {
-                curSx = x;
-                newPosition = new Vector2((jumpPos.x + curSx), (jumpPos.y));
-
-                if (CheckForCollisions(newPosition, heightInNodes))
-                {
-                    passCheck = false;
-                    break;
-                }
-
-                points.Add(newPosition);
-            }
-        }
-
-        return (passCheck) ? points : null;
-    }
 
     /// <summary>
     /// Converts points from simulated points into points along the gridgraph
