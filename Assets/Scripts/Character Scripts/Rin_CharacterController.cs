@@ -119,6 +119,7 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformMovementAi(Vector2 direction)
     {
+        if (holdMovementAiOverride) return;
         // do a better check
         // if (rb.velocity.normalized != direction.normalized) return;
 
@@ -185,6 +186,8 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformJumpAi()
     {
+        if (holdMovementAiOverride) return;
+
         if (jumpIndex <= maxJumps - 1)
         {
             float targetVerticalVelocity;

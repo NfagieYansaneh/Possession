@@ -300,6 +300,11 @@ public class BaseCharacterController : MonoBehaviour
                 // Do some end dodging shiz
             }
 
+            if (holdMovementAiOverride && Time.time > t_holdMovementAiTimeStamp)
+            {
+                holdMovementAiOverride = false;
+            }
+
             if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
             {
                 dodgeCarryingMomentum = false;
@@ -1017,6 +1022,8 @@ public class BaseCharacterController : MonoBehaviour
 
     public virtual void PerformDodgeAi(Vector2 direction)
     {
+        if (holdMovementAiOverride) return;
+
         // not meant to be typically overwritten
         if (dodgeIndex > maxDodges - 1) return;
 
@@ -1118,6 +1125,15 @@ public class BaseCharacterController : MonoBehaviour
     public virtual void JumpWaypointAI()
     {
         PerformJumpAi();
+    }
+
+    private float t_holdMovementAiTimeStamp = 0f;
+    public bool holdMovementAiOverride = false;
+    public virtual void HoldMovementAi(Vector2 direction, float time)
+    {
+        holdMovementAiOverride = true;
+        t_holdMovementAiTimeStamp = Time.time + time;
+        PerformMovementAi(direction);
     }
 
     public virtual void RunWaypointAI(Vector2 direction)

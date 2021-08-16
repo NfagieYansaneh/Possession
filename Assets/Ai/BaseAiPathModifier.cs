@@ -1106,50 +1106,28 @@ public class BaseAiPathModifier : MonoModifier
                 // Sxa_intrude
                 // Sxb_intrude
 
-                // facing right!
-                Vector2 Sxa_point = new Vector2(Sxa + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa) + newJumpNodePosition.y);
-                Vector2 Sxb_point = new Vector2(-Sxb + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa + time_sxb) + newJumpNodePosition.y);
-                // USE BresenhamCollisionDetection here
-
-                // imagine if I calculated the Sxa_collides distance or the Sxb_collides distance
-                GraphNode collisionNode;
-                bool Sxa_pathCollided = BresenhamCollisionDetection(SimulateSingleJump(newJumpNodePosition, Sxa_point, facingRight, 3, Vyi), 3, collisionNode);
-                
-                float Sxa_collides = 1f;
-                float time_sxaCollision;
-                if (Sxa_pathCollided)
-                {
-                    // we will use time_sxaCollision to wait for said amount of time
-                    time_sxaCollision = (Sxa - Sxa_collides) / Vx;
-                }
-
-                bool Sxb_pathCollided = true;
-                float Sxb_collides = 6f;
-                float time_sxbCollision;
-                if (Sxb_pathCollided)
-                {
-                    time_sxbCollision = (Sxb - Sxb_collides) / Vx;
-                }
-
-                // now we can locate where these nodes are and wait 'x' amount of time...
-                // but I need to work on using Bresenham's Algorithm to calculate collision
-
                 float airborneJumpTime = GetTimeOfDoubleJumpAirborneJumpTime(Sy);
+
+                float Sya = GetDoubleJumpHeightAtTime(Sy, time_sxa);
+                float Syb = GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxb);
+
                 float SxAirborne = 0f;
 
                 bool queueAirborneJumpBeforeA = false;
                 // bool queueAirborneJumpBeforeB = false;
 
-                if(airborneJumpTime < time_sxa)
+                if (airborneJumpTime < time_sxa)
                 {
-                    SxAirborne = Vx * airborneJumpTime * ((directionOfVaccantNodeFR)? -1 : 1);
+                    SxAirborne = Vx * airborneJumpTime * ((directionOfVaccantNodeFR) ? -1 : 1);
                     queueAirborneJumpBeforeA = true;
                     // queueAirborneJumpBeforeB = true;
-                } else if (airborneJumpTime < (time_sxa * 2))
+                }
+                else if (airborneJumpTime < (time_sxa * 2))
                 {
                     SxAirborne = Vx * (airborneJumpTime - time_sxa) * ((directionOfVaccantNodeFR) ? -1 : 1);
                     // queueAirborneJumpBeforeB = true;
-                } else if (airborneJumpTime < (time_sxb))
+                }
+                else if (airborneJumpTime < (time_sxb))
                 {
                     SxAirborne = Vx * (airborneJumpTime - time_sxa * 2) * ((directionOfVaccantNodeFR) ? 1 : -1);
                     // queueAirborneJumpBeforeB = true;
@@ -1159,8 +1137,94 @@ public class BaseAiPathModifier : MonoModifier
                     SxAirborne = Vx * (airborneJumpTime - time_sxa * 2 - time_sxb) * ((directionOfVaccantNodeFR) ? 1 : -1);
                 } // probably don't need to do any more if statements...
 
-                float Sya = GetDoubleJumpHeightAtTime(Sy, time_sxa);
-                float Syb = GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxb);
+                // facing right!
+                Vector2 Sxa_point = new Vector2(((directionOfVaccantNodeFR)? Sxa : -Sxa) + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa) + newJumpNodePosition.y);
+                Vector2 Sxb_point = new Vector2(((directionOfVaccantNodeFR)? -Sxb : Sxb) + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa + time_sxb) + newJumpNodePosition.y);
+                Vector2 airJumpPoint = new Vector2(newJumpNodePosition.x + ((directionOfVaccantNodeFR) ? -1 : 1) * SxAirborne, newJumpNodePosition.y + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime));
+                
+                // For Sxa
+                GraphNode collisionNode = null;
+                List<Vector2> points = new List<Vector2>();
+                points.Add(newJumpNodePosition);
+                points.Add(Sxa_point);
+
+                bool Sxa_pathCollided = BresenhamCollisionDetection(points, 3, ref collisionNode);
+                float Sxa_collides;
+                bool Sxa_willWait = false;
+                float time_sxaCollision;
+
+                if (Sxa_pathCollided)
+                {
+                    Vector2 collisionNodePosition = (Vector3)collisionNode.position;
+                    Sxa_collides = Mathf.Abs(jumpNodePosition.x - collisionNodePosition.x);
+                    if (Sxa_collides < Sxa)
+                    {
+                        // check if its possible to just jump backwards and restart the calculation
+                        float diff = (Sxa - Sxa_collides);
+                        time_sxaCollision = diff / Vx;
+
+                        Sxa_willWait = true;
+
+                        // create waiting node
+                        Sxa = Sxa_collides;
+                        time_sxa = Sxa / Vx;
+                        Sxa_point = new Vector2(((directionOfVaccantNodeFR) ? Sxa : -Sxa) + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa) + newJumpNodePosition.y);
+                        // set a waiting node
+                    }
+                }
+
+                // Sxa -> Sxb
+                points.Clear();
+                points.Add(Sxa_point);
+                points.Add(Sxb_point);
+
+                bool Sxb_pathCollided = BresenhamCollisionDetection(points, 3, ref collisionNode);
+                float Sxb_collides;
+                bool Sxb_willWait = false;
+                float time_sxbCollision;
+
+                if (Sxb_pathCollided)
+                {
+                    Vector2 collisionNodePosition = (Vector3)collisionNode.position;
+                    Sxb_collides = Mathf.Abs(jumpNodePosition.x - collisionNodePosition.x);
+                    if (Sxb_collides < Sxb)
+                    {
+                        // check if its possible to just jump backwards and restart the calculation
+                        float diff = (Sxb - Sxb_collides);
+                        time_sxbCollision = diff / Vx;
+
+                        Sxa_willWait = true;
+
+                        Sxb = Sxb_collides;
+                        time_sxb = Sxb_collides / Vx;
+                        Sxa_point = new Vector2(((directionOfVaccantNodeFR) ? Sxa : -Sxa) + newJumpNodePosition.x, GetSingleJumpHeightAtTime(time_sxa+time_sxa+time_sxb) + newJumpNodePosition.y);
+
+                        GraphNode calculatedNode_B_WAIT = GridGraphGenerate.gg.GetNearest(Sxa_point).node;
+                        BaseAiController.specialWaypoint waitWaypoint = new BaseAiController.specialWaypoint(typeofWaypoint.WAIT, calculatedNode_B_WAIT,
+                           () => { baseCharacterController.HoldMovementAi(Vector2.zero, time_sxbCollision); }, false, 0.5f, null, null);
+
+                        if (!baseAiController.specialWaypoints.Contains(waitWaypoint))
+                        {
+                            baseAiController.specialWaypoints.Add(waitWaypoint);
+                            debugNodes.Add(waitWaypoint.node);
+                            specialWaypoints.Add(waitWaypoint);
+                        }
+                        // set a waiting node
+                    }
+                }
+
+                /*
+                // Sxb -> End
+                points.Clear();
+                points.Add(Sxb_point);
+                points.Add(targetPosition);
+
+                bool Final_pathCollided = BresenhamCollisionDetection(points, 3, ref collisionNode);
+                // carry out Sy height reduction if possible, would have to send this to the front of the line
+                */
+
+                // now we can locate where these nodes are and wait 'x' amount of time...
+                // but I need to work on using Bresenham's Algorithm to calculate collision
 
                 Debug.LogError("Sya : " + Sya + " Syb : " + Syb);
 
@@ -1661,6 +1725,7 @@ public class BaseAiPathModifier : MonoModifier
 
     // Simulate Dropdown end position can just use BresenhamCollisionDetection and setting two points
 
+    // Height
     private float GetSingleJumpHeightAtTime (float time)
     {
         float deltaHeight = jumpHeight + ((Vyi * time) + ((-gravityFall * time * time) / 2));
@@ -1716,6 +1781,7 @@ public class BaseAiPathModifier : MonoModifier
         }
     }
 
+    // Time
     private float GetRemainingTimeAtSingleJumpTime(float height) { return 0f; }
     private float GetRemainingTimeAtDoubleJumpTime(float Sy, float time)
     {
@@ -1762,6 +1828,29 @@ public class BaseAiPathModifier : MonoModifier
         t_fall1 = Mathf.Sqrt(2 * -Sb / gravityFall);
         Debug.Log("t_fall1 : " + t_fall1);
         return t_rise1 + t_fall1;
+    }
+
+    // Velocity
+    private float GetVyOfDoubleJumpTime(float Sy, float time, float Vyi)
+    {
+        float timeOfDoubleJump = GetTimeOfDoubleJumpAirborneJumpTime(Sy);
+        float Vy = 0f;
+
+        if (time < timeOfDoubleJump && time < t_rise)
+        {
+            Vy = Mathf.Sqrt(Vyi * Vyi + 2 * gravityRise * GetDoubleJumpHeightAtTime(Sy, time));
+        } if (time < timeOfDoubleJump)
+        {
+            Vy = Mathf.Sqrt(Vyi * Vyi + 2 * gravityFall * GetDoubleJumpHeightAtTime(Sy, time));
+        } else if(time > timeOfDoubleJump && time < t_rise + timeOfDoubleJump)
+        {
+            Vy = Mathf.Sqrt(Vyi * Vyi + 2 * gravityRise * GetDoubleJumpHeightAtTime(Sy, time));
+        } else
+        {
+            Vy = Mathf.Sqrt(Vyi * Vyi + 2 * gravityFall * GetDoubleJumpHeightAtTime(Sy, time));
+        }
+
+        return Vy;
     }
     /*
     private float GetDropdownHeightAtTime(float deltaSy, float time)

@@ -7,7 +7,7 @@ using System;
 
 // help from https://arongranberg.com/astar/docs/custom_movement_script.html
 
-public enum typeofWaypoint { RUN, JUMP, AIRBORNE_JUMP, DODGE, NEUTRAL_DODGE };
+public enum typeofWaypoint { RUN, WAIT, JUMP, AIRBORNE_JUMP, DODGE, NEUTRAL_DODGE };
 
 public class BaseAiController : MonoBehaviour
 {
