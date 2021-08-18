@@ -98,6 +98,10 @@ public class BaseAiController : MonoBehaviour
                     str = "AIRBORNE_JUMP";
                     break;
 
+                case typeofWaypoint.WAIT:
+                    str = "WAIT";
+                    break;
+
                 default:
                     // typeofWaypoint.NEUTRAL_DODGE
                     str = "NEUTRAL_DODGE";
@@ -268,17 +272,23 @@ public class BaseAiController : MonoBehaviour
             distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
         }
 
-        if (!reachedEndOfPath && !pathComplete)
+        if (!reachedEndOfPath && !pathComplete && !baseCharacterController.holdMovementAiOverride)
         {
             if ((baseCharacterController.Ai_movementDirection == Vector2.right || baseCharacterController.Ai_movementDirection == Vector2.zero)
                 && (path.vectorPath[currentWaypoint] - transform.position).x < 0f)
             {
-                baseCharacterController.PerformMovementAi(Vector2.left);
+                if(Mathf.Abs((path.vectorPath[currentWaypoint] - transform.position).x) > 0.1f)
+                    baseCharacterController.PerformMovementAi(Vector2.left);
+                else
+                    baseCharacterController.PerformMovementAi(Vector2.zero);
             }
             else if ((baseCharacterController.Ai_movementDirection == Vector2.left || baseCharacterController.Ai_movementDirection == Vector2.zero)
               && (path.vectorPath[currentWaypoint] - transform.position).x > 0f)
             {
-                baseCharacterController.PerformMovementAi(Vector2.right);
+                if (Mathf.Abs((path.vectorPath[currentWaypoint] - transform.position).x) > 0.1f)
+                    baseCharacterController.PerformMovementAi(Vector2.right);
+                else
+                    baseCharacterController.PerformMovementAi(Vector2.zero);
             }
         }
         else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero && currentTypeofWaypoint == typeofWaypoint.RUN)

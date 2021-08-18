@@ -119,7 +119,7 @@ public class Rin_CharacterController : BaseCharacterController
 
     public override void PerformMovementAi(Vector2 direction)
     {
-        if (holdMovementAiOverride) return;
+        if (holdMovementAiOverride) direction = Vector2.zero;
         // do a better check
         // if (rb.velocity.normalized != direction.normalized) return;
 

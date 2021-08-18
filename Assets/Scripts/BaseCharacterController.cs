@@ -303,7 +303,7 @@ public class BaseCharacterController : MonoBehaviour
             if (holdMovementAiOverride && Time.time > t_holdMovementAiTimeStamp)
             {
                 holdMovementAiOverride = false;
-            }
+            } else if(holdMovementAiOverride) { SetVelocity(Vector2.zero); }
 
             if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
             {
