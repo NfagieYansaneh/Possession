@@ -651,7 +651,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28094
+  m_Name: pb_Mesh22200
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -815,7 +815,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28478
+  m_Name: pb_Mesh22644
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1357,6 +1357,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!1 &151648871
 GameObject:
   m_ObjectHideFlags: 0
@@ -2001,6 +2002,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!95 &181289302
 Animator:
   serializedVersion: 3
@@ -2836,6 +2838,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!95 &223946162
 Animator:
   serializedVersion: 3
@@ -3076,9 +3079,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
+  originalVectorPath: []
   newVectorPath: []
   jumpNodeStartAndEndIDs: 
-  gizmoJumping_SxSy: {x: 0, y: 0}
   baseCharacterController: {fileID: 0}
   baseAiController: {fileID: 0}
   resolution: 10
@@ -3904,6 +3907,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!212 &335915585
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -6439,6 +6443,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!95 &574087287
 Animator:
   serializedVersion: 3
@@ -6630,7 +6635,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28450
+  m_Name: pb_Mesh22612
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -7063,7 +7068,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh27934
+  m_Name: pb_Mesh22026
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -7227,7 +7232,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh27904
+  m_Name: pb_Mesh21996
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -8222,7 +8227,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28576
+  m_Name: pb_Mesh22748
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -9022,6 +9027,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!114 &892147508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9863,6 +9869,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!95 &962515801
 Animator:
   serializedVersion: 3
@@ -10545,6 +10552,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!114 &1131072816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11440,6 +11448,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!95 &1175180005
 Animator:
   serializedVersion: 3
@@ -12274,6 +12283,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!212 &1459144756
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -13019,7 +13029,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28536
+  m_Name: pb_Mesh22700
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -13183,7 +13193,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28248
+  m_Name: pb_Mesh22384
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -18239,7 +18249,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh27786
+  m_Name: pb_Mesh21864
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -18403,7 +18413,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28556
+  m_Name: pb_Mesh22728
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19214,6 +19224,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!212 &1821118985
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -19303,7 +19314,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh27680
+  m_Name: pb_Mesh21750
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19858,6 +19869,7 @@ MonoBehaviour:
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
   previousRbVelocity: {x: 0, y: 0}
+  holdMovementAiOverride: 0
 --- !u!212 &1894952959
 SpriteRenderer:
   m_ObjectHideFlags: 0

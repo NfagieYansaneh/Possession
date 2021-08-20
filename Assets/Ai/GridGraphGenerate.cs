@@ -44,9 +44,9 @@ public class GridGraphGenerate : MonoBehaviour
             for (int z = 0; z < gg.depth; z++)
             {
                 GraphNode currentNode = gg.nodes[z * gg.width + x];
-                if (z == 0)
+                if (z == 0 && currentNode.Walkable)
                 {
-                    currentNode.Penalty = highPenalty;
+                    currentNode.Penalty = lowPenalty;
                     continue;
                 }
 
