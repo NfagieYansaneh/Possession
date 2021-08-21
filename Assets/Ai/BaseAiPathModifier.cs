@@ -20,13 +20,13 @@ public class BaseAiPathModifier : MonoModifier
     // Jumping (Single jumps) & gizmos
     public List<GraphNode> jumpNodes = new List<GraphNode>();
     public List<GraphNode> jumpEndNodes = new List<GraphNode>();
-    public List<int> jumpNodeStartAndEndIDs = new List<int>(); // going to depreciate this soon
     public List<GraphNode> jumpNodesFinal = new List<GraphNode>(); // This contains the list of calculated and processed jump node positions
 
-    public List<GraphNode> ignoreNodes = new List<GraphNode>();
+    public List<GraphNode> ignoreNodes = new List<GraphNode>(); // might be depricated
     public List<GraphNode> adjNodesFromOverhead = new List<GraphNode>();
 
     public List<GraphNode> debugNodes = new List<GraphNode>(); // just to visualise some data quickly
+    public List<GraphNode> ignoreJumpNodes = new List<GraphNode>();
 
     // Queuing waypoint positions to insert
     public static GraphNode latestInsertNode = null;
@@ -152,7 +152,6 @@ public class BaseAiPathModifier : MonoModifier
             if(findNextLowPenalty == true && originalNodes[i].Penalty == GridGraphGenerate.lowPenalty)
             {
                 jumpEndNodes.Add(originalNodes[i]);
-                jumpNodeStartAndEndIDs.Add(i);
                 findNextLowPenalty = false;
             }
 
@@ -161,7 +160,6 @@ public class BaseAiPathModifier : MonoModifier
                 if (originalNodes[i + 2].Penalty == GridGraphGenerate.highPenalty)
                 {
                     jumpNodes.Add(originalNodes[i]);
-                    jumpNodeStartAndEndIDs.Add(i);
                     findNextLowPenalty = true;
                 }
             }
@@ -169,25 +167,38 @@ public class BaseAiPathModifier : MonoModifier
 
         for (int i = 0; i < jumpEndNodes.Count; i++)
         {
+            // I have to seperate the CalculateDropdown & CalculateSingleDropdown because of priority queuing issues
+            if (ignoreJumpNodes.Contains(jumpNodes[i])) continue;
+
             if (CalculateDropdown(jumpNodes[i], jumpEndNodes[i]))
             {
                 Debug.Log("Dropdown Pathing Chosen...");
+                continue;
             }
-            else if (CalculateSingleJump(jumpNodes[i], jumpEndNodes[i]))
-            {
+            else if (CalculateSingleJump(jumpNodes[i], jumpEndNodes[i], jumpNodes[((i < (jumpEndNodes.Count - 1)) ? i + 1 : i)],
+                jumpEndNodes[((i < (jumpEndNodes.Count - 1))? i + 1 : i)], (i < (jumpEndNodes.Count - 1)? true : false))) {
                 Debug.Log("Single Jump Pathing Chosen...");
+                continue;
+            }
+            else if (CalculateSingleDropdown(jumpNodes[i], jumpEndNodes[i]))
+            {
+                Debug.Log("Dropdown + Single jump");
+                continue;
             }
             else if (CalculateSingleJumpDashing(jumpNodes[i], jumpEndNodes[i]))
             {
                 Debug.Log("Single Jump + Dashing Pathing Chosen...");
+                continue;
             }
             else if (CalculateDoubleJump(jumpNodes[i], jumpEndNodes[i]))
             {
                 Debug.Log("Double Jump Pathing Chosen...");
+                continue;
             } else
             {
                 bool overheadFacingRight = false;
                 adjNodesFromOverhead = FindVaccantOverheadForOvershoot(jumpEndNodes[i], ref overheadFacingRight);
+                continue;
             }
             
         }
@@ -299,14 +310,16 @@ public class BaseAiPathModifier : MonoModifier
     {
         jumpNodes.Clear();
         jumpEndNodes.Clear();
-        jumpNodeStartAndEndIDs.Clear();
         jumpNodesFinal.Clear();
         ignoreNodes.Clear();
+        ignoreJumpNodes.Clear();
         specialWaypoints.Clear();
         waypointInserts.Clear();
         adjNodesFromOverhead.Clear();
         allPaddingStructs.Clear();
         trimRequests.Clear();
+        debugNodes.Clear();
+        ignoreJumpNodes.Clear();
     }
 
     enum AdjNodeSearchDirection { LEFT, RIGHT, BOTH }
@@ -561,6 +574,30 @@ public class BaseAiPathModifier : MonoModifier
             // ...
         }
 
+        return false;
+        // dropdown + double jump ?
+    }
+    private bool CalculateSingleDropdown(GraphNode jumpNode, GraphNode jumpEndNode)
+    {
+        Vector3 jumpNodePosition = (Vector3)jumpNode.position;
+        Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
+
+        // Should I really be returning false here?
+        bool foundAdjNodes = false;
+        List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
+        if (foundAdjNodes == false) return false;
+
+        GraphNode closestNode = FindClosestNode(jumpNodePosition, adjNodes);
+        Vector3 closestNodePosition = (Vector3)closestNode.position;
+
+        if (jumpNodePosition.y <= jumpEndNodePosition.y) return false;
+
+        bool waypointFacingRight = false;
+        if (jumpEndNodePosition.x > jumpNodePosition.x)
+        {
+            waypointFacingRight = true;
+        }
+
         // dropdown + single jump (! Rework this !) (Change positioning because of priority)
         Debug.Log("dropdown + single jump");
         waypointFacingRight = false;
@@ -569,6 +606,10 @@ public class BaseAiPathModifier : MonoModifier
         {
             waypointFacingRight = true;
         }
+
+        float Sy;
+        float t_fall;
+        float Sx;
 
         Sy = jumpEndNodePosition.y - jumpNodePosition.y; // This is bound to be a negative number
 
@@ -598,8 +639,8 @@ public class BaseAiPathModifier : MonoModifier
                 jumpNodesFinal.Add(dropdownAtThisNode);
             }
 
-            GraphNode jumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + (Vx * t_dropdown) + 
-                ((waypointFacingRight)? 1f : -1f), -Sb + jumpNodePosition.y)).node;
+            GraphNode jumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + (Vx * t_dropdown) +
+                ((waypointFacingRight) ? 1f : -1f), -Sb + jumpNodePosition.y)).node;
 
             Vector2 direction = (waypointFacingRight) ? Vector2.right : Vector2.left;
 
@@ -834,6 +875,221 @@ public class BaseAiPathModifier : MonoModifier
         }
 
         return false;
+    }
+    private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode, GraphNode nextJumpNode, GraphNode nextJumpEndNode, bool masterCall = true)
+    {
+        // float Vx = 8.5f;
+        // float jumpHeight = baseCharacterController.jumpHeight;
+
+        // Sees if we can calculate a single jump to the next jumpEndNode instead
+
+        
+        if (masterCall == true)
+        {
+            if (CalculateSingleJump(jumpNode, nextJumpEndNode, null, null, false))
+            {
+                ignoreJumpNodes.Add(nextJumpNode);
+                return true;
+            }
+        }
+        
+
+        Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
+        Vector3 jumpNodePosition = (Vector3)jumpNode.position;
+
+        bool waypointFacingRight = false;
+
+        if (jumpEndNodePosition.x > jumpNodePosition.x)
+        {
+            waypointFacingRight = true;
+        }
+
+        GraphNode jumpAtThisNode = null;
+
+        GraphNode currentTargetNode = jumpEndNode;
+        Vector3 currentTargetNodePosition = jumpEndNodePosition;
+
+        List<GraphNode> adjNodes = new List<GraphNode>();
+        List<GraphNode> adjTargetNodes = new List<GraphNode>();
+        bool foundAdjNodes = false;
+
+        if (waypointFacingRight)
+        {
+            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
+            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
+        }
+        else
+        {
+            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
+            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
+        }
+
+        adjNodes.Insert(0, jumpNode); // just for convenicene when using foreach loop
+        
+        adjNodes.Reverse();
+        // adjTargetNodes.Reverse();
+
+        // GraphNode currentTargetNode = adjTargetNodes[adjTargetNodes.Count - 1];
+        // Vector3 currentTargetNodePosition = (Vector3)currentTargetNode.position;
+
+        bool willSingleJump = false;
+        int index = 0;
+        Color[] colors = { Color.red, Color.green, Color.blue, Color.magenta, Color.cyan };
+
+        bool onlyPaddingLeft = false;
+        List<GraphNode> wasPaddingNode = new List<GraphNode>();
+        GraphNode landingNode = null;
+
+        while (!willSingleJump)
+        {
+            if (onlyPaddingLeft)
+            {
+                // can optimize this by not scanning over padding over and over again when i would only need to scan them once to identify them.
+                // thus, ignoringing them in the next scan
+                foreach (GraphNode node in wasPaddingNode)
+                {
+                    if (IsOverlappingWithPadding(node))
+                    {
+                        if (!wasPaddingNode.Contains(node))
+                            wasPaddingNode.Add(node);
+                        continue;
+                    }
+
+                    Vector3 nodePosition = (Vector3)node.position;
+
+                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - nodePosition.y);
+                    float t_fall = Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall));
+                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
+
+                    if ((Sx + currentTargetNodePosition.x > nodePosition.x && !waypointFacingRight) ||
+                            (Sx + currentTargetNodePosition.x < nodePosition.x && Sx + currentTargetNodePosition.x + 0.5f > nodePosition.x  && waypointFacingRight))
+                    {
+                        jumpAtThisNode = node;
+
+                        BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
+                            typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f,
+                            jumpNode, currentTargetNode);
+
+                        GraphNode nodeOfCollision = null;
+                        GraphNode nearNode = null;
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 4, ref nodeOfCollision, ref nearNode);
+
+                        if (!collided)
+                        {
+                            if (!jumpNodesFinal.Contains(jumpAtThisNode))
+                            {
+                                jumpNodesFinal.Add(jumpAtThisNode);
+                            }
+
+                            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
+                            {
+                                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                                specialWaypoints.Add(newSpecialWaypoint);
+
+                                // specialNodeCorrespFunction.Add(currentTargetNode);
+                            }
+
+                            landingNode = currentTargetNode;
+                            willSingleJump = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (GraphNode node in adjNodes)
+                {
+                    if (IsOverlappingWithPadding(node))
+                    {
+                        if (!wasPaddingNode.Contains(node))
+                            wasPaddingNode.Add(node);
+                        continue;
+                    }
+
+                    Vector3 nodePosition = (Vector3)node.position;
+
+                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - nodePosition.y);
+                    float t_fall = Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall));
+                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
+
+
+                    if ((Sx + currentTargetNodePosition.x > nodePosition.x && !waypointFacingRight) ||
+                            (Sx + currentTargetNodePosition.x < nodePosition.x && Sx + currentTargetNodePosition.x + 0.5f > nodePosition.x && waypointFacingRight))
+                    {
+                        jumpAtThisNode = node;
+
+                        BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
+                            typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f,
+                            jumpNode, currentTargetNode);
+
+                        GraphNode nodeOfCollision = null;
+                        GraphNode nearNode = null;
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 4, ref nodeOfCollision, ref nearNode);
+
+                        if (!collided)
+                        {
+                            if (!jumpNodesFinal.Contains(jumpAtThisNode))
+                            {
+                                jumpNodesFinal.Add(jumpAtThisNode);
+                            }
+
+                            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
+                            {
+                                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
+                                specialWaypoints.Add(newSpecialWaypoint);
+
+                                // specialNodeCorrespFunction.Add(currentTargetNode);
+                            }
+
+                            landingNode = currentTargetNode;
+                            willSingleJump = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            Debug.Log("index: " + index);
+            Debug.Log("adjTargetNodes.Count: " + adjTargetNodes.Count);
+            if (index == adjTargetNodes.Count || adjTargetNodes.Count == 0)
+            {
+                if (!onlyPaddingLeft)
+                {
+                    onlyPaddingLeft = true;
+                    currentTargetNode = jumpEndNode;
+                    currentTargetNodePosition = jumpEndNodePosition;
+                    index = 0;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                currentTargetNode = adjTargetNodes[index];
+                currentTargetNodePosition = (Vector3)adjTargetNodes[index].position;
+                int colorIndex = index;
+                if (colorIndex > colors.Length - 1) colorIndex -= colors.Length * (Mathf.FloorToInt((float)colorIndex / (float)colors.Length));
+
+                Helper.DrawArrow.ForDebugTimed(currentTargetNodePosition + Vector3.up * 1f, Vector3.down, colors[colorIndex], 1000f);
+                index++;
+            }
+        }
+
+        if (willSingleJump)
+        {
+            // trimming & padding
+            TrimRequestStruct newTrimRequest = new TrimRequestStruct(jumpAtThisNode, landingNode);
+            trimRequests.Add(newTrimRequest);
+
+            List<GraphNode> paddingNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2, landingNode);
+            PadTheseNodes(paddingNodes, false);
+
+            Debug.Log("Finished search after " + (index + 1) + " cycle(s)");
+            return true;
+        }
+        else return false;
     }
 
     private bool CalculateSingleJumpDashing(GraphNode jumpNode, GraphNode jumpEndNode)
@@ -1499,7 +1755,7 @@ public class BaseAiPathModifier : MonoModifier
             for (int z = 0; z < heightInNodes; z++)
             {
                 currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)];
-                if (!point.Walkable) return true;
+                if (!currentNodeBeingVetted.Walkable) return true;
             }
         }
 
@@ -1534,232 +1790,6 @@ public class BaseAiPathModifier : MonoModifier
         return false;
     }
 
-    private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode) 
-    {
-        // float Vx = 8.5f;
-        // float jumpHeight = baseCharacterController.jumpHeight;
-
-        Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
-        Vector3 jumpNodePosition = (Vector3)jumpNode.position;
-
-        bool waypointFacingRight = false;
-
-        if(jumpEndNodePosition.x > jumpNodePosition.x)
-        {
-            waypointFacingRight = true;
-        }
-
-        GraphNode jumpAtThisNode = null;
-
-        GraphNode currentTargetNode = jumpEndNode;
-        Vector3 currentTargetNodePosition = jumpEndNodePosition;
-
-        List<GraphNode> adjNodes = new List<GraphNode>();
-        List<GraphNode> adjTargetNodes = new List<GraphNode>();
-        bool foundAdjNodes = false;
-
-        if (waypointFacingRight)
-        {
-            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
-            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
-        }
-        else
-        {
-            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
-            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
-        }
-
-        adjNodes.Insert(0, jumpNode); // just for convenicene when using foreach loop
-
-        bool willSingleJump = false;
-        int index = 0;
-        Color[] colors = { Color.red, Color.green, Color.blue, Color.magenta, Color.cyan };
-
-        bool onlyPaddingLeft = false;
-        List<GraphNode> wasPaddingNode = new List<GraphNode>();
-        GraphNode landingNode = null;
-
-        while (!willSingleJump)
-        {
-            if (onlyPaddingLeft)
-            {
-                foreach (GraphNode node in wasPaddingNode)
-                {
-                    if (IsOverlappingWithPadding(node))
-                    {
-                        if (!wasPaddingNode.Contains(node))
-                            wasPaddingNode.Add(node);
-                        continue;
-                    }
-
-                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - jumpNodePosition.y);
-                    float t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
-                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((waypointFacingRight == false) ? 1 : -1);
-
-                    Vector3 nodePosition = (Vector3)node.position;
-
-                    List<GraphNode> tempNodes = new List<GraphNode>();
-                    if ((Sx + currentTargetNodePosition.x > nodePosition.x + 0.25f && !waypointFacingRight) ||
-                        (Sx + currentTargetNodePosition.x < nodePosition.x - 0.25f && waypointFacingRight))
-                    {
-
-                        // newNodes.Remove(node);
-                        tempNodes.Add(node);
-                    }
-                    else
-                    if ((Sx + currentTargetNodePosition.x > nodePosition.x - 0.25f && !waypointFacingRight) ||
-                            (Sx + currentTargetNodePosition.x < nodePosition.x + 0.25f && waypointFacingRight))
-                    {
-                        jumpAtThisNode = node;
-
-                        BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                            typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f,
-                            jumpNode, currentTargetNode);
-
-                        GraphNode nodeOfCollision = null;
-                        GraphNode nearNode = null;
-                        bool passCheck = BresenhamCollisionDetection(SimulateSingleJump(jumpNodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 3, ref nodeOfCollision, ref nearNode);
-
-                        if (passCheck)
-                        {
-                            foreach (GraphNode tempNode in tempNodes)
-                            {
-                                if (!ignoreNodes.Contains(tempNode))
-                                {
-                                    ignoreNodes.Add(tempNode);
-                                }
-                            }
-
-                            if (!jumpNodesFinal.Contains(jumpAtThisNode))
-                            {
-                                jumpNodesFinal.Add(jumpAtThisNode);
-                            }
-
-                            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
-                            {
-                                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
-                                specialWaypoints.Add(newSpecialWaypoint);
-
-                                // specialNodeCorrespFunction.Add(currentTargetNode);
-                            }
-
-                            landingNode = currentTargetNode;
-                            willSingleJump = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (GraphNode node in adjNodes)
-                {
-                    if (IsOverlappingWithPadding(node))
-                    {
-                        if (!wasPaddingNode.Contains(node))
-                            wasPaddingNode.Add(node);
-                        continue;
-                    }
-
-                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - jumpNodePosition.y);
-                    float t_fall = Mathf.Sqrt(2 * Sy_fall / gravityFall);
-                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((waypointFacingRight == false) ? 1 : -1);
-
-                    Vector3 nodePosition = (Vector3)node.position;
-
-                    List<GraphNode> tempNodes = new List<GraphNode>();
-                    if ((Sx + currentTargetNodePosition.x > nodePosition.x + 0.25f && !waypointFacingRight) ||
-                        (Sx + currentTargetNodePosition.x < nodePosition.x - 0.25f && waypointFacingRight))
-                    {
-
-                        // newNodes.Remove(node);
-                        tempNodes.Add(node);
-                    }
-                    else
-                    if ((Sx + currentTargetNodePosition.x > nodePosition.x - 0.25f && !waypointFacingRight) ||
-                            (Sx + currentTargetNodePosition.x < nodePosition.x + 0.25f && waypointFacingRight))
-                    {
-                        jumpAtThisNode = node;
-
-                        BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                            typeofWaypoint.JUMP, jumpAtThisNode, baseCharacterController.JumpWaypointAI, waypointFacingRight, 0.25f,
-                            jumpNode, currentTargetNode);
-
-                        GraphNode nodeOfCollision = null;
-                        GraphNode nearNode = null;
-                        bool passCheck = BresenhamCollisionDetection(SimulateSingleJump(jumpNodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 3, ref nodeOfCollision, ref nearNode);
-
-                        if (passCheck)
-                        {
-                            foreach (GraphNode tempNode in tempNodes)
-                            {
-                                if (!ignoreNodes.Contains(tempNode))
-                                {
-                                    ignoreNodes.Add(tempNode);
-                                }
-                            }
-
-                            if (!jumpNodesFinal.Contains(jumpAtThisNode))
-                            {
-                                jumpNodesFinal.Add(jumpAtThisNode);
-                            }
-
-                            if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
-                            {
-                                baseAiController.specialWaypoints.Add(newSpecialWaypoint);
-                                specialWaypoints.Add(newSpecialWaypoint);
-
-                                // specialNodeCorrespFunction.Add(currentTargetNode);
-                            }
-
-                            landingNode = currentTargetNode;
-                            willSingleJump = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            Debug.Log("index: " + index);
-            Debug.Log("adjTargetNodes.Count: " + adjTargetNodes.Count);
-            if(index == adjTargetNodes.Count || adjTargetNodes.Count == 0)
-            {
-                if (!onlyPaddingLeft)
-                {
-                    onlyPaddingLeft = true;
-                    currentTargetNode = jumpEndNode;
-                    currentTargetNodePosition = jumpEndNodePosition;
-                    index = 0;
-                }
-                else
-                {
-                    break;
-                }
-            } 
-            else
-            {
-                currentTargetNode = adjTargetNodes[index];
-                currentTargetNodePosition = (Vector3)adjTargetNodes[index].position;
-                int colorIndex = index;
-                if (colorIndex > colors.Length - 1) colorIndex -= colors.Length * (Mathf.FloorToInt((float)colorIndex / (float)colors.Length));
-
-                Helper.DrawArrow.ForDebugTimed(currentTargetNodePosition + Vector3.up * 1f, Vector3.down, colors[colorIndex], 1000f);
-                index++;
-            }
-        }
-
-        if (willSingleJump)
-        {
-            // trimming & padding
-            TrimRequestStruct newTrimRequest = new TrimRequestStruct(jumpAtThisNode, landingNode);
-            trimRequests.Add(newTrimRequest);
-
-            List<GraphNode> paddingNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2, landingNode);
-            PadTheseNodes(paddingNodes, false);
-            return true;
-        }
-        else return false;
-    }
-
     // Help from http://members.chello.at/~easyfilter/bresenham.html
     // true if we collidied
     /// <summary>
@@ -1769,14 +1799,14 @@ public class BaseAiPathModifier : MonoModifier
     /// <param name="collisionHeightInNodes"></param>
     /// <param name="nodeOfCollision"></param>
     /// <param name="nearNode"></param>
-    /// <returns>returns false if I have collided, else returns true</returns>
+    /// <returns>returns true if I have collided, else returns false</returns>
     private bool BresenhamCollisionDetection(List<Vector2> points, int collisionHeightInNodes, ref GraphNode nodeOfCollision, ref GraphNode nearNode)
     {
         List<GraphNode> nodes = Helper.BresenhamLineLoopThrough(GridGraphGenerate.gg, points);
 
         foreach (GraphNode node in nodes)
         {
-
+            debugNodes.Add(node);
             Vector3 nodePosition = (Vector3)node.position;
             if (node.Walkable) nearNode = node;
 
@@ -1829,7 +1859,7 @@ public class BaseAiPathModifier : MonoModifier
             Vector2 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
 
             /* shift this out */
-            if (oldPosition != Vector2.zero)
+        if (oldPosition != Vector2.zero)
             {
                 points.Add(newPosition);
             }
