@@ -184,9 +184,11 @@ public class Rin_CharacterController : BaseCharacterController
         }
     }
 
-    public override void PerformJumpAi()
+    public override void PerformJumpAi(bool holdSpaceKey =false)
     {
         if (holdMovementAiOverride) return;
+
+        Ai_holdSpaceKey = holdSpaceKey; // need to make sure it is not holding space key when sliding I think...
 
         if (jumpIndex <= maxJumps - 1)
         {

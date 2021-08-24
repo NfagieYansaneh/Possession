@@ -985,7 +985,7 @@ public class BaseCharacterController : MonoBehaviour
         // meant to be overwritten
     }
 
-    public virtual void PerformJumpAi()
+    public virtual void PerformJumpAi(bool holdSpaceKey=false)
     {
         // meant to be overwritten
     }
@@ -1122,9 +1122,9 @@ public class BaseCharacterController : MonoBehaviour
 
     // Ai Virtual
 
-    public virtual void JumpWaypointAI()
+    public virtual void JumpWaypointAI(bool holdSpaceKey=false)
     {
-        PerformJumpAi();
+        PerformJumpAi(holdSpaceKey);
     }
 
     private float t_holdMovementAiTimeStamp = 0f;
