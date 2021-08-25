@@ -609,10 +609,10 @@ public class BaseAiPathModifier : MonoModifier
         List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         if (foundAdjNodes == false) return false;
 
-        GraphNode closestNode = FindClosestNode(jumpNodePosition, adjNodes);
+        GraphNode closestNode = jumpEndNode; // (jumpNodePosition, adjNodes);
         Vector3 closestNodePosition = (Vector3)closestNode.position;
 
-        if (jumpNodePosition.y <= jumpEndNodePosition.y) return false;
+        if (jumpNodePosition.y + 1.5f <= jumpEndNodePosition.y) return false;
 
         bool waypointFacingRight = false;
         if (jumpEndNodePosition.x > jumpNodePosition.x)
@@ -637,18 +637,22 @@ public class BaseAiPathModifier : MonoModifier
 
         float airborneVyi = GetAirborneVyi();
 
+
         float Sz = 3f; // magic value
+        if (jumpNodePosition.y <= jumpEndNodePosition.y) Sz = 0f;
+
         float Sb = GetAirborneJumpHeight() - Sy - Sz;
 
-        float t_dropdown = Mathf.Sqrt(2 * Sb / gravityFall);
+        float t_dropdown = Mathf.Sqrt(Mathf.Abs(2 * Sb / gravityFall));
         float t_rise = 2 * GetAirborneJumpHeight() / airborneVyi;
         t_fall = Mathf.Sqrt(2 * Sz / gravityFall);
         float t_total = t_dropdown + t_rise;
 
         Sx = t_total * Vx;
 
-        if ((jumpNodePosition.x < -Sx + closestNodePosition.x) && waypointFacingRight ||
-            (jumpNodePosition.x > Sx + closestNodePosition.x) && !waypointFacingRight)
+        // Allowing for a bit of overshoot
+        if ((jumpNodePosition.x < -Sx + closestNodePosition.x + 3f) && waypointFacingRight ||
+            (jumpNodePosition.x > Sx + closestNodePosition.x - 3f) && !waypointFacingRight)
         {
             // Adding dropdown waypoint
             GraphNode dropdownAtThisNode = jumpNode;
@@ -844,8 +848,8 @@ public class BaseAiPathModifier : MonoModifier
                 Sz = Sy - ((jumpHeight + airborneJumpHeight) - Sz);
             }
 
-            t_fall1 = Mathf.Sqrt(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall); // Debug.Log(t_fall1);
-            t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall); // Debug.Log(t_fall2);
+            t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall)); // Debug.Log(t_fall1);
+            t_fall2 = Mathf.Sqrt(Mathf.Abs(2 * Sz / gravityFall)); // Debug.Log(t_fall2);
             t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
 
             // Adding single jump waypoint
@@ -1910,7 +1914,8 @@ public class BaseAiPathModifier : MonoModifier
 
             for (int z = 0; z < heightInNodes; z++)
             {
-                if (GridGraphGenerate.gg.nodes.Length < (z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)) continue;
+                if (GridGraphGenerate.gg.nodes.Length < (z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)) return true;
+
                 currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + 1 + (int)pointPosition.y) * GridGraphGenerate.gg.width + ((int)pointPosition.x)];
                 if (!currentNodeBeingVetted.Walkable) return true;
             }
