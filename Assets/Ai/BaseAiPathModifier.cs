@@ -931,8 +931,17 @@ public class BaseAiPathModifier : MonoModifier
 
         Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
         Vector3 jumpNodePosition = (Vector3)jumpNode.position;
+        bool Ai_holdSpaceKey = false;
 
-        if (jumpEndNodePosition.y - jumpNodePosition.y > jumpHeight) return false;
+        if (jumpEndNodePosition.y - jumpNodePosition.y > jumpHeight && maxJumpHeight >= jumpEndNodePosition.y - jumpNodePosition.y)
+        {
+            Debug.Log("Single Jump will be holding");
+            Ai_holdSpaceKey = true;
+        }
+        else if (maxJumpHeight < jumpEndNodePosition.y - jumpNodePosition.y)
+        {
+            return false;
+        }
 
         bool waypointFacingRight = false;
 
@@ -994,9 +1003,9 @@ public class BaseAiPathModifier : MonoModifier
 
                     Vector3 nodePosition = (Vector3)node.position;
 
-                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - nodePosition.y);
+                    float Sy_fall = ((Ai_holdSpaceKey)? maxJumpHeight : jumpHeight) - (currentTargetNodePosition.y - nodePosition.y);
                     float t_fall = Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall));
-                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
+                    float Sx = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
 
                     if ((Sx + currentTargetNodePosition.x > nodePosition.x && !waypointFacingRight) ||
                             (Sx + currentTargetNodePosition.x < nodePosition.x && Sx + currentTargetNodePosition.x + 0.5f > nodePosition.x  && waypointFacingRight))
@@ -1004,12 +1013,12 @@ public class BaseAiPathModifier : MonoModifier
                         jumpAtThisNode = node;
 
                         BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                            typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(); }, waypointFacingRight, 0.25f,
+                            typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(Ai_holdSpaceKey); }, waypointFacingRight, 0.25f,
                             jumpNode, currentTargetNode);
 
                         GraphNode nodeOfCollision = null;
                         GraphNode nearNode = null;
-                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 3, ref nodeOfCollision, ref nearNode);
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
 
                         if (!collided)
                         {
@@ -1046,9 +1055,9 @@ public class BaseAiPathModifier : MonoModifier
 
                     Vector3 nodePosition = (Vector3)node.position;
 
-                    float Sy_fall = jumpHeight - (currentTargetNodePosition.y - nodePosition.y);
+                    float Sy_fall = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) - (currentTargetNodePosition.y - nodePosition.y);
                     float t_fall = Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall));
-                    float Sx = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
+                    float Sx = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + Mathf.Sqrt(Mathf.Abs(2 * Sy_fall / gravityFall))) * ((waypointFacingRight == false) ? 1 : -1);
 
 
                     if ((Sx + currentTargetNodePosition.x > nodePosition.x && !waypointFacingRight) ||
@@ -1057,12 +1066,12 @@ public class BaseAiPathModifier : MonoModifier
                         jumpAtThisNode = node;
 
                         BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                            typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(); }, waypointFacingRight, 0.25f,
+                            typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(Ai_holdSpaceKey); }, waypointFacingRight, 0.25f,
                             jumpNode, currentTargetNode);
 
                         GraphNode nodeOfCollision = null;
                         GraphNode nearNode = null;
-                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi), 3, ref nodeOfCollision, ref nearNode);
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
 
                         if (!collided)
                         {
@@ -1881,7 +1890,7 @@ public class BaseAiPathModifier : MonoModifier
 
     // Simulating jumps and movement
 
-    private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion, float Vyi)
+    private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion, float Vyi, bool Ai_holdSpaceKey=false)
     {
         List<Vector2> points = new List<Vector2>();
 
@@ -1893,8 +1902,8 @@ public class BaseAiPathModifier : MonoModifier
 
         Debug.DrawLine(jumpNodePosition, Vector2.zero, Color.magenta, 5f);
         // Simulating jump points
-        float Sy_fall = jumpHeight - (jumpEndNodePosition.y - jumpNodePosition.y);
-        float x = Vx * ((2 * jumpHeight / Vyi) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((facingRight == false) ? 1 : -1);
+        float Sy_fall = ((Ai_holdSpaceKey)?maxJumpHeight:jumpHeight) - (jumpEndNodePosition.y - jumpNodePosition.y);
+        float x = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((facingRight == false) ? 1 : -1);
 
         // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
         for (int k = 0; k < simulationResoultion; k++)
@@ -1904,11 +1913,12 @@ public class BaseAiPathModifier : MonoModifier
             float elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
             if (elaspedTime < t_rise)
             {
-                curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime) / 2);
+                curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime * ((Ai_holdSpaceKey) ? 0.8f : 1f)) / 2);
             }
             else
             {
-                curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                curSy = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) + (-gravityFall * (elaspedTime - ((Ai_holdSpaceKey) ? t_maxRise : t_rise))
+                    * (elaspedTime - ((Ai_holdSpaceKey) ? t_maxRise : t_rise)) * 0.5f);
                 // curSy = (Vyi * elaspedTime) + ((-gravityFall * elaspedTime * elaspedTime) / 2);
             }
 
@@ -1927,7 +1937,8 @@ public class BaseAiPathModifier : MonoModifier
             {
                 curSx = x;
                 elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
-                curSy = jumpHeight + (-gravityFall * (elaspedTime - t_rise) * (elaspedTime - t_rise) * 0.5f);
+                curSy = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) + (-gravityFall * (elaspedTime - ((Ai_holdSpaceKey) ? t_maxRise : t_rise)) 
+                    * (elaspedTime - ((Ai_holdSpaceKey) ? t_maxRise : t_rise)) * 0.5f);
                 newPosition = new Vector2((jumpPos.x - curSx), (jumpPos.y + curSy));
 
                 points.Add(newPosition);
