@@ -62,7 +62,7 @@ public class BaseAiPathModifier : MonoModifier
             indexNode = insertAtNode;
             latestInsertNode = newNode;
 
-            Debug.Log("Called from " + (Vector3)insertAtNode.position + " : to " + (Vector3)newNode.position);
+            // Debug.Log("Called from " + (Vector3)insertAtNode.position + " : to " + (Vector3)newNode.position);
         }
     }
     public struct TrimRequestStruct
@@ -179,8 +179,8 @@ public class BaseAiPathModifier : MonoModifier
             }
         }
 
-        Debug.Log(jumpNodes.Count);
-        Debug.Log(jumpEndNodes.Count);
+        // Debug.Log(jumpNodes.Count);
+        // Debug.Log(jumpEndNodes.Count);
         for (int i = 0; i < jumpEndNodes.Count; i++)
         {
             // I have to seperate the CalculateDropdown & CalculateSingleDropdown because of priority queuing issues
@@ -273,6 +273,7 @@ public class BaseAiPathModifier : MonoModifier
     {
         int fromIndex = newNodes.FindIndex(d => d == from);
         int toIndex = newNodes.FindIndex(d => d == to);
+        // Debug.LogWarning("TRIMMING FROM " + fromIndex + " TO " + toIndex);
 
         if (fromIndex + 1 == toIndex || fromIndex == toIndex) return;
 
@@ -562,7 +563,7 @@ public class BaseAiPathModifier : MonoModifier
                 // specialNodeCorrespFunction.Add(jumpEndNode);
             }
 
-            Debug.Log("?");
+            // Debug.Log("?");
 
             // padding logic & trimming
 
@@ -660,7 +661,7 @@ public class BaseAiPathModifier : MonoModifier
                 jumpNodesFinal.Add(dropdownAtThisNode);
             }
 
-            GraphNode jumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + (Vx * t_dropdown) +
+            GraphNode jumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + (Vx * t_dropdown * ((waypointFacingRight) ? 1 : -1)) +
                 ((waypointFacingRight) ? 1f : -1f), -Sb + jumpNodePosition.y)).node;
 
             Vector2 direction = (waypointFacingRight) ? Vector2.right : Vector2.left;
@@ -689,7 +690,7 @@ public class BaseAiPathModifier : MonoModifier
                 WaypointInsertStruct newInsert = new WaypointInsertStruct(newSpecialWaypoint.node, jumpNode);
                 waypointInserts.Add(newInsert);
 
-                Debug.Log("Added a special waypoint");
+                // Debug.Log("Added a special waypoint");
                 // specialNodeCorrespFunction.Add(jumpEndNode);
             }
 
@@ -713,7 +714,7 @@ public class BaseAiPathModifier : MonoModifier
     // needs collision detection
     private bool CalculateDoubleJump(GraphNode jumpNode, GraphNode jumpEndNode)
     {
-        Debug.Log("Double Jump Chosen");
+        // Debug.Log("Double Jump Chosen");
         Vector3 jumpNodePosition = (Vector3)jumpNode.position;
         Vector3 jumpEndNodePosition = (Vector3)jumpEndNode.position;
 
@@ -745,17 +746,17 @@ public class BaseAiPathModifier : MonoModifier
         bool foundAnyPotentialNodes = false;
         List<GraphNode> potentialNodes = new List<GraphNode>();
 
-        Debug.Log("ofoiewfierbtin");
+        // Debug.Log("ofoiewfierbtin");
         foreach (GraphNode node in adjNodesAtJump)
         {
             Vector3 nodePosition = (Vector3)node.position;
 
             Sy = jumpEndNodePosition.y - nodePosition.y;
             Sz = 3f; // magic value
-            Debug.Log("ofoiewfierbtin");
-            Debug.Log("maxJumpHeight : " + maxJumpHeight);
-            Debug.Log("maxAirborneJumpHeight : " + maxAirborneJumpHeight);
-            Debug.Log("Sy : " + Sy);
+            // Debug.Log("ofoiewfierbtin");
+            // Debug.Log("maxJumpHeight : " + maxJumpHeight);
+            // Debug.Log("maxAirborneJumpHeight : " + maxAirborneJumpHeight);
+            // Debug.Log("Sy : " + Sy);
 
             if (maxJumpHeight + maxAirborneJumpHeight < Sy)
             {
@@ -772,27 +773,27 @@ public class BaseAiPathModifier : MonoModifier
                 Sz = Sy - ((maxJumpHeight + maxAirborneJumpHeight) - Sz);
             }
 
-            Debug.Log("ofoiewfierbtin");
+            // Debug.Log("ofoiewfierbtin");
 
-            t_fall1 = Mathf.Sqrt(2 * (2 * jumpHeight - Sy - Sz) / gravityFall);
+            t_fall1 = Mathf.Sqrt(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall);
             t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall);
             t_total = t_rise1 + t_rise2 + t_fall2;
 
             float Sx = t_total * Vx;
 
-            Debug.Log("ofoiewfierbtin");
+            // Debug.Log("ofoiewfierbtin");
 
             if (maxJumpHeight + maxAirborneJumpHeight >= Sy && 
                 (((nodePosition.x > -Sx + jumpEndNodePosition.x) && waypointFacingRight) ||
                 ((nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight))){
                 isCapableOfOverhead = true;
-                Debug.Log("CapabaleOfOverhead : 0");
+                // Debug.Log("CapabaleOfOverhead : 0");
             }
 
             if ((nodePosition.x < -Sx + jumpEndNodePosition.x + 0.25f) && waypointFacingRight ||
                 (nodePosition.x > Sx + jumpEndNodePosition.x - 0.25f) && !waypointFacingRight)
             {
-                Debug.Log("Found a potential node");
+                // Debug.Log("Found a potential node");
                 foundAnyPotentialNodes = true;
                 potentialNodes.Add(node);
                 continue;
@@ -802,19 +803,19 @@ public class BaseAiPathModifier : MonoModifier
                 if(maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
                     isCapableOfOverhead = true;
-                    Debug.Log("CapabaleOfOverhead : 0");
+                    // Debug.Log("CapabaleOfOverhead : 0");
                 }
                 // ...
             }
 
-            Debug.Log("ofoiewfierbtin");
+            // Debug.Log("ofoiewfierbtin");
         }
 
         if (!foundAnyPotentialNodes)
         {
             if (isCapableOfOverhead)
             {
-                Debug.Log("CapableOfOverhead : 1");
+                // Debug.Log("CapableOfOverhead : 1");
                 CalculateOvershootWaypoints_S(jumpEndNode, jumpNode, 1.5f, 2);
             }
 
@@ -825,7 +826,7 @@ public class BaseAiPathModifier : MonoModifier
         if (potentialNodes.Count >= 1)
         {
             // Possible to perform double jump
-            Debug.Log("HOW MANY NODES? " + potentialNodes.Count);
+            // Debug.Log("HOW MANY NODES? " + potentialNodes.Count);
             GraphNode jumpAtThisNode = FindClosestNode(jumpNodePosition, potentialNodes);
             Vector3 jumpAtThisNodePosition = (Vector3)jumpAtThisNode.position;
 
@@ -843,13 +844,14 @@ public class BaseAiPathModifier : MonoModifier
                 Sz = Sy - ((jumpHeight + airborneJumpHeight) - Sz);
             }
 
-            t_fall1 = Mathf.Sqrt(2 * (2 * jumpHeight - Sy - Sz) / gravityFall); Debug.Log(t_fall1);
-            t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall); Debug.Log(t_fall2);
+            t_fall1 = Mathf.Sqrt(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall); // Debug.Log(t_fall1);
+            t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall); // Debug.Log(t_fall2);
             t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
 
             // Adding single jump waypoint
             // Finding the position where we need to jump;
-            float Sx_Dropdown = Vx * (t_rise1 + t_fall1) + jumpAtThisNodePosition.x;
+            float Sx_Dropdown = Vx * (t_rise1 + t_fall1) * ((waypointFacingRight)? 1 : -1);
+            // Debug.Log(Sx_Dropdown);
 
             float Sy_Dropdown = (jumpHeight - ((gravityFall * (t_fall1) * (t_fall1)) / 2)) + jumpAtThisNodePosition.y;
             Sy_Dropdown = jumpHeight - ((gravityFall * t_fall1 * t_fall1) / 2);
@@ -859,7 +861,7 @@ public class BaseAiPathModifier : MonoModifier
             // float Sy_DropdownRounded = (int)(Sy_Dropdown * 2) / 2f;
 
             // gg.nodes[(z - 1) * gg.width + x];
-            GraphNode secondJumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(Sx_Dropdown, Sy_Dropdown + jumpAtThisNodePosition.y)).node;
+            GraphNode secondJumpAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(Sx_Dropdown + jumpAtThisNodePosition.x, Sy_Dropdown + jumpAtThisNodePosition.y)).node;
 
             // first jump
             if (!jumpNodesFinal.Contains(jumpAtThisNode))
@@ -1122,7 +1124,7 @@ public class BaseAiPathModifier : MonoModifier
                 index++;
             }
 
-            Debug.Log("Looping through options");
+            // Debug.Log("Looping through options");
         }
 
         if (willSingleJump)
@@ -1181,8 +1183,6 @@ public class BaseAiPathModifier : MonoModifier
         
         List<GraphNode> potentialNodes = new List<GraphNode>();
         bool foundAnyPotentialNode = false;
-
-        
         
         float Sz;
         float Sy;
@@ -1248,7 +1248,7 @@ public class BaseAiPathModifier : MonoModifier
 
         if (!foundAnyPotentialNode)
         {
-            Debug.Log("no potential nodes");
+            // Debug.Log("no potential nodes");
             return false;
         }
 
@@ -1276,7 +1276,7 @@ public class BaseAiPathModifier : MonoModifier
                     if (maxJumpHeight - Sz < Sy)
                     {
                         Sz -= 0.5f;
-                        Debug.LogError("SZ IS NOW " + Sz);
+                        // Debug.LogError("SZ IS NOW " + Sz);
                     }
                     else break;
                 }
@@ -1285,7 +1285,7 @@ public class BaseAiPathModifier : MonoModifier
                     if (jumpHeight - Sz < Sy)
                     {
                         Sz -= 0.5f;
-                        Debug.LogError("SZ IS NOWNOWNOWNOW " + Sz);
+                        // Debug.LogError("SZ IS NOWNOWNOWNOW " + Sz);
                     }
                     else break;
                 }
@@ -1299,6 +1299,7 @@ public class BaseAiPathModifier : MonoModifier
             // Adding single jump waypoint
             // Finding the position where we need to jump;
             float Sx_Dropdown = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + t_fall);
+            Sx_Dropdown *= (waypointFacingRight) ? 1 : -1;
 
             // damn, I need to calculate gravityFall & rise somewhere
             float Sy_Dropdown = (((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) - ((gravityFall * (t_fall) * (t_fall)) / 2));
@@ -1316,7 +1317,7 @@ public class BaseAiPathModifier : MonoModifier
 
             if (collided)
             {
-                Debug.Log("Jump section collided");
+                // Debug.Log("Jump section collided");
                 continue;
             }
 
@@ -1330,7 +1331,7 @@ public class BaseAiPathModifier : MonoModifier
 
             if (collided)
             {
-                Debug.Log("dodge section collided");
+                // Debug.Log("dodge section collided");
                 continue;
             }
 
@@ -1387,8 +1388,12 @@ public class BaseAiPathModifier : MonoModifier
         (GraphNode target, GraphNode jumpNode, float Sxa=1.5f, int distanceFromJumpNode=0, 
         TypeofJump typeofJump=TypeofJump.DOUBLE_JUMP, bool flip_s=false)
     {
-        bool directionOfVaccantNodeFR = false; // FL means facing right
+        bool directionOfVaccantNodeFR = false; // FL means facing right and facing is relative to jumpEndNode towards the vaccant node
         List<GraphNode> vaccantNodes = FindVaccantOverheadForOvershoot(target, ref directionOfVaccantNodeFR); // pointless function
+        if (flip_s) directionOfVaccantNodeFR = !directionOfVaccantNodeFR;
+
+        Debug.LogError("directionOfVaccantNodeFR : " + directionOfVaccantNodeFR);
+
         // POINTLESS FUNCTION :L
         if (vaccantNodes.Count < 1) return;
 
@@ -1405,8 +1410,10 @@ public class BaseAiPathModifier : MonoModifier
             bool foundAdjNodes = false;
             List<GraphNode> adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes,
                 (directionOfVaccantNodeFR) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT);
+            
+            // do some skipping by using the return value of foundAdjNodes
 
-            if (adjNodes.Count >= distanceFromJumpNode)
+            if (adjNodes.Count >= distanceFromJumpNode && foundAdjNodes)
             {
                 newJumpNode = adjNodes[distanceFromJumpNode];
                 newJumpNodePosition = (Vector3)newJumpNode.position;
@@ -1441,16 +1448,17 @@ public class BaseAiPathModifier : MonoModifier
                 float Sy = targetPosition.y - newJumpNodePosition.y;
                 Sy = Mathf.Clamp(Sy, 0, 8f); // clamping to prevent bug beyond 8f and seems to be a working solution
 
-                if(Sy > jumpHeight + airborneJumpHeight && maxJumpHeight + maxAirborneJumpHeight >= Sy)
+                if (Sy > jumpHeight + airborneJumpHeight && maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
                     Ai_holdSpaceKey = true;
-                    Debug.Log("Holding");
-                } else Debug.Log("not holding");
+                    // Debug.Log("Holding");
+                }
+                else ; // Debug.Log("not holding");
 
                 float time_total = GetRemainingTimeAtDoubleJumpTime(Sy, 0f, Ai_holdSpaceKey);
                 time_total = Mathf.Clamp(time_total, 0, 1.563938f);
 
-                Debug.Log("time_total= " + time_total);
+                // Debug.Log("time_total= " + time_total);
 
                 float Sx = Mathf.Abs(targetPosition.x - newJumpNodePosition.x);
                 float time_sx = Sx / Vx;
@@ -1458,14 +1466,14 @@ public class BaseAiPathModifier : MonoModifier
                 float time_sxa = Sxa / Vx;
 
                 float time_sxb = time_total - time_sxa - time_sxa - time_sx;
-                Debug.Log("time_sxb= " + time_sxb);
+                // Debug.Log("time_sxb= " + time_sxb);
                 float Sxb = (time_sxb / 2) * Vx;
                 // Sxa_intrude
                 // Sxb_intrude
 
                 float airborneJumpTime = GetTimeOfDoubleJumpAirborneJumpTime(Sy, Ai_holdSpaceKey);
-                Debug.Log("airborneJumpTime: " + airborneJumpTime);
-                Debug.Log("airborneJumpHeight: " + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey));
+                // Debug.Log("airborneJumpTime: " + airborneJumpTime);
+                // Debug.Log("airborneJumpHeight: " + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey));
 
                 float Sya = GetDoubleJumpHeightAtTime(Sy, time_sxa, Ai_holdSpaceKey);
                 float Syb = GetDoubleJumpHeightAtTime(Sy, time_sxa*2 + time_sxb/2, Ai_holdSpaceKey);
@@ -1553,7 +1561,8 @@ public class BaseAiPathModifier : MonoModifier
                 points.Add(Sxa_point);
                 points.Add(Sxb_point);
 
-                bool Sxb_pathCollided = BresenhamCollisionDetection(points, 7, ref collisionNode, ref nearNode);
+                bool Sxb_pathCollided = BresenhamCollisionDetection(points, 8, ref collisionNode, ref nearNode);
+
                 float Sxb_collides;
                 bool Sxb_willWait = false; // used for trimming
                 bool Sxb_airborneJumpWithinWait = false; // used for trimming
@@ -1563,7 +1572,7 @@ public class BaseAiPathModifier : MonoModifier
 
                 if (Sxb_pathCollided)
                 {
-                    Debug.LogWarning("COLLIDED");
+                    // Debug.LogWarning("COLLIDED");
                     Vector2 nearNodePosition = (Vector3)nearNode.position;
                     Sxb_collides = Mathf.Abs(newJumpNodePosition.x - nearNodePosition.x);
 
@@ -1579,11 +1588,11 @@ public class BaseAiPathModifier : MonoModifier
                         Sxb = Sxb_collides;
                         //time_sxb = Sxb_collides / Vx;
                         // ((directionOfVaccantNodeFR) ? Sxb : -Sxb) + newJumpNodePosition.x
-                        Debug.Log("Height: " + GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxa + time_sxb, Ai_holdSpaceKey));
-                        Debug.Log("time_sxa : " + time_sxa);
-                        Debug.Log("time_sxb : " + time_sxb);
-                        Sxb_point = new Vector2(nearNodePosition.x + 1f, GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxb, Ai_holdSpaceKey) + newJumpNodePosition.y);
-                        temp = nearNodePosition.x + 1f;
+                        // Debug.Log("Height: " + GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxa + time_sxb, Ai_holdSpaceKey));
+                        // Debug.Log("time_sxa : " + time_sxa);
+                        // Debug.Log("time_sxb : " + time_sxb);
+                        Sxb_point = new Vector2(nearNodePosition.x + ((directionOfVaccantNodeFR)? -1f : 1f), GetDoubleJumpHeightAtTime(Sy, time_sxa + time_sxb, Ai_holdSpaceKey) + newJumpNodePosition.y);
+                        temp = nearNodePosition.x + ((directionOfVaccantNodeFR) ? -1f : 1f);
 
                         calculatedNode_B_WAIT = GridGraphGenerate.gg.GetNearest(Sxb_point).node;
                         BaseAiController.specialWaypoint waitWaypoint = new BaseAiController.specialWaypoint(typeofWaypoint.WAIT, calculatedNode_B_WAIT,
@@ -1605,7 +1614,7 @@ public class BaseAiPathModifier : MonoModifier
                 // Sxb -> End (carry out height reduction but this will mean we will have to put this in the front of the queue)
 
 
-                Debug.LogError("Sya : " + Sya + " Syb : " + Syb);
+                // Debug.LogError("Sya : " + Sya + " Syb : " + Syb);
 
 
                 GraphNode calculatedNode_A = null;
@@ -1620,17 +1629,17 @@ public class BaseAiPathModifier : MonoModifier
                 calculatedNode_B = GridGraphGenerate.gg.GetNearest(new Vector3(
                     newJumpNodePosition.x + ((directionOfVaccantNodeFR) ? 1 : -1) * Sxb, newJumpNodePosition.y + Syb)).node;
 
-                Debug.Log("Double jump time: " +GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey));
+                // Debug.Log("Double jump time: " +GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey));
                 GraphNode calculatedNode_AirborneJump = null;
 
                 if (Sxa_airborneJumpWithinWait) {
-                    Debug.LogWarning("1st case");
+                    // Debug.LogWarning("1st case");
                     calculatedNode_AirborneJump = GridGraphGenerate.gg.GetNearest(new Vector3(
                     newJumpNodePosition.x + ((directionOfVaccantNodeFR) ? -1 : 1) * Sxa, newJumpNodePosition.y + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey))).node;
                 } 
                 else if (Sxb_airborneJumpWithinWait)
                 {
-                    Debug.LogWarning("2nd case");
+                    // Debug.LogWarning("2nd case");
                     calculatedNode_AirborneJump = GridGraphGenerate.gg.GetNearest(new Vector3(
                     newJumpNodePosition.x + ((directionOfVaccantNodeFR) ? 1 : -1) * Sxb, newJumpNodePosition.y + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey))).node;
                 } 
@@ -1638,13 +1647,13 @@ public class BaseAiPathModifier : MonoModifier
                 {
                     if (Sxb_willWait)
                     {
-                        Debug.LogWarning("3rd case");
+                        // Debug.LogWarning("3rd case");
                         calculatedNode_AirborneJump = GridGraphGenerate.gg.GetNearest(new Vector3(
                         temp, newJumpNodePosition.y + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey))).node;
                     }
                     else
                     {
-                        Debug.LogWarning("4th case");
+                        // Debug.LogWarning("4th case");
                         calculatedNode_AirborneJump = GridGraphGenerate.gg.GetNearest(new Vector3(
                         newJumpNodePosition.x + SxAirborne, newJumpNodePosition.y + GetDoubleJumpHeightAtTime(Sy, airborneJumpTime, Ai_holdSpaceKey))).node;
                     }
@@ -1694,8 +1703,23 @@ public class BaseAiPathModifier : MonoModifier
                     }
                 }
 
+                // trimming
+                if (originalNodes.Contains(newJumpNode))
+                {
+                    TrimRequestStruct newTrimRequest = new TrimRequestStruct(newJumpNode, target);
+                    trimRequests.Add(newTrimRequest);
+                }
+                else
+                {
+                    TrimRequestStruct newTrimRequest = new TrimRequestStruct(jumpNode, target);
+                    trimRequests.Add(newTrimRequest);
+
+                    WaypointInsertStruct newInsert = new WaypointInsertStruct(newJumpNode, jumpNode);
+                    waypointInserts.Add(newInsert);
+                }
+
                 // Corresponding queueing logic
-                
+
                 if (queueAirborneJumpBeforeA)
                 {
                     WaypointInsertStruct newInsert;
@@ -1801,10 +1825,6 @@ public class BaseAiPathModifier : MonoModifier
                 
                 jumpNodesFinal.Add(newJumpNode);
 
-                // trimming
-                TrimRequestStruct newTrimRequest = new TrimRequestStruct(newJumpNode, target);
-                trimRequests.Add(newTrimRequest);
-
                 break;
         }
     }
@@ -1826,6 +1846,7 @@ public class BaseAiPathModifier : MonoModifier
     // Add direction control
     // false - left
     // true - right
+    // Left is priority
     private List<GraphNode> FindVaccantOverheadForOvershoot(GraphNode scanNodePoint, ref bool retDirection)
     {
         GraphNode currentNodeBeingVetted;
@@ -1839,11 +1860,12 @@ public class BaseAiPathModifier : MonoModifier
         {
             currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x + 1)];
             if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty) notVaccant = true;
-
-            retDirection = true;
         }
 
-        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x + 1)]);
+        if (!notVaccant) { 
+            vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x + 1)]);
+            retDirection = true;
+        }
 
         // Checking nodes to the left
         notVaccant = false;
@@ -1853,12 +1875,13 @@ public class BaseAiPathModifier : MonoModifier
         {
             currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x - 1)];
             if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty) notVaccant = true;
-
-            retDirection = false;
         }
 
-        if (!notVaccant) vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x - 1)]);
-
+        if (!notVaccant)
+        {
+            vaccantNodes.Add(GridGraphGenerate.gg.nodes[((int)scanNodePointPosition.y) * GridGraphGenerate.gg.width + ((int)scanNodePointPosition.x - 1)]);
+            retDirection = false;
+        }
         if (vaccantNodes.Count == 0) retDirection = false;
         return vaccantNodes;
     }
@@ -1877,6 +1900,12 @@ public class BaseAiPathModifier : MonoModifier
         else
         {
             GraphNode currentNodeBeingVetted;
+
+            /* if (originalVectorPoint != null)
+            {
+                if (originalVectorPoint.x*0.5f > GridGraphGenerate.gg.width || originalVectorPoint.x*0.5f < -GridGraphGenerate.gg.width) return true; // should this be returning true?
+            } */
+
             Vector3 pointPosition = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, point);
 
             for (int z = 0; z < heightInNodes; z++)
@@ -2087,37 +2116,37 @@ public class BaseAiPathModifier : MonoModifier
         }
 
         float Sb = ((Ai_holdSpaceKey)? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sy - Sz;
-        Debug.Log("Sb = " + Sb);
+        // Debug.Log("Sb = " + Sb);
         t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * (-Sb) / gravityFall));
         t_fall2 = Mathf.Sqrt(Mathf.Abs(2 * Sz / gravityFall));
         t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
 
         float deltaHeight;
-        Debug.Log("time : " + time);
-        Debug.Log("t_rise1 + t_fall1 : " + (t_rise1 + t_fall1));
-        Debug.Log("t_rise1 : " + t_rise1);
-        Debug.Log("t_fall1 : " + t_fall1);
+        // Debug.Log("time : " + time);
+        // Debug.Log("t_rise1 + t_fall1 : " + (t_rise1 + t_fall1));
+        // Debug.Log("t_rise1 : " + t_rise1);
+        // Debug.Log("t_fall1 : " + t_fall1);
 
         if (time <= t_rise1)
         {
-            Debug.Log("time case 1");
+            // Debug.Log("time case 1");
             deltaHeight = (Vyi * time) + ((-gravityRise * time * time * ((Ai_holdSpaceKey) ? 0.8f : 1f)) / 2);
-            Debug.LogWarning(deltaHeight);
+            // Debug.LogWarning(deltaHeight);
             return deltaHeight;
         }
         else if (time + 0.0000001 < t_rise1 + t_fall1) // the 0.0000001 is to fix a bug when at max height
         {
-            Debug.Log("time case 2");
+            // Debug.Log("time case 2");
             float new_time = time - (t_rise1);
             deltaHeight = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) + ((-gravityFall * new_time * new_time) / 2);
-            Debug.LogWarning(deltaHeight);
+            // Debug.LogWarning(deltaHeight);
             return deltaHeight;
         }
         else if (time < t_rise1 + t_fall1 + t_rise2) // fix this like above
         {
-            Debug.Log("time case 3");
+            // Debug.Log("time case 3");
             float new_time = Mathf.Abs(time - (t_rise1 + t_fall1));
-            Debug.Log("airborne vyi: " + GetAirborneVyi(0));
+            // Debug.Log("airborne vyi: " + GetAirborneVyi(0));
             deltaHeight = (((Ai_holdSpaceKey)? maxJumpHeight : jumpHeight) - Sb) 
                 + ((GetAirborneVyi(0) * new_time) + ((-gravityRise * new_time * new_time * ((Ai_holdSpaceKey) ? 0.8f : 1f)) / 2));
 
@@ -2128,14 +2157,14 @@ public class BaseAiPathModifier : MonoModifier
             Debug.Log(gravityFall);
             */
 
-            Debug.LogWarning(deltaHeight);
+            // Debug.LogWarning(deltaHeight);
             return deltaHeight;
         }
         else // fix this like above
         {
-            Debug.Log("time case 4");
+            // Debug.Log("time case 4");
             float new_time = time - (t_rise1 + t_fall1 + t_rise2);
-            Debug.Log("airborne vyi: " + GetAirborneVyi(0));
+            // Debug.Log("airborne vyi: " + GetAirborneVyi(0));
             deltaHeight = ((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight: jumpHeight + airborneJumpHeight) + Sb
                 + ((-gravityFall * new_time * new_time) / 2);
 
@@ -2146,7 +2175,7 @@ public class BaseAiPathModifier : MonoModifier
             Debug.Log(gravityFall);
             */
 
-            Debug.LogWarning(deltaHeight);
+            // Debug.LogWarning(deltaHeight);
             return deltaHeight;
         }
     }
@@ -2157,8 +2186,8 @@ public class BaseAiPathModifier : MonoModifier
     {
         // float airborneVyi = GetAirborneVyi();
 
-        float t_rise1 = (Ai_holdSpaceKey) ? t_maxRise : t_rise; Debug.LogWarning(t_rise1);
-        float t_rise2 = (Ai_holdSpaceKey) ? t_maxAirborneRise : t_airborneRise; Debug.LogWarning(t_rise2); // 2 * GetAirborneJumpHeight() / airborneVyi;
+        float t_rise1 = (Ai_holdSpaceKey) ? t_maxRise : t_rise; // Debug.LogWarning(t_rise1);
+        float t_rise2 = (Ai_holdSpaceKey) ? t_maxAirborneRise : t_airborneRise; // Debug.LogWarning(t_rise2); // 2 * GetAirborneJumpHeight() / airborneVyi;
 
         float t_fall1 = 0f;
         float t_fall2 = 0f;
@@ -2185,11 +2214,11 @@ public class BaseAiPathModifier : MonoModifier
 
         float Sb = ((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : jumpHeight + airborneJumpHeight) - Sy - Sz;
 
-        t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * -Sb / gravityFall)); Debug.LogError(t_fall1);
-        t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall); Debug.LogError(t_fall2);
+        t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * -Sb / gravityFall)); // Debug.LogError(t_fall1);
+        t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall); // Debug.LogError(t_fall2);
         t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
 
-        Debug.Log("t_total in f(x)= " + t_total);
+        // Debug.Log("t_total in f(x)= " + t_total);
         return t_total - time;
     }
     private float GetTimeOfDoubleJumpAirborneJumpTime(float Sy, bool Ai_holdSpaceKey)
@@ -2221,7 +2250,7 @@ public class BaseAiPathModifier : MonoModifier
         float Sb = ((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : jumpHeight + airborneJumpHeight) - Sy - Sz;
 
         t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * -Sb / gravityFall));
-        Debug.Log("t_fall1 : " + t_fall1);
+        // Debug.Log("t_fall1 : " + t_fall1);
         return t_rise1 + t_fall1;
     }
 
