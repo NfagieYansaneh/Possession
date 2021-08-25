@@ -765,7 +765,7 @@ public class BaseAiPathModifier : MonoModifier
             if (maxJumpHeight + maxAirborneJumpHeight < Sy)
             {
                 // ..  DON'T PERFORM DOUBLE JUMP
-                Debug.Log("Im being called??????");
+                // Debug.Log("Im being called??????");
                 continue;
             }
             else if (jumpHeight + airborneJumpHeight - Sz < Sy)
@@ -785,13 +785,13 @@ public class BaseAiPathModifier : MonoModifier
 
             float Sx = t_total * Vx;
 
-            Debug.Log("ofoiewfierbtin");
+            // Debug.Log("ofoiewfierbtin");
 
             if (maxJumpHeight + maxAirborneJumpHeight >= Sy && 
                 (((nodePosition.x > -Sx + jumpEndNodePosition.x) && waypointFacingRight) ||
                 ((nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight))){
                 isCapableOfOverhead = true;
-                Debug.Log("CapabaleOfOverhead : 0");
+                // Debug.Log("CapabaleOfOverhead : 0");
             }
 
             if ((nodePosition.x < -Sx + jumpEndNodePosition.x + 0.25f) && waypointFacingRight ||
@@ -799,7 +799,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 if (jumpHeight + airborneJumpHeight >= Sy)
                 {
-                    Debug.Log("Found a potential node");
+                    // Debug.Log("Found a potential node");
                     foundAnyPotentialNodes = true;
                     potentialNodes.Add(node);
                     continue;
@@ -810,24 +810,19 @@ public class BaseAiPathModifier : MonoModifier
                 if(maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
                     isCapableOfOverhead = true;
-                    Debug.Log("CapabaleOfOverhead : 0");
+                    // Debug.Log("CapabaleOfOverhead : 0");
                 }
                 // ...
             }
 
-            Debug.Log("ofoiewfierbtin");
-        }
-
-        if (isCapableOfOverhead)
-        {
-            Debug.Log("CapableOfOverhead?????");
+            // Debug.Log("ofoiewfierbtin");
         }
 
         if (!foundAnyPotentialNodes)
         {
             if (isCapableOfOverhead)
             {
-                Debug.Log("CapableOfOverhead : 1");
+                // Debug.Log("CapableOfOverhead : 1");
                 CalculateOvershootWaypoints_S(jumpEndNode, jumpNode, 1.5f, 2);
             }
 
