@@ -765,8 +765,8 @@ public class BaseAiPathModifier : MonoModifier
             if (maxJumpHeight + maxAirborneJumpHeight < Sy)
             {
                 // ..  DON'T PERFORM DOUBLE JUMP
-
-                return false;
+                Debug.Log("Im being called??????");
+                continue;
             }
             else if (jumpHeight + airborneJumpHeight - Sz < Sy)
             {
@@ -785,41 +785,49 @@ public class BaseAiPathModifier : MonoModifier
 
             float Sx = t_total * Vx;
 
-            // Debug.Log("ofoiewfierbtin");
+            Debug.Log("ofoiewfierbtin");
 
             if (maxJumpHeight + maxAirborneJumpHeight >= Sy && 
                 (((nodePosition.x > -Sx + jumpEndNodePosition.x) && waypointFacingRight) ||
                 ((nodePosition.x > Sx + jumpEndNodePosition.x) && !waypointFacingRight))){
                 isCapableOfOverhead = true;
-                // Debug.Log("CapabaleOfOverhead : 0");
+                Debug.Log("CapabaleOfOverhead : 0");
             }
 
             if ((nodePosition.x < -Sx + jumpEndNodePosition.x + 0.25f) && waypointFacingRight ||
                 (nodePosition.x > Sx + jumpEndNodePosition.x - 0.25f) && !waypointFacingRight)
             {
-                // Debug.Log("Found a potential node");
-                foundAnyPotentialNodes = true;
-                potentialNodes.Add(node);
-                continue;
+                if (jumpHeight + airborneJumpHeight >= Sy)
+                {
+                    Debug.Log("Found a potential node");
+                    foundAnyPotentialNodes = true;
+                    potentialNodes.Add(node);
+                    continue;
+                }
             }
             else
             {
                 if(maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
                     isCapableOfOverhead = true;
-                    // Debug.Log("CapabaleOfOverhead : 0");
+                    Debug.Log("CapabaleOfOverhead : 0");
                 }
                 // ...
             }
 
-            // Debug.Log("ofoiewfierbtin");
+            Debug.Log("ofoiewfierbtin");
+        }
+
+        if (isCapableOfOverhead)
+        {
+            Debug.Log("CapableOfOverhead?????");
         }
 
         if (!foundAnyPotentialNodes)
         {
             if (isCapableOfOverhead)
             {
-                // Debug.Log("CapableOfOverhead : 1");
+                Debug.Log("CapableOfOverhead : 1");
                 CalculateOvershootWaypoints_S(jumpEndNode, jumpNode, 1.5f, 2);
             }
 
@@ -1450,14 +1458,20 @@ public class BaseAiPathModifier : MonoModifier
 
             case TypeofJump.DOUBLE_JUMP:
                 float Sy = targetPosition.y - newJumpNodePosition.y;
-                Sy = Mathf.Clamp(Sy, 0, 8f); // clamping to prevent bug beyond 8f and seems to be a working solution
+                Debug.Log(Sy);
+                // Sy = Mathf.Clamp(Sy, 0, 8f); // clamping to prevent bug beyond 8f and seems to be a working solution
 
-                if (Sy > jumpHeight + airborneJumpHeight && maxJumpHeight + maxAirborneJumpHeight >= Sy)
+                if (Sy >= jumpHeight + airborneJumpHeight && maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
+                    Sy = Mathf.Clamp(Sy, 0, 8f);
                     Ai_holdSpaceKey = true;
-                    // Debug.Log("Holding");
+                    Debug.Log("Holding");
                 }
-                else ; // Debug.Log("not holding");
+                else
+                {
+                    Sy = Mathf.Clamp(Sy, 0, 6f);
+                    Debug.Log("not holding");
+                }
 
                 float time_total = GetRemainingTimeAtDoubleJumpTime(Sy, 0f, Ai_holdSpaceKey);
                 time_total = Mathf.Clamp(time_total, 0, 1.563938f);
