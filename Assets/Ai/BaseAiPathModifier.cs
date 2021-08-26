@@ -715,7 +715,7 @@ public class BaseAiPathModifier : MonoModifier
         // dropdown + double jump ?
     }
 
-    // needs collision detection
+    // this could be optimized like crazy 
     private bool CalculateDoubleJump(GraphNode jumpNode, GraphNode jumpEndNode)
     {
         // Debug.Log("Double Jump Chosen");
@@ -724,6 +724,7 @@ public class BaseAiPathModifier : MonoModifier
 
         bool waypointFacingRight = false;
         bool isCapableOfOverhead = false;
+        bool Ai_holdSpaceKey = false;
 
         if (jumpEndNodePosition.x > jumpNodePosition.x)
         {
@@ -757,31 +758,53 @@ public class BaseAiPathModifier : MonoModifier
 
             Sy = jumpEndNodePosition.y - nodePosition.y;
             Sz = 3f; // magic value
-            // Debug.Log("ofoiewfierbtin");
-            // Debug.Log("maxJumpHeight : " + maxJumpHeight);
-            // Debug.Log("maxAirborneJumpHeight : " + maxAirborneJumpHeight);
-            // Debug.Log("Sy : " + Sy);
+                     // Debug.Log("ofoiewfierbtin");
+                     // Debug.Log("maxJumpHeight : " + maxJumpHeight);
+                     // Debug.Log("maxAirborneJumpHeight : " + maxAirborneJumpHeight);
+                     // Debug.Log("Sy : " + Sy);
 
+            // Sz logic
             if (maxJumpHeight + maxAirborneJumpHeight < Sy)
             {
                 // ..  DON'T PERFORM DOUBLE JUMP
                 // Debug.Log("Im being called??????");
                 continue;
             }
-            else if (jumpHeight + airborneJumpHeight - Sz < Sy)
+            else while (true)
+                {
+                    if (Ai_holdSpaceKey)
+                    {
+                        if (maxJumpHeight + maxAirborneJumpHeight - Sz < Sy)
+                        {
+                            Sz -= 0.5f;
+                            // Debug.LogError("SZ IS NOW " + Sz);
+                        }
+                        else break;
+                    }
+                    else
+                    {
+                        if (jumpHeight + airborneJumpHeight - Sz < Sy)
+                        {
+                            Sz -= 0.5f;
+                            // Debug.LogError("SZ IS NOWNOWNOWNOW " + Sz);
+                        }
+                        else break;
+                    }
+                }
+
+            if (jumpHeight + airborneJumpHeight < Sy && maxJumpHeight + maxAirborneJumpHeight >= Sy)
             {
-                Sz = Sy - ((jumpHeight + airborneJumpHeight) - Sz);
-            }
-            else if (maxJumpHeight + maxAirborneJumpHeight - Sz < Sy)
-            {
-                Sz = Sy - ((maxJumpHeight + maxAirborneJumpHeight) - Sz);
+                Ai_holdSpaceKey = true;
+                Debug.Log("holding");
             }
 
             // Debug.Log("ofoiewfierbtin");
 
-            t_fall1 = Mathf.Sqrt(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall);
+            t_fall1 = Mathf.Sqrt(2 * (((Ai_holdSpaceKey)? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sy - Sz) / gravityFall);
+            Debug.LogWarning(2 * (((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sy - Sz) / gravityFall);
+
             t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall);
-            t_total = t_rise1 + t_rise2 + t_fall2;
+            t_total = ((Ai_holdSpaceKey) ? t_maxRise : t_rise) + ((Ai_holdSpaceKey) ? t_maxAirborneRise : t_airborneRise) + t_fall2;
 
             float Sx = t_total * Vx;
 
@@ -797,8 +820,27 @@ public class BaseAiPathModifier : MonoModifier
             if ((nodePosition.x < -Sx + jumpEndNodePosition.x + 0.25f) && waypointFacingRight ||
                 (nodePosition.x > Sx + jumpEndNodePosition.x - 0.25f) && !waypointFacingRight)
             {
-                if (jumpHeight + airborneJumpHeight >= Sy)
+                if (maxJumpHeight + maxAirborneJumpHeight >= Sy)
                 {
+                    float Sx_Dropdown = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + t_fall1) * ((waypointFacingRight) ? 1 : -1);
+                    Debug.Log(Vx);
+                    Debug.Log(t_maxRise);
+                    Debug.Log(t_rise);
+                    Debug.Log(t_fall1);
+                    Debug.Log(Sx_Dropdown);
+
+                    float Sy_Dropdown = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) - ((gravityFall * t_fall1 * t_fall1) / 2);
+                    Vector2 secondJumpAtThisNodePosition = new Vector2(Sx_Dropdown + nodePosition.x, Sy_Dropdown + nodePosition.y);
+
+                    GraphNode nodeOfCollision = null;
+                    GraphNode nearNode = null;
+
+                    bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, secondJumpAtThisNodePosition, waypointFacingRight, 4, false, 0, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
+                    if (collided) continue;
+
+                    collided = BresenhamCollisionDetection(SimulateSingleJump(secondJumpAtThisNodePosition, jumpEndNodePosition, waypointFacingRight, 4, true, 0, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
+                    if (collided) continue;
+
                     // Debug.Log("Found a potential node");
                     foundAnyPotentialNodes = true;
                     potentialNodes.Add(node);
@@ -840,28 +882,27 @@ public class BaseAiPathModifier : MonoModifier
             Sy = jumpEndNodePosition.y - jumpAtThisNodePosition.y;
             Sz = 0.5f; // magic value
 
-            if (jumpHeight + airborneJumpHeight < Sy)
+            if (((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sz < Sy)
             {
-                // ..  DON'T PERFORM DOUBLE JUMP
-                // do I need to even check this again??
-                return false;
-            }
-            else if (jumpHeight + airborneJumpHeight - Sz < Sy)
-            {
-                Sz = Sy - ((jumpHeight + airborneJumpHeight) - Sz);
+                Sz = Sy - (((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sz);
             }
 
-            t_fall1 = Mathf.Sqrt(Mathf.Abs(2 * (airborneJumpHeight + jumpHeight - Sy - Sz) / gravityFall)); // Debug.Log(t_fall1);
-            t_fall2 = Mathf.Sqrt(Mathf.Abs(2 * Sz / gravityFall)); // Debug.Log(t_fall2);
-            t_total = t_rise1 + t_fall1 + t_rise2 + t_fall2;
+            if (jumpHeight + airborneJumpHeight < Sy && maxJumpHeight + maxAirborneJumpHeight >= Sy)
+            {
+                Ai_holdSpaceKey = true;
+            }
+
+            t_fall1 = Mathf.Sqrt(2 * (((Ai_holdSpaceKey) ? maxJumpHeight + maxAirborneJumpHeight : airborneJumpHeight + jumpHeight) - Sy - Sz) / gravityFall);
+
+            t_fall2 = Mathf.Sqrt(2 * Sz / gravityFall);
+            t_total = ((Ai_holdSpaceKey) ? t_maxRise : t_rise) + ((Ai_holdSpaceKey) ? t_maxAirborneRise : t_airborneRise) + t_fall2;
 
             // Adding single jump waypoint
             // Finding the position where we need to jump;
-            float Sx_Dropdown = Vx * (t_rise1 + t_fall1) * ((waypointFacingRight)? 1 : -1);
+            float Sx_Dropdown = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + t_fall1) * ((waypointFacingRight) ? 1 : -1);
             // Debug.Log(Sx_Dropdown);
 
-            float Sy_Dropdown = (jumpHeight - ((gravityFall * (t_fall1) * (t_fall1)) / 2)) + jumpAtThisNodePosition.y;
-            Sy_Dropdown = jumpHeight - ((gravityFall * t_fall1 * t_fall1) / 2);
+            float Sy_Dropdown = ((Ai_holdSpaceKey) ? maxJumpHeight : jumpHeight) - ((gravityFall * t_fall1 * t_fall1) / 2);
 
             // rounding to nearest 0.5f
             // float Sx_DropdownRounded = (int)(Sx_Dropdown * 2) / 2f;
@@ -875,7 +916,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 jumpNodesFinal.Add(jumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(); }, waypointFacingRight, 0.25f, 
+                typeofWaypoint.JUMP, jumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(Ai_holdSpaceKey); }, waypointFacingRight, 0.25f, 
                 jumpNode, jumpEndNode);
 
                 if (!baseAiController.specialWaypoints.Contains(newSpecialWaypoint))
@@ -891,7 +932,7 @@ public class BaseAiPathModifier : MonoModifier
             {
                 //jumpNodesFinal.Add(secondJumpAtThisNode);
                 BaseAiController.specialWaypoint newSpecialWaypoint = new BaseAiController.specialWaypoint(
-                typeofWaypoint.AIRBORNE_JUMP, secondJumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(); }, waypointFacingRight, 0.6f,
+                typeofWaypoint.AIRBORNE_JUMP, secondJumpAtThisNode, () => { baseCharacterController.JumpWaypointAI(Ai_holdSpaceKey); }, waypointFacingRight, 0.6f,
                 jumpNode, jumpEndNode);
 
                 WaypointInsertStruct newInsert = new WaypointInsertStruct(newSpecialWaypoint.node, jumpAtThisNode);
@@ -1027,7 +1068,7 @@ public class BaseAiPathModifier : MonoModifier
 
                         GraphNode nodeOfCollision = null;
                         GraphNode nearNode = null;
-                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, false, 0, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
 
                         if (!collided)
                         {
@@ -1080,7 +1121,7 @@ public class BaseAiPathModifier : MonoModifier
 
                         GraphNode nodeOfCollision = null;
                         GraphNode nearNode = null;
-                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, Vyi, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
+                        bool collided = BresenhamCollisionDetection(SimulateSingleJump(nodePosition, currentTargetNodePosition, waypointFacingRight, 4, false, 0, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
 
                         if (!collided)
                         {
@@ -1320,7 +1361,7 @@ public class BaseAiPathModifier : MonoModifier
 
             Vector3 dodgeAtThisNodePosition = (Vector3)dodgeAtThisNode.position;
 
-            bool collided = BresenhamCollisionDetection(SimulateSingleJump(jumpAtThisNodePosition, dodgeAtThisNodePosition, waypointFacingRight, 4, Vyi, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
+            bool collided = BresenhamCollisionDetection(SimulateSingleJump(jumpAtThisNodePosition, dodgeAtThisNodePosition, waypointFacingRight, 4, false, 0, Ai_holdSpaceKey), 3, ref nodeOfCollision, ref nearNode);
 
             if (collided)
             {
@@ -1995,9 +2036,22 @@ public class BaseAiPathModifier : MonoModifier
 
     // Simulating jumps and movement
 
-    private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion, float Vyi, bool Ai_holdSpaceKey=false)
+    private List<Vector2> SimulateSingleJump(Vector2 position, Vector2 endPosition, bool facingRight, int simulationResoultion, bool airborne = false, int numOfAirborneJmps=0, bool Ai_holdSpaceKey=false)
     {
         List<Vector2> points = new List<Vector2>();
+
+        float store_maxJumpHeight = maxJumpHeight;
+        float store_jumpHeight = jumpHeight;
+        float store_t_maxRise = t_maxRise;
+        float store_t_rise = t_rise;
+        
+        if(airborne)
+        {
+            maxJumpHeight = maxAirborneJumpHeight;
+            jumpHeight = airborneJumpHeight;
+            t_maxRise = t_maxAirborneRise;
+            t_rise = t_airborneRise;
+        }
 
         Vector2 oldPosition = Vector2.zero;
 
@@ -2007,7 +2061,7 @@ public class BaseAiPathModifier : MonoModifier
 
         Debug.DrawLine(jumpNodePosition, Vector2.zero, Color.magenta, 5f);
         // Simulating jump points
-        float Sy_fall = ((Ai_holdSpaceKey)?maxJumpHeight:jumpHeight) - (jumpEndNodePosition.y - jumpNodePosition.y);
+        float Sy_fall = ((Ai_holdSpaceKey)? maxJumpHeight : jumpHeight) - (jumpEndNodePosition.y - jumpNodePosition.y);
         float x = Vx * (((Ai_holdSpaceKey) ? t_maxRise : t_rise) + Mathf.Sqrt(2 * Sy_fall / gravityFall)) * ((facingRight == false) ? 1 : -1);
 
         // BaseAiController.specialWaypoint specialWaypoint = specialWaypoints.FindIndex
@@ -2018,7 +2072,7 @@ public class BaseAiPathModifier : MonoModifier
             float elaspedTime = ((facingRight) ? -curSx : curSx) / Vx;
             if (elaspedTime < t_rise)
             {
-                curSy = (Vyi * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime * ((Ai_holdSpaceKey) ? 0.8f : 1f)) / 2);
+                curSy = (((airborne)? GetAirborneVyi(numOfAirborneJmps) : Vyi) * elaspedTime) + ((-gravityRise * elaspedTime * elaspedTime * ((Ai_holdSpaceKey) ? 0.8f : 1f)) / 2);
             }
             else
             {
@@ -2048,6 +2102,14 @@ public class BaseAiPathModifier : MonoModifier
 
                 points.Add(newPosition);
             }
+        }
+
+        if (airborne)
+        {
+            maxJumpHeight = store_maxJumpHeight;
+            jumpHeight = store_jumpHeight;
+            t_maxRise = store_t_maxRise;
+            t_rise = store_t_rise;
         }
 
         return points;
