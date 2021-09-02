@@ -184,11 +184,16 @@ public class Rin_CharacterController : BaseCharacterController
         }
     }
 
-    public override void PerformJumpAi(bool holdSpaceKey =false)
+    public override void PerformJumpAi(bool holdSpaceKey =false, bool mustBeGrounded=false)
     {
-        if (holdMovementAiOverride) return;
+        // if (holdMovementAiOverride) return;
 
         Ai_holdSpaceKey = holdSpaceKey; // need to make sure it is not holding space key when sliding I think...
+        if (mustBeGrounded && !isGrounded)
+        {
+            Ai_jumpIsQueued = true;
+            return;
+        }
 
         if (jumpIndex <= maxJumps - 1)
         {
@@ -211,6 +216,8 @@ public class Rin_CharacterController : BaseCharacterController
             curVerticalVelocity = targetVerticalVelocity;
             rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
             jumpIndex++;
+        } else { 
+            Ai_jumpIsQueued = true; // should un-queue after a certain distance
         }
     }
 

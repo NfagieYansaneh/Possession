@@ -205,6 +205,39 @@ public static class Helper
 
         return nodes;
     }
+    
+    public static bool SearchInDirection(GridGraph gg, GraphNode point, int distanceInNodes, ref GraphNode returnedNode)
+    {
+        Vector2 pointPosition = TurnPositionIntoPointOnGridGraph(gg, (Vector3)point.position);
+        GraphNode currentNodeBeingVetted = null;
+        // GraphNode node = null;
+
+        for (int z = 0; z < distanceInNodes; z++)
+        {
+            if (0 >= (-z - 1 + (int)pointPosition.y) * gg.width + ((int)pointPosition.x)) return true;
+            returnedNode = gg.nodes[(-z - 1 + (int)pointPosition.y) * gg.width + ((int)pointPosition.x)];
+
+            currentNodeBeingVetted = gg.nodes[(-z - 1 + (int)pointPosition.y) * gg.width + ((int)pointPosition.x)];
+            if (currentNodeBeingVetted.Walkable && currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty) return true;
+        }
+
+        returnedNode = gg.nodes[(-distanceInNodes - 1 + (int)pointPosition.y) * gg.width + ((int)pointPosition.x)];
+        return false;
+    }
+
+    public static bool CheckDirectionOfPathInSequence(List<Vector2> vectorPath, Vector2 direction)
+    {
+        if (vectorPath.Count < 2) return false;
+
+        for (int index = 1; index < vectorPath.Count - 1; index++)
+        {
+            Debug.Log("Calculated direction: " + (vectorPath[index] - vectorPath[index - 1]).normalized);
+            Debug.DrawLine(vectorPath[index], vectorPath[index - 1], Color.magenta, 5f);
+            if ((vectorPath[index] - vectorPath[index - 1]).normalized != direction) return false;
+        }
+
+        return true;
+    }
 
     // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
     public static class DrawArrow

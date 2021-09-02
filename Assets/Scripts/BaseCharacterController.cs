@@ -46,6 +46,8 @@ public class BaseCharacterController : MonoBehaviour
     public bool airControl = true;              // Whether you can steer while jumping
     public float jumpHeight = 1;
     public float airborneJumpHeight = 1;
+    [HideInInspector]
+    public bool Ai_jumpIsQueued = false;
 
     [Tooltip("successiveJumpHeightReduction")]
     [Range(0f, 1f)]
@@ -335,6 +337,11 @@ public class BaseCharacterController : MonoBehaviour
         {
             HandleCollisionsAndSnapping();
             HandleMovementRevamped();
+            if (Ai_jumpIsQueued && isGrounded)
+            {
+                Ai_jumpIsQueued = false;
+                PerformJumpAi();
+            }
         }
 
         RunAtFixedUpdate();
@@ -985,7 +992,7 @@ public class BaseCharacterController : MonoBehaviour
         // meant to be overwritten
     }
 
-    public virtual void PerformJumpAi(bool holdSpaceKey=false)
+    public virtual void PerformJumpAi(bool holdSpaceKey = false, bool mustBeGrounded = false)
     {
         // meant to be overwritten
     }
@@ -1122,9 +1129,9 @@ public class BaseCharacterController : MonoBehaviour
 
     // Ai Virtual
 
-    public virtual void JumpWaypointAI(bool holdSpaceKey=false)
+    public virtual void JumpWaypointAI(bool holdSpaceKey=false, bool mustBeGrounded=false)
     {
-        PerformJumpAi(holdSpaceKey);
+        PerformJumpAi(holdSpaceKey, mustBeGrounded);
     }
 
     private float t_holdMovementAiTimeStamp = 0f;

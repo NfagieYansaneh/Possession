@@ -209,33 +209,44 @@ public class BaseAiController : MonoBehaviour
         }
 
         // for maximum perforance, you can just check the squard distance
-        float distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
+        float distanceToWaypoint; // = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
         reachedEndOfPath = false;
 
         currentTypeofWaypoint = typeofWaypoint.RUN;
 
-        for (int i=0; i < specialWaypoints.Count; i++)
+        while (true)
         {
-            if (specialWaypoints[i].active == false) continue;
+            bool willLoop = false;
+            distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
 
-            if(path.path[currentWaypoint] == specialWaypoints[i].node)
+            for (int i = 0; i < specialWaypoints.Count; i++)
             {
-                specialWaypointUpcoming = true;
-                // Magic value!
-                if (distanceToWaypoint <= specialWaypoints[i].activationRange)
+                if (specialWaypoints[i].active == false) continue;
+
+                if (path.path[currentWaypoint] == specialWaypoints[i].node)
                 {
-                    specialWaypointUpcoming = false;
-                    currentTypeofWaypoint = specialWaypoints[i].waypointType;
-                    specialWaypoints[i].events.Invoke();
-                    reachedEndOfPath = true;
-                    currentWaypoint++;
+                    specialWaypointUpcoming = true;
+                    // Magic value!
+                    if (distanceToWaypoint <= specialWaypoints[i].activationRange)
+                    {
+                        Debug.Log("x" + i);
+                        specialWaypointUpcoming = false;
+                        currentTypeofWaypoint = specialWaypoints[i].waypointType;
+                        specialWaypoints[i].events.Invoke();
+                        reachedEndOfPath = true;
+                        currentWaypoint++;
 
-                    Debug.Log(specialWaypoints[i].waypointTypeToString());
+                        Debug.Log(specialWaypoints[i].waypointTypeToString());
 
-                    specialWaypoints[i].isActive(false);
-                    break;
+                        specialWaypoints[i].isActive(false);
+                        willLoop = true;
+                        break;
+                    }
                 }
             }
+
+            if (willLoop) continue;
+            else break;
         }
 
         while (!specialWaypointUpcoming)
