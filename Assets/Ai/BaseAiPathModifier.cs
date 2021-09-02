@@ -9,6 +9,8 @@ using System;
 using UnityEditor;
 #endif
 
+public enum AdjNodeSearchDirection { LEFT, RIGHT, BOTH }
+
 public class BaseAiPathModifier : MonoModifier
 {
     public List<GraphNode> originalNodes;
@@ -78,11 +80,91 @@ public class BaseAiPathModifier : MonoModifier
             to = toNode;
         }
     }
+    public struct NodeGroupStruct
+    {
+        List<GraphNode> allNodes;
+        List<Vector3> allNodePositions;
+
+        GraphNode highestNode;
+        Vector3 highestNodePosition { get { return (Vector3)highestNode.position; } }
+
+        GraphNode lowestNode;
+        Vector3 lowestNodePosition { get { return (Vector3)lowestNode.position; } }
+
+        GraphNode leftistNode;
+        Vector3 leftistNodePosition { get { return (Vector3)leftistNode.position; } }
+
+        GraphNode rightistNode;
+        Vector3 rightistNodePosition { get { return (Vector3)rightistNode.position; } }
+
+        GraphNode middleNode;
+        Vector3 middleNodePosition { get { return (Vector3)middleNode.position; } }
+
+        int Area;
+
+        public NodeGroupStruct(List<GraphNode> nodes, bool leftToRight=true)
+        {
+            allNodes = nodes;
+
+            allNodes.Sort(delegate (GraphNode param1, GraphNode param2)
+            {
+                Vector3 param1Position = (Vector3)param1.position;
+                Vector3 param2Position = (Vector3)param2.position;
+
+                if (leftToRight && param1Position.x < param2Position.x) return -1;
+                else if (!leftToRight && param2Position.x < param1Position.x) return -1;
+                else return 1;
+            });
+
+            allNodePositions = new List<Vector3>();
+
+            foreach(GraphNode node in allNodes)
+            {
+                allNodePositions.Add((Vector3)node.position);
+            }
+
+            float highest = 0f;
+            int highestIndex = 0;
+
+            float lowest = 0f;
+            int lowestIndex = 0;
+
+            leftistNode = (leftToRight)? allNodes[0] : allNodes[allNodes.Count - 1];
+            rightistNode = (!leftToRight) ? allNodes[0] : allNodes[allNodes.Count - 1];
+
+            Area = allNodes.Count;
+
+            middleNode = allNodes[(int)allNodes.Count / 2];
+
+            for(int i=0; i<allNodePositions.Count; i++)
+            {
+                if (i==0) {
+                    highest = lowest = allNodePositions[i].y;
+                }
+
+                if (highest < allNodePositions[i].y)
+                {
+                    highest = allNodePositions[i].y;
+                    highestIndex = i;
+                }
+
+                if (lowest > allNodePositions[i].y)
+                {
+                    lowest = allNodePositions[i].y;
+                    lowestIndex = i;
+                }
+            }
+
+            highestNode = allNodes[highestIndex];
+            lowestNode = allNodes[lowestIndex];
+        }
+    }
 
     public List<PaddingNodeStruct> allPaddingStructs = new List<PaddingNodeStruct>();
     public List<WaypointInsertStruct> waypointInserts = new List<WaypointInsertStruct>();
     public List<TrimRequestStruct> trimRequests = new List<TrimRequestStruct>();
     public List<TrimRequestStruct> lateTrimRequests = new List<TrimRequestStruct>();
+    public List<NodeGroupStruct> nodeGroups = new List<NodeGroupStruct>();
 
     public BaseCharacterController baseCharacterController;
     public BaseAiController baseAiController;
@@ -158,6 +240,7 @@ public class BaseAiPathModifier : MonoModifier
 
         newNodes = originalNodes;
         newVectorPath = path.vectorPath;
+
         bool findNextLowPenalty = false;
 
         List<Vector2> tempVectorPath = new List<Vector2>();
@@ -378,152 +461,6 @@ public class BaseAiPathModifier : MonoModifier
         ignoreJumpNodes.Clear();
     }
 
-    enum AdjNodeSearchDirection { LEFT, RIGHT, BOTH }
-    private List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes, AdjNodeSearchDirection searchDirection, int count = 0, GraphNode startCounterPastNode = null, int maxHeightDisplacementInNodes = 10)
-    {
-        Debug.Log("Called");
-        List<GraphNode> adjNodes = new List<GraphNode>();
-        if (node.Penalty == GridGraphGenerate.highPenalty)
-        {
-            foundAdjNodes = false;
-            return null;
-        }
-
-        // Checking adj nodes to the left
-        bool stopCurrentScan = false;
-
-        GraphNode currentNodeBeingVetted = null;
-        Vector2 temp = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, node);
-        Vector2 scanNodePoint = temp;
-
-        bool counterActive = false;
-        bool counterPaused = (startCounterPastNode != null && startCounterPastNode != node); // counter will be paused if startCounterPastNode exists, and we will turn on the counter later
-        int counterIndex = 0;
-        if (count != 0) counterActive = true;
-
-        // checking for adj nodes on the left
-        if (searchDirection == AdjNodeSearchDirection.LEFT || searchDirection == AdjNodeSearchDirection.BOTH)
-            while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
-            {
-
-                if (scanNodePoint.x == 0f) break;
-                if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y))
-                {
-                    Debug.LogError("Hmm?" + Mathf.Abs(scanNodePoint.y - temp.y));
-                    break;
-                }
-
-                for (int z = 0; z < 3; z++)
-                {
-
-                    if (scanNodePoint.y != 0f)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
-                    else if (scanNodePoint.y == 0f && z != 2)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
-                    else
-                    {
-                        stopCurrentScan = true;
-                        break;
-                    }
-
-
-                    if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty && currentNodeBeingVetted.Walkable)
-                    {
-                        adjNodes.Add(currentNodeBeingVetted);
-                        scanNodePoint.x--;
-
-                        if (scanNodePoint.y != 0f)
-                            scanNodePoint.y += (z - 1);
-                        else
-                            scanNodePoint.y += z;
-
-                        if (scanNodePoint.x == 0) stopCurrentScan = true;
-
-                        Vector3 pos = (Vector3)currentNodeBeingVetted.position;
-                        // Debug.Log(pos);
-                        Helper.DrawArrow.ForDebugTimed(pos + Vector3.down * 1f, Vector3.up, Color.magenta, 3f);
-                        foundAdjNodes = true;
-                        break;
-                    }
-
-
-                    else if (z == 2) // On final scan and found no adj node
-                    {
-                        stopCurrentScan = true;
-                    }
-                }
-
-                if (startCounterPastNode != null && startCounterPastNode == currentNodeBeingVetted)
-                    counterPaused = false;
-
-                if (!counterPaused)
-                    counterIndex++;
-            }
-
-        // Checking adj nodes to the right
-        stopCurrentScan = false;
-        scanNodePoint = temp;
-
-        counterPaused = (startCounterPastNode != null && startCounterPastNode != node);
-        counterIndex = 0;
-
-        if (searchDirection == AdjNodeSearchDirection.RIGHT || searchDirection == AdjNodeSearchDirection.BOTH)
-            while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
-            {
-
-                if (scanNodePoint.x == GridGraphGenerate.gg.width) break;
-                if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y)) break;
-
-                for (int z = 0; z < 3; z++)
-                {
-
-                    if (scanNodePoint.y != 0f)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
-                    else if (scanNodePoint.y == 0f && z != 2)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
-                    else
-                    {
-                        stopCurrentScan = true;
-                        break;
-                    }
-
-                    if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty && currentNodeBeingVetted.Walkable)
-                    {
-                        adjNodes.Add(currentNodeBeingVetted);
-                        scanNodePoint.x++;
-
-                        if (scanNodePoint.y != 0f)
-                            scanNodePoint.y += (z - 1);
-                        else
-                            scanNodePoint.y += z;
-
-                        if (scanNodePoint.x == GridGraphGenerate.gg.width) stopCurrentScan = true;
-
-                        Vector3 pos = (Vector3)currentNodeBeingVetted.position;
-                        Helper.DrawArrow.ForDebugTimed(pos + Vector3.down * 1f, Vector3.up, Color.magenta, 3f);
-                        foundAdjNodes = true;
-                        break;
-                    }
-
-                
-
-                    else if (z == 2) // On final scan and found no adj node
-                    {
-                        stopCurrentScan = true;
-                    }
-                }
-
-                if (startCounterPastNode != null && startCounterPastNode == currentNodeBeingVetted)
-                    counterPaused = false;
-
-                if (!counterPaused)
-                    counterIndex++;
-            }
-
-        Debug.Log("whatsbcanw");
-        return adjNodes;
-    }
-
     private GraphNode FindClosestNode(Vector3 position, List<GraphNode> list)
     {
         if (list.Count == 0) return null;
@@ -570,7 +507,7 @@ public class BaseAiPathModifier : MonoModifier
 
         // Am i not grabbing the wrong adj nodes?
         bool foundAdjNodes = false;
-        List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
+        List<GraphNode> adjNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         if (foundAdjNodes == false) return false;
 
         adjNodes.Insert(0, jumpEndNode);
@@ -641,7 +578,7 @@ public class BaseAiPathModifier : MonoModifier
                 newVectorPath.RemoveAt(index);
             }
 
-            List<GraphNode> paddingNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes,
+            List<GraphNode> paddingNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes,
                 (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2 + potentialNodes.Count);
             paddingNodes.Add(jumpEndNode);
             PadTheseNodes(paddingNodes, false);
@@ -665,7 +602,7 @@ public class BaseAiPathModifier : MonoModifier
 
         // Should I really be returning false here?
         bool foundAdjNodes = false;
-        List<GraphNode> adjNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
+        List<GraphNode> adjNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         if (foundAdjNodes == false) return false;
 
         GraphNode closestNode = jumpEndNode; // (jumpNodePosition, adjNodes);
@@ -770,7 +707,7 @@ public class BaseAiPathModifier : MonoModifier
             TrimRequestStruct newTrimRequest = new TrimRequestStruct(jumpNode, closestNode);
             trimRequests.Add(newTrimRequest);
 
-            List<GraphNode> paddingNodes = FindAdjacentNodes(closestNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2);
+            List<GraphNode> paddingNodes = Helper.FindAdjacentNodes(closestNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2);
             PadTheseNodes(paddingNodes, false);
             return true;
         }
@@ -801,9 +738,9 @@ public class BaseAiPathModifier : MonoModifier
 
         bool foundAdjNodes = false;
 
-        GraphNode closestNode = FindClosestNode(jumpEndNodePosition, FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
+        GraphNode closestNode = FindClosestNode(jumpEndNodePosition, Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
         Vector3 closestNodePosition = (Vector3)closestNode.position;
-        List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
+        List<GraphNode> adjNodesAtJump = Helper.FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
         adjNodesAtJump.Add(jumpNode);
 
         float airborneVyi = GetAirborneVyi();
@@ -1033,6 +970,7 @@ public class BaseAiPathModifier : MonoModifier
 
         return false;
     }
+
     private bool CalculateSingleJump(GraphNode jumpNode, GraphNode jumpEndNode, GraphNode nextJumpNode, GraphNode nextJumpEndNode, bool masterCall = true)
     {
         // float Vx = 8.5f;
@@ -1087,13 +1025,13 @@ public class BaseAiPathModifier : MonoModifier
 
         if (waypointFacingRight)
         {
-            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
-            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
+            adjNodes = Helper.FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
+            adjTargetNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
         }
         else
         {
-            adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
-            adjTargetNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
+            adjNodes = Helper.FindAdjacentNodes(jumpNode, ref foundAdjNodes, AdjNodeSearchDirection.RIGHT);
+            adjTargetNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.LEFT);
         }
 
         adjNodes.Insert(0, jumpNode); // just for convenicene when using foreach loop
@@ -1261,7 +1199,7 @@ public class BaseAiPathModifier : MonoModifier
             TrimRequestStruct newTrimRequest = new TrimRequestStruct(jumpAtThisNode, landingNode);
             trimRequests.Add(newTrimRequest);
 
-            List<GraphNode> paddingNodes = FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2, landingNode);
+            List<GraphNode> paddingNodes = Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, (waypointFacingRight) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 2, landingNode);
             PadTheseNodes(paddingNodes, false);
 
             // Debug.Log("Finished search after " + (index + 1) + " cycle(s)");
@@ -1300,10 +1238,10 @@ public class BaseAiPathModifier : MonoModifier
         
         bool foundAdjNodes = false;
         
-        GraphNode closestNode = FindClosestNode(jumpNodePosition, FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
+        GraphNode closestNode = FindClosestNode(jumpNodePosition, Helper.FindAdjacentNodes(jumpEndNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH));
         Vector3 closestNodePosition = (Vector3)closestNode.position;
         
-        List<GraphNode> adjNodesAtJump = FindAdjacentNodes(jumpNode, ref foundAdjNodes, (waypointFacingRight)? AdjNodeSearchDirection.LEFT : AdjNodeSearchDirection.RIGHT);
+        List<GraphNode> adjNodesAtJump = Helper.FindAdjacentNodes(jumpNode, ref foundAdjNodes, (waypointFacingRight)? AdjNodeSearchDirection.LEFT : AdjNodeSearchDirection.RIGHT);
         adjNodesAtJump.Insert(0, jumpNode);
         
         float SxDash = baseCharacterController.dodgeDistance;
@@ -1362,7 +1300,7 @@ public class BaseAiPathModifier : MonoModifier
                 foundAnyPotentialNode = true;
         
                 // if we want to be more performant. We can just stop our search once we find one node potential node since
-                // FindAdjacentNodes is directional
+                // Helper.FindAdjacentNodes is directional
         
                 potentialNodes.Add(node);
                 continue;
@@ -1544,7 +1482,7 @@ public class BaseAiPathModifier : MonoModifier
         if (distanceFromJumpNode != 0)
         {
             bool foundAdjNodes = false;
-            List<GraphNode> adjNodes = FindAdjacentNodes(jumpNode, ref foundAdjNodes,
+            List<GraphNode> adjNodes = Helper.FindAdjacentNodes(jumpNode, ref foundAdjNodes,
                 (directionOfVaccantNodeFR) ? AdjNodeSearchDirection.RIGHT : AdjNodeSearchDirection.LEFT, 0, null, 0);
             if(adjNodes == null) ;
             // do some skipping by using the return value of foundAdjNodes

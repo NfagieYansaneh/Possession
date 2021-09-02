@@ -25,6 +25,151 @@ public static class Helper
         return to;
     }
 
+    public static List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes, AdjNodeSearchDirection searchDirection, int count = 0, GraphNode startCounterPastNode = null, int maxHeightDisplacementInNodes = 10)
+    {
+        Debug.Log("Called");
+        List<GraphNode> adjNodes = new List<GraphNode>();
+        if (node.Penalty == GridGraphGenerate.highPenalty)
+        {
+            foundAdjNodes = false;
+            return null;
+        }
+
+        // Checking adj nodes to the left
+        bool stopCurrentScan = false;
+
+        GraphNode currentNodeBeingVetted = null;
+        Vector2 temp = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, node);
+        Vector2 scanNodePoint = temp;
+
+        bool counterActive = false;
+        bool counterPaused = (startCounterPastNode != null && startCounterPastNode != node); // counter will be paused if startCounterPastNode exists, and we will turn on the counter later
+        int counterIndex = 0;
+        if (count != 0) counterActive = true;
+
+        // checking for adj nodes on the left
+        if (searchDirection == AdjNodeSearchDirection.LEFT || searchDirection == AdjNodeSearchDirection.BOTH)
+            while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
+            {
+
+                if (scanNodePoint.x == 0f) break;
+                if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y))
+                {
+                    Debug.LogError("Hmm?" + Mathf.Abs(scanNodePoint.y - temp.y));
+                    break;
+                }
+
+                for (int z = 0; z < 3; z++)
+                {
+
+                    if (scanNodePoint.y != 0f)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
+                    else if (scanNodePoint.y == 0f && z != 2)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
+                    else
+                    {
+                        stopCurrentScan = true;
+                        break;
+                    }
+
+
+                    if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty && currentNodeBeingVetted.Walkable)
+                    {
+                        adjNodes.Add(currentNodeBeingVetted);
+                        scanNodePoint.x--;
+
+                        if (scanNodePoint.y != 0f)
+                            scanNodePoint.y += (z - 1);
+                        else
+                            scanNodePoint.y += z;
+
+                        if (scanNodePoint.x == 0) stopCurrentScan = true;
+
+                        Vector3 pos = (Vector3)currentNodeBeingVetted.position;
+                        // Debug.Log(pos);
+                        Helper.DrawArrow.ForDebugTimed(pos + Vector3.down * 1f, Vector3.up, Color.magenta, 3f);
+                        foundAdjNodes = true;
+                        break;
+                    }
+
+
+                    else if (z == 2) // On final scan and found no adj node
+                    {
+                        stopCurrentScan = true;
+                    }
+                }
+
+                if (startCounterPastNode != null && startCounterPastNode == currentNodeBeingVetted)
+                    counterPaused = false;
+
+                if (!counterPaused)
+                    counterIndex++;
+            }
+
+        // Checking adj nodes to the right
+        stopCurrentScan = false;
+        scanNodePoint = temp;
+
+        counterPaused = (startCounterPastNode != null && startCounterPastNode != node);
+        counterIndex = 0;
+
+        if (searchDirection == AdjNodeSearchDirection.RIGHT || searchDirection == AdjNodeSearchDirection.BOTH)
+            while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
+            {
+
+                if (scanNodePoint.x == GridGraphGenerate.gg.width) break;
+                if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y)) break;
+
+                for (int z = 0; z < 3; z++)
+                {
+
+                    if (scanNodePoint.y != 0f)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
+                    else if (scanNodePoint.y == 0f && z != 2)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
+                    else
+                    {
+                        stopCurrentScan = true;
+                        break;
+                    }
+
+                    if (currentNodeBeingVetted.Penalty == GridGraphGenerate.lowPenalty && currentNodeBeingVetted.Walkable)
+                    {
+                        adjNodes.Add(currentNodeBeingVetted);
+                        scanNodePoint.x++;
+
+                        if (scanNodePoint.y != 0f)
+                            scanNodePoint.y += (z - 1);
+                        else
+                            scanNodePoint.y += z;
+
+                        if (scanNodePoint.x == GridGraphGenerate.gg.width) stopCurrentScan = true;
+
+                        Vector3 pos = (Vector3)currentNodeBeingVetted.position;
+                        Helper.DrawArrow.ForDebugTimed(pos + Vector3.down * 1f, Vector3.up, Color.magenta, 3f);
+                        foundAdjNodes = true;
+                        break;
+                    }
+
+
+
+                    else if (z == 2) // On final scan and found no adj node
+                    {
+                        stopCurrentScan = true;
+                    }
+                }
+
+                if (startCounterPastNode != null && startCounterPastNode == currentNodeBeingVetted)
+                    counterPaused = false;
+
+                if (!counterPaused)
+                    counterIndex++;
+            }
+
+        Debug.Log("whatsbcanw");
+        return adjNodes;
+    }
+
     public static Vector2 TurnPositionIntoPointOnGridGraph(GridGraph gg, Vector3 position)
     {
         int x = (int)Helper.Remap(position.x,
