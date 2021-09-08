@@ -47,7 +47,7 @@ public class Rin_CharacterController : BaseCharacterController
             {
                 if (playingJumpAnimation)
                 {
-                    Debug.Log("Landed");
+                    // Debug.Log("Landed");
                     anim.SetTrigger(Animator.StringToHash("Landed"));
                     playingJumpAnimation = false;
                     anim.speed = 1f;

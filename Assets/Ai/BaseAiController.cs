@@ -11,9 +11,11 @@ public enum typeofWaypoint { RUN, WAIT, JUMP, AIRBORNE_JUMP, DODGE, NEUTRAL_DODG
 
 public class BaseAiController : MonoBehaviour
 {
-    public Transform targetPosition;
+    public Transform targetPlayerPosition;
+    Vector3 detourWaypointPosition;
+
     public BaseCharacterController baseCharacterController;
-    Seeker seeker;
+    public Seeker seeker;
     bool calculatePathing = false;
     Path path;
     int currentWaypoint = 0;
@@ -21,10 +23,12 @@ public class BaseAiController : MonoBehaviour
     bool reachedEndOfPath = false;
     bool pathComplete = false;
 
+
     float nextWaypointDistance = 2;
     float pathCompleteDistance = 1.9f;
     float pathLeftDistance = 2.5f;
 
+    public bool takingDetour = false;
     bool specialWaypointUpcoming = false;
     typeofWaypoint currentTypeofWaypoint = typeofWaypoint.RUN;
 
@@ -40,11 +44,20 @@ public class BaseAiController : MonoBehaviour
         public UnityEvent events;
         public float activationRange;
 
+        public bool ifBelowActivate;
+        public bool ifLeftActivate;
+        public bool ifRightActivate;
+        public bool ifAboveActivate;
+        public bool ifFallingActivate;
+
+        public bool ignoreY;
+
         public GraphNode contextJumpNode;
         public GraphNode contextJumpEndNode;
 
         public specialWaypoint(typeofWaypoint type, GraphNode targetNode, UnityAction action, bool waypointFacingRight = false, float activateRange = 0.25f,
-            GraphNode newContextJumpNode = null, GraphNode newContextJumpEndNode = null)
+            GraphNode newContextJumpNode = null, GraphNode newContextJumpEndNode = null, bool belowActivate=false, bool leftActivate=false, bool rightActivate=false,
+            bool aboveActivate=false, bool fallingActivate=false, bool setIgnoreY = false)
         {
             active = true;
             node = targetNode;
@@ -58,6 +71,14 @@ public class BaseAiController : MonoBehaviour
 
             events = new UnityEvent();
             events.AddListener(action);
+
+            ifBelowActivate = belowActivate;
+            ifLeftActivate = leftActivate;
+            ifRightActivate = rightActivate;
+            ifAboveActivate = aboveActivate;
+            ifFallingActivate = fallingActivate;
+
+            ignoreY = setIgnoreY;
         }
 
         static public specialWaypoint operator +(specialWaypoint myStruct, UnityAction action)
@@ -120,8 +141,8 @@ public class BaseAiController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        seeker = GetComponent<Seeker>();
-        baseCharacterController = GetComponent<BaseCharacterController>();
+        // seeker = GetComponent<Seeker>();
+        // baseCharacterController = GetComponent<BaseCharacterController>();
 
         // baseCharacterController.PerformMovementAi(Vector2.left);
         // InvokeRepeating("StartNewPath", 2f, 3456f);
@@ -133,7 +154,7 @@ public class BaseAiController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(targetPosition.position, 0.2f);
+        Gizmos.DrawWireSphere(targetPlayerPosition.position, 0.2f);
     }
 
     private void FixedUpdate()
@@ -141,14 +162,21 @@ public class BaseAiController : MonoBehaviour
         // baseCharacterController.PerformMovementAi(Vector2.);
         /* if (calculatePathing)
         {
-            // seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
-            seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
+            // seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
         } */
     }
 
-    public void StartNewPath()
+    public void StartNewPath(Vector3 position, bool takingDetourEnabled = false)
     {
-        seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
+        specialWaypoints.Clear();
+        seeker.StartPath(transform.position, position, OnPathComplete);
+
+        if (takingDetourEnabled)
+        {
+            takingDetour = true;
+            detourWaypointPosition = position;
+        }
     }
 
     // Update is called once per frame
@@ -158,7 +186,9 @@ public class BaseAiController : MonoBehaviour
 
         if (GUI.Button(new Rect(500, 20, 135, 50), new GUIContent("Calculate Pathing")))
         {
-            seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
+            specialWaypoints.Clear();
+            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+            InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.5f);
         }
     }
 
@@ -180,6 +210,11 @@ public class BaseAiController : MonoBehaviour
             }
             */
 
+            reachedEndOfPath = false;
+            pathComplete = false;
+            takingDetour = false;
+            specialWaypointUpcoming = false;
+
             currentWaypoint = 0;
         }
     }
@@ -188,6 +223,26 @@ public class BaseAiController : MonoBehaviour
     public void Update()
     {
         HandleAiLogic();
+    }
+
+    void PeriodicUpdatePathRepeating()
+    {
+        if (baseCharacterController.isGrounded && takingDetour==false && startedEnumerator==false && baseCharacterController.hitStopActive==false)
+        {
+            StartNewPath(targetPlayerPosition.position);
+            // also only update if player leaves nodegroup?
+        }
+    }
+
+    bool startedEnumerator = false;
+    IEnumerator CalculateNewPathEnumerator(float wait)
+    {
+        yield return new WaitForSeconds(wait);
+        pathComplete = true;
+        takingDetour = false;
+        startedEnumerator = false;
+        // specialWaypoints.Clear();
+        StartNewPath(targetPlayerPosition.position);
     }
 
     public void HandleAiLogic()
@@ -199,25 +254,38 @@ public class BaseAiController : MonoBehaviour
         }
 
         // can be optimised
-        if (Vector2.Distance(transform.position, targetPosition.position) <= pathCompleteDistance)
+        if (!takingDetour)
         {
-            pathComplete = true;
-        }
-        else if (pathComplete && Vector2.Distance(transform.position, targetPosition.position) >= pathLeftDistance)
+            if (Vector2.Distance(transform.position, targetPlayerPosition.position) <= pathCompleteDistance)
+            {
+                pathComplete = true;
+            }
+            else if (pathComplete && Vector2.Distance(transform.position, targetPlayerPosition.position) >= pathLeftDistance)
+            {
+                pathComplete = false;
+            }
+        } else
         {
-            pathComplete = false;
+            if (Vector2.Distance(transform.position, detourWaypointPosition) <= 1f && !startedEnumerator)
+            {
+                Debug.Log("Recalculating pathing after completing the detour");
+                startedEnumerator = true;
+                StartCoroutine(CalculateNewPathEnumerator(0.2f));
+            }
         }
 
         // for maximum perforance, you can just check the squard distance
         float distanceToWaypoint; // = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
+        distanceToWaypoint = Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x);
         reachedEndOfPath = false;
 
         currentTypeofWaypoint = typeofWaypoint.RUN;
 
+        bool ignoreY = false;
+
         while (true)
         {
             bool willLoop = false;
-            distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
 
             for (int i = 0; i < specialWaypoints.Count; i++)
             {
@@ -225,18 +293,26 @@ public class BaseAiController : MonoBehaviour
 
                 if (path.path[currentWaypoint] == specialWaypoints[i].node)
                 {
+                    ignoreY = specialWaypoints[i].ignoreY;
+
+                    distanceToWaypoint = (specialWaypoints[i].ignoreY)? Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) :
+                    Vector3.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
+
                     specialWaypointUpcoming = true;
                     // Magic value!
-                    if (distanceToWaypoint <= specialWaypoints[i].activationRange)
+                    if (distanceToWaypoint <= specialWaypoints[i].activationRange || 
+                        (specialWaypoints[i].ifBelowActivate && baseCharacterController.groundCheck.position.y < specialWaypoints[i].nodePosition.y) ||
+                        (specialWaypoints[i].ifLeftActivate && baseCharacterController.groundCheck.position.x < specialWaypoints[i].nodePosition.x) ||
+                        (specialWaypoints[i].ifRightActivate && baseCharacterController.groundCheck.position.x > specialWaypoints[i].nodePosition.x))
                     {
-                        Debug.Log("x" + i);
+                        // Debug.Log("x" + i);
                         specialWaypointUpcoming = false;
                         currentTypeofWaypoint = specialWaypoints[i].waypointType;
                         specialWaypoints[i].events.Invoke();
                         reachedEndOfPath = true;
                         currentWaypoint++;
 
-                        Debug.Log(specialWaypoints[i].waypointTypeToString());
+                        // Debug.Log(specialWaypoints[i].waypointTypeToString());
 
                         specialWaypoints[i].isActive(false);
                         willLoop = true;
@@ -248,6 +324,7 @@ public class BaseAiController : MonoBehaviour
             if (willLoop) continue;
             else break;
         }
+
 
         while (!specialWaypointUpcoming)
         {
@@ -280,7 +357,11 @@ public class BaseAiController : MonoBehaviour
                 break;
             }
 
-            distanceToWaypoint = Vector2.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
+            if (specialWaypointUpcoming && !ignoreY)
+            {
+                distanceToWaypoint = Vector3.Distance(baseCharacterController.groundCheck.position + Vector3.up * 0.25f, path.vectorPath[currentWaypoint]);
+            } else
+            distanceToWaypoint = Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x);
         }
 
         if (!reachedEndOfPath && !pathComplete && !baseCharacterController.holdMovementAiOverride)
@@ -288,7 +369,7 @@ public class BaseAiController : MonoBehaviour
             if ((baseCharacterController.Ai_movementDirection == Vector2.right || baseCharacterController.Ai_movementDirection == Vector2.zero)
                 && (path.vectorPath[currentWaypoint] - transform.position).x < 0f)
             {
-                if(Mathf.Abs((path.vectorPath[currentWaypoint] - transform.position).x) > 0.1f)
+                if(Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.2f)
                     baseCharacterController.PerformMovementAi(Vector2.left);
                 else
                     baseCharacterController.PerformMovementAi(Vector2.zero);
@@ -296,7 +377,7 @@ public class BaseAiController : MonoBehaviour
             else if ((baseCharacterController.Ai_movementDirection == Vector2.left || baseCharacterController.Ai_movementDirection == Vector2.zero)
               && (path.vectorPath[currentWaypoint] - transform.position).x > 0f)
             {
-                if (Mathf.Abs((path.vectorPath[currentWaypoint] - transform.position).x) > 0.1f)
+                if (Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.2f)
                     baseCharacterController.PerformMovementAi(Vector2.right);
                 else
                     baseCharacterController.PerformMovementAi(Vector2.zero);

@@ -5,8 +5,14 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: d1c3109bdb54ad54c8a2b2838528e640
+  - enabled: 0
+    path: Assets/Scenes/Ai Crashcourse.unity
+    guid: 78b4004b8a4500648878eac1ea24cdb9
+  - enabled: 1
+    path: Assets/Scenes/Maimi Beach.unity
+    guid: 52d4cae3b95c628499a08395855f8b69
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: e03da234f3ccb4f439cb09c37a46cea4, type: 2}

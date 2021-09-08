@@ -326,6 +326,7 @@ public class BaseCharacterController : MonoBehaviour
                 dodgeBoxPosition = new Vector2(transform.position.x - dodgeBoxOffset.x, transform.position.y + dodgeBoxOffset.y);
 
             RunAtUpdate();
+            HandleCollisionsAndSnapping(); // smoother when running every frame
         }
     }
 
@@ -335,7 +336,7 @@ public class BaseCharacterController : MonoBehaviour
 
         if (!hitStopActive)
         {
-            HandleCollisionsAndSnapping();
+            // HandleCollisionsAndSnapping();
             HandleMovementRevamped();
             if (Ai_jumpIsQueued && isGrounded)
             {

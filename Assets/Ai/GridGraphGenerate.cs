@@ -19,8 +19,14 @@ public class GridGraphGenerate : MonoBehaviour
         public GraphNode leftistNode;
         public Vector3 leftistNodePosition { get { return (Vector3)leftistNode.position; } }
 
+        public GraphNode leftistNode_3IN;
+        public Vector3 leftistNode_3IN_Position { get { return (Vector3)leftistNode_3IN.position; } }
+
         public GraphNode rightistNode;
         public Vector3 rightistNodePosition { get { return (Vector3)rightistNode.position; } }
+
+        public GraphNode rightistNode_3IN;
+        public Vector3 rightistNode_3IN_Position { get { return (Vector3)rightistNode_3IN.position; } }
 
         public GraphNode middleNode;
         public Vector3 middleNodePosition { get { return (Vector3)middleNode.position; } }
@@ -85,11 +91,29 @@ public class GridGraphGenerate : MonoBehaviour
             highestNode = allNodes[highestIndex];
             lowestNode = allNodes[lowestIndex];
 
+            List<GraphNode> buffer = new List<GraphNode>();
+            bool foundAdjNodes = false;
+            buffer = Helper.FindAdjacentNodes(leftistNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH, 2);
+
+            if (foundAdjNodes)
+            {
+                leftistNode_3IN = buffer[buffer.Count - 1];
+            }
+            else leftistNode_3IN = leftistNode;
+
+            foundAdjNodes = false;
+            buffer = Helper.FindAdjacentNodes(rightistNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH, 2);
+
+            if (foundAdjNodes)
+            {
+                rightistNode_3IN = buffer[buffer.Count - 1];
+            }
+            else rightistNode_3IN = rightistNode;
 
         }
     }
 
-    public List<NodeGroupStruct> nodeGroups = new List<NodeGroupStruct>();
+    public static List<NodeGroupStruct> nodeGroups = new List<NodeGroupStruct>();
 
     bool drawForLowPenalty = false;
     List<GraphNode> lowPenaltyNodes = new List<GraphNode>();
@@ -102,6 +126,7 @@ public class GridGraphGenerate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        nodeGroups.Clear();
         Scan();
 
         /* gg.GetNodes(node => {
@@ -111,6 +136,17 @@ public class GridGraphGenerate : MonoBehaviour
 
     }
 
+    public static NodeGroupStruct FindThisNodesNodeGroup(GraphNode node)
+    {
+        for(int index=0; index<nodeGroups.Count;index++)
+        {
+            NodeGroupStruct nodeGroup = nodeGroups[index];
+            if (nodeGroup.allNodes.Contains(node))
+                return nodeGroup;
+        }
+
+        return nodeGroups[0]; // this will never happen
+    }
     private void Scan()
     {
         AstarPath.FindAstarPath();
@@ -177,7 +213,7 @@ public class GridGraphGenerate : MonoBehaviour
                             List<GraphNode> nodesToAdd = Helper.FindAdjacentNodes(currentNode, ref foundAdjNodes, AdjNodeSearchDirection.BOTH);
 
                             if (!foundAdjNodes) Debug.Log("Found no adjacent nodes?");
-                            else Debug.Log(nodesToAdd.Count);
+                            else; // Debug.Log(nodesToAdd.Count);
 
                             nodesToAdd.Insert(0, currentNode);
 

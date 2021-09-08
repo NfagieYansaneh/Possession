@@ -27,7 +27,7 @@ public static class Helper
 
     public static List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes, AdjNodeSearchDirection searchDirection, int count = 0, GraphNode startCounterPastNode = null, int maxHeightDisplacementInNodes = 10)
     {
-        Debug.Log("Called");
+        // Debug.Log("Called");
         List<GraphNode> adjNodes = new List<GraphNode>();
         if (node.Penalty == GridGraphGenerate.highPenalty)
         {
@@ -52,21 +52,24 @@ public static class Helper
             while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
             {
 
-                if (scanNodePoint.x == 0f) break;
+                if (scanNodePoint.x == 0f || scanNodePoint.y > GridGraphGenerate.gg.Depth) break;
                 if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y))
                 {
-                    Debug.LogError("Hmm?" + Mathf.Abs(scanNodePoint.y - temp.y));
+                    // Debug.LogError("Hmm?" + Mathf.Abs(scanNodePoint.y - temp.y));
                     break;
                 }
 
                 for (int z = 0; z < 3; z++)
                 {
 
-                    if (scanNodePoint.y != 0f)
+                    if (scanNodePoint.y < GridGraphGenerate.gg.Depth - 1 && scanNodePoint.y != 0f)
+                    {
                         currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
-                    else if (scanNodePoint.y == 0f && z != 2)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
-                    else
+                        // Helper.DrawArrow.ForDebugTimed((Vector3)currentNodeBeingVetted.position + Vector3.left * 1f, Vector3.right, Color.gray, 100f);
+                    }
+                    else if ((scanNodePoint.y == GridGraphGenerate.gg.Depth - 1 || scanNodePoint.y == 0f) && z == 0)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(int)(scanNodePoint.x - 1)];
+                    else if (scanNodePoint.y == GridGraphGenerate.gg.Depth - 1 && z > 0)
                     {
                         stopCurrentScan = true;
                         break;
@@ -117,17 +120,17 @@ public static class Helper
             while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
             {
 
-                if (scanNodePoint.x == GridGraphGenerate.gg.width) break;
+                if (scanNodePoint.x == GridGraphGenerate.gg.width || scanNodePoint.y > GridGraphGenerate.gg.Depth) break;
                 if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y)) break;
 
                 for (int z = 0; z < 3; z++)
                 {
 
-                    if (scanNodePoint.y != 0f)
+                    if (scanNodePoint.y < GridGraphGenerate.gg.Depth - 1 && scanNodePoint.y != 0f)
                         currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
-                    else if (scanNodePoint.y == 0f && z != 2)
-                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x + 1)];
-                    else
+                    else if ((scanNodePoint.y == GridGraphGenerate.gg.Depth - 1 || scanNodePoint.y == 0f) && z == 0)
+                        currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(int)(scanNodePoint.x + 1)];
+                    else if (scanNodePoint.y == GridGraphGenerate.gg.Depth - 1 && z > 0)
                     {
                         stopCurrentScan = true;
                         break;
@@ -166,7 +169,7 @@ public static class Helper
                     counterIndex++;
             }
 
-        Debug.Log("whatsbcanw");
+        // Debug.Log("whatsbcanw");
         return adjNodes;
     }
 
@@ -340,7 +343,7 @@ public static class Helper
         for(int index=0; index<count-1; index++)
         {
             List<GraphNode> temp = BresenhamLine(GridGraphGenerate.gg, points[index], points[index + 1]);
-            Debug.DrawLine(points[index], points[index + 1], Color.red, 1000f);
+            Debug.DrawLine(points[index], points[index + 1], Color.red, 1f);
             for (int nodeIndex=0; nodeIndex<temp.Count; nodeIndex++)
             {
                 // hopefully, this isn't a performance intensive process
@@ -370,15 +373,18 @@ public static class Helper
         return false;
     }
 
-    public static bool CheckDirectionOfPathInSequence(List<Vector2> vectorPath, Vector2 direction)
+    public static bool CheckDirectionOfPathInSequence(List<Vector2> vectorPath, Vector2 direction, int sequenceCap)
     {
-        if (vectorPath.Count < 2) return false;
+        if (vectorPath.Count < sequenceCap) return false;
 
-        for (int index = 1; index < vectorPath.Count - 1; index++)
+        for (int index = sequenceCap; index < vectorPath.Count; index++)
         {
-            Debug.Log("Calculated direction: " + (vectorPath[index] - vectorPath[index - 1]).normalized);
-            Debug.DrawLine(vectorPath[index], vectorPath[index - 1], Color.magenta, 5f);
-            if ((vectorPath[index] - vectorPath[index - 1]).normalized != direction) return false;
+            // Debug.Log("Calculated direction: " + (vectorPath[index] - vectorPath[index - 1]).normalized);
+            // Debug.DrawLine(vectorPath[index], vectorPath[index - 1], Color.magenta, 5f);
+            for (int i = 1; i < sequenceCap; i++)
+            {
+                if ((vectorPath[index] - vectorPath[index - 1]).normalized != direction) return false;
+            }
         }
 
         return true;
