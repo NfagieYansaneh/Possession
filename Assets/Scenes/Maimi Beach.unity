@@ -14359,7 +14359,7 @@ MonoBehaviour:
   curVerticalVelocity: 0
   crownObject: {fileID: 1314453555}
   crownScript: {fileID: 1314453558}
-  currentlyPossessed: 0
+  currentlyPossessed: 1
   playerInputHandler: {fileID: 979204401}
   movementDirection: {x: 0, y: 0}
   anim: {fileID: 413490896}
