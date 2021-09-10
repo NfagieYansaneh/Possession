@@ -4,11 +4,13 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System;
+using Photon;
+using Photon.Pun;
 
 public enum animationCurves { LINEAR, CONSTANT, EXPONENTIAL, EXPONENTIAL_DECAY };
 public enum backgroundVelocityType { GRAVITY_INCORPORATED_WITH_FRICTION, LERPING_EFFECT };
 
-public class BaseCharacterController : MonoBehaviour
+public class BaseCharacterController : MonoBehaviourPun
 {
     // Character controller : https://github.com/Brackeys/2D-Character-Controller/blob/master/CharacterController2D.cs
     // Input system : https://www.youtube.com/watch?v=IurqiqduMVQ
@@ -195,7 +197,7 @@ public class BaseCharacterController : MonoBehaviour
     public Vector2 Ai_movementDirection = Vector2.zero;
     public bool Ai_holdDownKey = false;
     public bool Ai_holdSpaceKey = false;
-
+    public bool requirePhotonView = true;
     // come on, use the struct for background velocity
 
     void Awake()
@@ -239,6 +241,7 @@ public class BaseCharacterController : MonoBehaviour
     {
         baseCharacterControllers.Remove(this);
     }
+
     private void OnDrawGizmosSelected()
     {
         // Debugging sake
@@ -290,6 +293,11 @@ public class BaseCharacterController : MonoBehaviour
 
     void Update()
     {
+        if (requirePhotonView)
+        {
+            if (!photonView.IsMine) return;
+        }
+
         if (!hitStopActive)
         {
             // Handling timers and shiz
@@ -305,7 +313,8 @@ public class BaseCharacterController : MonoBehaviour
             if (holdMovementAiOverride && Time.time > t_holdMovementAiTimeStamp)
             {
                 holdMovementAiOverride = false;
-            } else if(holdMovementAiOverride) { SetVelocity(Vector2.zero); }
+            }
+            else if (holdMovementAiOverride) { SetVelocity(Vector2.zero); }
 
             if (Time.time > dodgeMomentumFallofCurveTimestamp && dodgeCarryingMomentum && isGrounded)
             {
@@ -328,12 +337,17 @@ public class BaseCharacterController : MonoBehaviour
             RunAtUpdate();
             HandleCollisionsAndSnapping(); // smoother when running every frame
         }
+        
     }
 
     // FixedUpdate is called every 'x' seconds
     void FixedUpdate()
     {
-
+        if (requirePhotonView)
+        {
+            if (!photonView.IsMine) return;
+        }
+        
         if (!hitStopActive)
         {
             // HandleCollisionsAndSnapping();
@@ -346,6 +360,7 @@ public class BaseCharacterController : MonoBehaviour
         }
 
         RunAtFixedUpdate();
+        
     }
 
 

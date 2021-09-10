@@ -55,8 +55,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 5
   - m_ConditionMode: 1
-    m_ConditionEvent: Down Heavy
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -4404720899678581951}
@@ -66,7 +69,7 @@ AnimatorStateTransition:
   serializedVersion: 3
   m_TransitionDuration: 0
   m_TransitionOffset: 0
-  m_ExitTime: 0.7499999
+  m_ExitTime: 0
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -197,8 +200,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 7
   - m_ConditionMode: 1
-    m_ConditionEvent: Up Heavy
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 553991281983695515}
@@ -299,8 +305,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 4
   - m_ConditionMode: 1
-    m_ConditionEvent: Forward Heavy
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 2593636677142998105}
@@ -411,37 +420,13 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: Forward Light
-    m_Type: 9
+  - m_Name: Attack ID
+    m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: Down Light
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 0}
-  - m_Name: Forward Heavy
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 0}
-  - m_Name: Down Heavy
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 0}
-  - m_Name: Up Heavy
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 0}
-  - m_Name: Up Light
+  - m_Name: Perform Attack
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -522,8 +507,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 3
   - m_ConditionMode: 1
-    m_ConditionEvent: Up Light
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6955531037182716263}
@@ -569,8 +557,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 1
   - m_ConditionMode: 1
-    m_ConditionEvent: Down Light
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 329009965442080835}
@@ -720,8 +711,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: Attack ID
+    m_EventTreshold: 0
   - m_ConditionMode: 1
-    m_ConditionEvent: Forward Light
+    m_ConditionEvent: Perform Attack
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6892094063823649550}

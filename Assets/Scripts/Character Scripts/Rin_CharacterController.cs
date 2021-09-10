@@ -231,18 +231,21 @@ public class Rin_CharacterController : BaseCharacterController
         switch (playerInputHandler.playerAttackDirection)
         {
             case (int)attackDirection.FORWARD:
-                anim.SetTrigger(Animator.StringToHash("Forward Light"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 0);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
 
             case (int)attackDirection.DOWN:
-                anim.SetTrigger(Animator.StringToHash("Down Light"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 1);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
 
             case (int)attackDirection.NEUTRAL:
                 break;
 
             case (int)attackDirection.UP:
-                anim.SetTrigger(Animator.StringToHash("Up Light"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 3);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
         }
         //anim.SetTrigger(Animator.StringToHash("Forward Light"));
@@ -281,18 +284,22 @@ public class Rin_CharacterController : BaseCharacterController
         switch (playerInputHandler.playerAttackDirection)
         {
             case (int)attackDirection.FORWARD:
-                anim.SetTrigger(Animator.StringToHash("Forward Heavy"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 4);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
 
             case (int)attackDirection.DOWN:
-                anim.SetTrigger(Animator.StringToHash("Down Heavy"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 5);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
 
             case (int)attackDirection.NEUTRAL:
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 6);
                 break;
 
             case (int)attackDirection.UP:
-                anim.SetTrigger(Animator.StringToHash("Up Heavy"));
+                anim.SetInteger(Animator.StringToHash("Attack ID"), 7);
+                anim.SetTrigger(Animator.StringToHash("Perform Attack"));
                 break;
         }
 

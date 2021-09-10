@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4387741358681193281
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4387741358681193282}
+  - component: {fileID: 4387741358681193283}
+  - component: {fileID: 4387741358681193280}
+  m_Layer: 0
+  m_Name: Player Input Handler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4387741358681193282
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4387741358681193281}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4387741358681193283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4387741358681193281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 14e14b7865f34b04bbf08d91d5c1f07a, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: afd2d575-2a2d-452b-945c-5f5db9a4c1fd
+    m_ActionName: Player/Jump[/Keyboard/space,/Keyboard/k]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c619c604-9a8c-4068-a0a9-ab93f9463c7f
+    m_ActionName: Player/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow,/Keyboard/i,/Keyboard/k,/Keyboard/j,/Keyboard/l]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
+--- !u!114 &4387741358681193280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4387741358681193281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48c658d5f2eefe74a91d82710e5465d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerColor: {r: 0.43137255, g: 0.93333334, b: 1, a: 0.65882355}
+  universalFixedMinDeadzone: 0.61404455
+  universalFixedMaxDeadzone: 0.92499995
+  groundHorizontalDeadzone: 0.322
+  groundVerticalDeadzone: 0
+  aerialHorizontalDeadzone: 0
+  aerialVerticalDeadzone: 0.306
+  attackVerticalAngleDeadzone: 90
+  attackHorizontalAngleDeadzone: 90
+  attackNeutralRadius: 1
+  playerAttackDirection: 0
+  playerAttackType: 0
+  mouseNormalized: {x: 0, y: 0}
+  RAWmovementDirection: {x: 0, y: 0}
+  universalMovementDirection: {x: 0, y: 0}
+  groundMovementDirection: {x: 0, y: 0}
+  aerialMovementDirection: {x: 0, y: 0}
+  dashingMovementDirection: {x: 0, y: 0}
+  RAWattackDirection: {x: 0, y: 0}
+  groundAttackDirection: {x: 0, y: 0}
+  aerialAttackDirection: {x: 0, y: 0}
+  spaceKeyHeld: 0
+  enableInputs: 1
+  showGUI: 0
+  requirePhotonView: 1
+  possessedCharacter: {fileID: 0}

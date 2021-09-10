@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+using Photon;
+using Photon.Pun;
 using UnityEditor;
 
-public class Crown : MonoBehaviour
+public class Crown : MonoBehaviourPun
 {
     [Header("Basic variables")]
     public float throwSpeed;
@@ -64,7 +65,7 @@ public class Crown : MonoBehaviour
     Vector3 upperIgnoreFOVBound;
     Vector3 lowerIgnoreFOVBound;
 
-
+    public bool requirePhotonView = true;
 
     public void Start()
     {
@@ -78,6 +79,10 @@ public class Crown : MonoBehaviour
         // For drawing and setting up the values for the crowns FOV for seeking characters when outside of a characters forceLockOnRadius
         // This will be shifted outside of FixedUpdate() and into Start() later for performance reasons as we don't need to continously compute this number over and over
         // again. This is only in FixedUpdate() for convenice.
+        if (requirePhotonView)
+        {
+            if (!photonView.IsMine) return;
+        }
 
         upperFOVBound = transform.right * (characterAffnRange / 2);
         lowerFOVBound = transform.right * (characterAffnRange / 2);
@@ -101,6 +106,11 @@ public class Crown : MonoBehaviour
     #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
+        if (requirePhotonView)
+        {
+            if (!photonView.IsMine) return;
+        }
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(transform.position, transform.position + upperFOVBound);
         Gizmos.DrawLine(transform.position, transform.position + lowerFOVBound);
@@ -292,6 +302,11 @@ public class Crown : MonoBehaviour
 
     public void HandleDeflectionResponse(Collider2D collider)
     {
+        if (requirePhotonView)
+        {
+            if (!photonView.IsMine) return;
+        }
+
         // I should be using Physics2D.IgnoreCollision so I will implement that later
         if (collider.gameObject == playerInputHandler.possessedCharacter.gameObject)
         {

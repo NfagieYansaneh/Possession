@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using Photon;
+using Photon.Pun;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -11,7 +13,7 @@ using UnityEditor;
 public enum attackDirection { NEUTRAL, FORWARD, UP, DOWN };
 public enum attackType { LIGHT, HEAVY, BASIC_ABILITY, ULTIMATE_ABILITY };
 
-public class PlayerInputHandler : MonoBehaviour
+public class PlayerInputHandler : MonoBehaviourPun
 {
     // Variable stores an instance of the InputMaster, which holds all of our input actions for input processing
     InputMaster input;
@@ -51,6 +53,7 @@ public class PlayerInputHandler : MonoBehaviour
 
     public bool enableInputs = true;
     public bool showGUI = true;
+    public bool requirePhotonView = true;
 
     // need to detect if im using a contoller or kb&m
 
@@ -89,10 +92,13 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void Update()
     {
-        mousePosition = Camera.main.ScreenToWorldPoint(input.Player.MousePosition.ReadValue<Vector2>());
-        Vector2 directionRelativeToPlayer = new Vector3(mousePosition.x, mousePosition.y) - possessedCharacter.transform.position;
-        mouseNormalized = directionRelativeToPlayer.normalized;
-        RefineAttack();
+        if (true)
+        {
+            mousePosition = Camera.main.ScreenToWorldPoint(input.Player.MousePosition.ReadValue<Vector2>());
+            Vector2 directionRelativeToPlayer = new Vector3(mousePosition.x, mousePosition.y) - possessedCharacter.transform.position;
+            mouseNormalized = directionRelativeToPlayer.normalized;
+            RefineAttack();
+        }
         //Vector2 mousePositon = mainCam.ScreenToWorldPoint(Mouse.current.position);
     }
 
@@ -199,85 +205,109 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnMovementPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        RAWmovementDirection = context.ReadValue<Vector2>();
-        RefineMovement();
-        //RefineAttack();
-
-        if(possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformMovement(context);
+            if (!enableInputs) return;
+
+            RAWmovementDirection = context.ReadValue<Vector2>();
+            RefineMovement();
+            //RefineAttack();
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformMovement(context);
+            }
         }
     }
 
     void OnJumpPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformJump(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformJump(context);
+            }
         }
     }
 
     void OnDodgePerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformDodge(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformDodge(context);
+            }
         }
     }
 
     void OnLightAttackPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformLightAttack(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformLightAttack(context);
+            }
         }
     }
 
     void OnHeavyAttackPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformHeavyAttack(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformHeavyAttack(context);
+            }
         }
     }
 
     void OnBasicAbilityPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformBasicAbility(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformBasicAbility(context);
+            }
         }
     }
 
     void OnUltimateAbilityPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformUltimateAbility(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformUltimateAbility(context);
+            }
         }
     }
 
     void OnCrownThrowPerformed(InputAction.CallbackContext context)
     {
-        if (!enableInputs) return;
-
-        if (possessedCharacter != null)
+        if (true)
         {
-            possessedCharacter.PerformCrownThrow(context);
+            if (!enableInputs) return;
+
+            if (possessedCharacter != null)
+            {
+                possessedCharacter.PerformCrownThrow(context);
+            }
         }
     }
 
