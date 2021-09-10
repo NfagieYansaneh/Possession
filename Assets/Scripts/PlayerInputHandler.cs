@@ -49,6 +49,11 @@ public class PlayerInputHandler : MonoBehaviour
 
     [HideInInspector] public bool spaceKeyHeld = false;
 
+    public bool enableInputs = true;
+    public bool showGUI = true;
+
+    // need to detect if im using a contoller or kb&m
+
     public BaseCharacterController possessedCharacter;
 
     private void Awake()
@@ -93,9 +98,12 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnGUI()
     {
-        GUI.Label(new Rect(20f, 120f, 150f, 40f), new GUIContent("Current Health "));
-        possessedCharacter.healthHandler.currentHealth =
-            (int)GUI.HorizontalSlider(new Rect(20f, 140f, 150f, 40f), possessedCharacter.healthHandler.currentHealth, 0f, possessedCharacter.healthHandler.maxHealth);
+        if (showGUI)
+        {
+            GUI.Label(new Rect(20f, 120f, 150f, 40f), new GUIContent("Current Health "));
+            possessedCharacter.healthHandler.currentHealth =
+                (int)GUI.HorizontalSlider(new Rect(20f, 140f, 150f, 40f), possessedCharacter.healthHandler.currentHealth, 0f, possessedCharacter.healthHandler.maxHealth);
+        }
     }
 
 #if UNITY_EDITOR
@@ -107,8 +115,14 @@ public class PlayerInputHandler : MonoBehaviour
     }
 #endif
 
+    public void ReadAndProcessInputs(bool enable)
+    {
+        enableInputs = enable;
+    }
+
     void RefineMovement()
     {
+
         if (RAWmovementDirection.magnitude <= universalFixedMinDeadzone)
         {
             groundMovementDirection = aerialMovementDirection = universalMovementDirection = Vector2.zero;
@@ -185,6 +199,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnMovementPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         RAWmovementDirection = context.ReadValue<Vector2>();
         RefineMovement();
         //RefineAttack();
@@ -197,6 +213,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnJumpPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformJump(context);
@@ -205,6 +223,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnDodgePerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformDodge(context);
@@ -213,6 +233,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnLightAttackPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformLightAttack(context);
@@ -221,6 +243,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnHeavyAttackPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformHeavyAttack(context);
@@ -229,6 +253,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnBasicAbilityPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformBasicAbility(context);
@@ -237,6 +263,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnUltimateAbilityPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformUltimateAbility(context);
@@ -245,6 +273,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     void OnCrownThrowPerformed(InputAction.CallbackContext context)
     {
+        if (!enableInputs) return;
+
         if (possessedCharacter != null)
         {
             possessedCharacter.PerformCrownThrow(context);

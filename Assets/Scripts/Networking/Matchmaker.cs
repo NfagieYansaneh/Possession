@@ -67,7 +67,7 @@ public class Matchmaker : MonoBehaviourPunCallbacks
     {
         // No random rooms to join
 
-        Debug.Log("No clients are witing for an opponent, creating a new room");
+        Debug.Log("No clients are waiting for an opponent, creating a new room");
 
         // setting room name to null will just let Photon set a name
 
@@ -82,7 +82,7 @@ public class Matchmaker : MonoBehaviourPunCallbacks
 
         if(playerCount != MaxPlayersPerRoom)
         {
-            waitingStatusText.text = "Waiting For Opponent";
+            waitingStatusText.text = "Waiting For Opponent...";
             Debug.Log("Client is waiting for an opponent");
         }
         else

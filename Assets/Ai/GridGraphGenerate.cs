@@ -123,6 +123,8 @@ public class GridGraphGenerate : MonoBehaviour
 
     public static GridGraph gg;
 
+    public bool showGUI = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -254,10 +256,13 @@ public class GridGraphGenerate : MonoBehaviour
 
     private void OnGUI()
     {
-        drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
-        if(GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
+        if (showGUI)
         {
-            Scan();
+            drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
+            if (GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
+            {
+                Scan();
+            }
         }
     }
 

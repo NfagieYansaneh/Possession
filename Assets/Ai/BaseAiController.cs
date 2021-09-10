@@ -16,7 +16,6 @@ public class BaseAiController : MonoBehaviour
 
     public BaseCharacterController baseCharacterController;
     public Seeker seeker;
-    bool calculatePathing = false;
     Path path;
     int currentWaypoint = 0;
 
@@ -135,6 +134,8 @@ public class BaseAiController : MonoBehaviour
 
     public List<specialWaypoint> specialWaypoints = new List<specialWaypoint>();
 
+    public bool showGUI = true;
+    public bool calculatePathingStartup = false;
     // public List<GraphNode> specialWaypoints = new List<GraphNode>();
     // public List<typeofWaypoint> specialWaypointTypes = new List<typeofWaypoint>();
 
@@ -149,6 +150,12 @@ public class BaseAiController : MonoBehaviour
         // InvokeRepeating("HandleAiLogic", 1f, 0.16f);
 
         // StartNewPath();
+
+        if (calculatePathingStartup)
+        {
+            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+            InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.5f);
+        }
     }
 
     private void OnDrawGizmos()
@@ -183,12 +190,14 @@ public class BaseAiController : MonoBehaviour
     private void OnGUI()
     {
         /* calculatePathing = GUI.Toggle(new Rect(500, 20, 135, 25), calculatePathing, new GUIContent("Calculate Pathing")); */
-
-        if (GUI.Button(new Rect(500, 20, 135, 50), new GUIContent("Calculate Pathing")))
+        if (showGUI)
         {
-            specialWaypoints.Clear();
-            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
-            InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.5f);
+            if (GUI.Button(new Rect(500, 20, 135, 50), new GUIContent("Calculate Pathing")))
+            {
+                specialWaypoints.Clear();
+                seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+                InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.5f);
+            }
         }
     }
 
