@@ -8,6 +8,9 @@
 // <author>developer@exitgames.com</author>
 // ----------------------------------------------------------------------------
 
+#pragma warning disable 618 // Deprecation warnings
+
+
 #if UNITY_2017_4_OR_NEWER
 #define SUPPORTED_UNITY
 #endif

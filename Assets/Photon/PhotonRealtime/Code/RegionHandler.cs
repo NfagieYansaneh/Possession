@@ -14,7 +14,7 @@
 #define SUPPORTED_UNITY
 #endif
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL || UNITY_SWITCH
 #define PING_VIA_COROUTINE
 #endif
 

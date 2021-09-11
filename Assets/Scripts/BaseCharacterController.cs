@@ -5,12 +5,12 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System;
 using Photon;
-using Photon.Pun;
+//using Photon.Pun;
 
 public enum animationCurves { LINEAR, CONSTANT, EXPONENTIAL, EXPONENTIAL_DECAY };
 public enum backgroundVelocityType { GRAVITY_INCORPORATED_WITH_FRICTION, LERPING_EFFECT };
 
-public class BaseCharacterController : MonoBehaviourPun
+public class BaseCharacterController : MonoBehaviour
 {
     // Character controller : https://github.com/Brackeys/2D-Character-Controller/blob/master/CharacterController2D.cs
     // Input system : https://www.youtube.com/watch?v=IurqiqduMVQ
@@ -295,7 +295,7 @@ public class BaseCharacterController : MonoBehaviourPun
     {
         if (requirePhotonView)
         {
-            if (!photonView.IsMine) return;
+            if (true) return;
         }
 
         if (!hitStopActive)
@@ -345,7 +345,7 @@ public class BaseCharacterController : MonoBehaviourPun
     {
         if (requirePhotonView)
         {
-            if (!photonView.IsMine) return;
+            if (true) return;
         }
         
         if (!hitStopActive)

@@ -1,14 +1,64 @@
 using System.Collections;
 using System.Collections.Generic;
-using Photon;
-using Photon.Pun;
+using Photon.Bolt;
+using Photon.Bolt.Matchmaking;
+//using Photon.Pun;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using Photon.Realtime;
+using UdpKit;
+using System;
 
-// assisted w/ Photon Pun documentation & https://www.youtube.com/watch?v=gxUCMOlISeQ&list=PLS6sInD7ThM0nJcyLfxgP9fnHKoQMJu-v
+// assisted w/ Photon Bolt Documentation && https://www.youtube.com/watch?v=wPKuMnXe-eA&list=PL8OCpfy38RwnwU9iJkV39M42mTXvqj6wt&t=8s
 
+public class Matchmaker : GlobalEventListener
+{
+    public GameObject findMatchPanel = null;
+    public GameObject waitingStatusPanel = null;
+    public TextMeshProUGUI waitingStatusText = null;
+
+    private bool isConnecting = false;
+
+    private const string GameVersion = "0.3.1-alpha.1";
+    private const int MaxPlayersPerRoom = 2;
+
+    public void StartServer()
+    {
+        BoltLauncher.StartServer();
+        waitingStatusText.text = "Waiting for client...";
+    }
+
+    public override void BoltStartDone()
+    {
+        BoltMatchmaking.CreateSession(sessionID: "test", sceneToLoad: "Miami Beach");
+    }
+
+    public override void Connected(BoltConnection connection)
+    {
+        // BoltMatchmaking.CreateSession(sessionID: "test", sceneToLoad: "Miami Beach");
+    }
+
+    public void StartClient()
+    {
+        BoltLauncher.StartClient();
+        waitingStatusText.text = "Searching for an open server...";
+    }
+
+    public override void SessionListUpdated(Map<Guid, UdpSession> sessionList)
+    {
+       foreach (var session in sessionList)
+        {
+            UdpSession photonSession = session.Value as UdpSession;
+            
+            if(photonSession.Source == UdpSessionSource.Photon)
+            {
+                BoltMatchmaking.JoinSession(photonSession);
+            }
+        }
+    }
+}
+
+/*
 public class Matchmaker : MonoBehaviourPunCallbacks
 {
     public GameObject findMatchPanel = null;
@@ -111,3 +161,4 @@ public class Matchmaker : MonoBehaviourPunCallbacks
         
     }
 }
+*/

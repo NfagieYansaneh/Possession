@@ -3,6 +3,14 @@ Photon Realtime C# Client - Changelog
 Exit Games GmbH - www.photonengine.com - forum.photonengine.com
 
 
+Version 4.1.5.4 (13. April 2021)
+    Changed: Connect-methods in the LoadBalancingClient now fail "early" when the peer is already connected. This prevents unintentional modifications of the state and auth token.
+    Added: The LoadBalancingClient will now check if the token is available when the AuthMode 'AuthOnce' or 'AuthOnceWss' require it. If it's not available, the client will log an error and prevent the connection attempt. If this happens, the client is already in a bad state and won't connect anyways.
+
+Version 4.1.5.3 (07. April 2021)
+    Fixed: Protocol Fallback will now connect correctly when a fixed region is set.
+    Changed: ConnectUsingSettings internally sets connectToBestRegion value, based on CloudRegion (equals appSettings.FixedRegion). This avoids pinging when a fixed region is set. Leads to callback OnDisconnected(InvalidRegion).
+
 Version 4.1.5.2 (12. March 2021)
     Changed: Region pinging will now apply port overrides for the Master Server port for UDP and address-based pinging (in the address and the UDP pings).
     Changed: The RegionHandler gets the override port from lbc.ServerPortOverrides.MasterServerPort. If it's 0, the default port 5055 is being used.

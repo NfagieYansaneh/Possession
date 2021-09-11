@@ -851,6 +851,12 @@ namespace Photon.Realtime
 
         public virtual bool ConnectUsingSettings(AppSettings appSettings)
         {
+            if (this.LoadBalancingPeer.PeerState != PeerStateValue.Disconnected)
+            {
+                Debug.LogWarning("ConnectUsingSettings() failed. Can only connect while in state 'Disconnected'. Current state: " + this.LoadBalancingPeer.PeerState);
+                return false;
+            }
+
             if (appSettings == null)
             {
                 this.DebugReturn(DebugLevel.ERROR, "ConnectUsingSettings failed. The appSettings can't be null.'");
@@ -862,6 +868,7 @@ namespace Photon.Realtime
 
             this.IsUsingNameServer = appSettings.UseNameServer;
             this.CloudRegion = appSettings.FixedRegion;
+            this.connectToBestRegion = string.IsNullOrEmpty(this.CloudRegion);
 
             this.EnableLobbyStatistics = appSettings.EnableLobbyStatistics;
             this.LoadBalancingPeer.DebugOut = appSettings.NetworkLogging;
@@ -871,7 +878,6 @@ namespace Photon.Realtime
             this.ExpectedProtocol = appSettings.Protocol;
             this.EnableProtocolFallback = appSettings.EnableProtocolFallback;
 
-            this.connectToBestRegion = true;
             this.bestRegionSummaryFromStorage = appSettings.BestRegionSummaryFromStorage;
             this.DisconnectedCause = DisconnectCause.None;
 
@@ -942,14 +948,26 @@ namespace Photon.Realtime
         /// </remarks>
         public virtual bool ConnectToMasterServer()
         {
+            if (this.LoadBalancingPeer.PeerState != PeerStateValue.Disconnected)
+            {
+                Debug.LogWarning("ConnectToMasterServer() failed. Can only connect while in state 'Disconnected'. Current state: " + this.LoadBalancingPeer.PeerState);
+                return false;
+            }
+
+            // when using authMode AuthOnce or AuthOnceWSS, the token must be available for the init request. if it's null in that case, don't connect
+            if (this.AuthMode != AuthModeOption.Auth && this.TokenForInit == null)
+            {
+                this.DebugReturn(DebugLevel.ERROR, "Connect() failed. Can't connect to MasterServer with Token == null in AuthMode: " + this.AuthMode);
+                return false;
+            }
+
             this.CheckConnectSetupWebGl();
             this.CheckConnectSetupXboxOne(); // may throw an exception if there are issues that can not be corrected
 
-
-            this.connectToBestRegion = false;
-            this.DisconnectedCause = DisconnectCause.None;
             if (this.LoadBalancingPeer.Connect(this.MasterServerAddress, this.ProxyServerAddress, this.AppId, this.TokenForInit))
             {
+                this.DisconnectedCause = DisconnectCause.None;
+                this.connectToBestRegion = false;
                 this.State = ClientState.ConnectingToMasterServer;
                 this.Server = ServerConnection.MasterServer;
                 return true;
@@ -966,6 +984,12 @@ namespace Photon.Realtime
         /// <returns>If the workflow was started or failed right away.</returns>
         public bool ConnectToNameServer()
         {
+            if (this.LoadBalancingPeer.PeerState != PeerStateValue.Disconnected)
+            {
+                Debug.LogWarning("ConnectToNameServer() failed. Can only connect while in state 'Disconnected'. Current state: " + this.LoadBalancingPeer.PeerState);
+                return false;
+            }
+
             this.IsUsingNameServer = true;
             this.CloudRegion = null;
 
@@ -983,16 +1007,16 @@ namespace Photon.Realtime
                 this.LoadBalancingPeer.TransportProtocol = ConnectionProtocol.WebSocketSecure;
             }
 
-            this.connectToBestRegion = false;
-            this.DisconnectedCause = DisconnectCause.None;
-            if (!this.LoadBalancingPeer.Connect(this.NameServerAddress, this.ProxyServerAddress, "NameServer", this.TokenForInit))
+            if (this.LoadBalancingPeer.Connect(this.NameServerAddress, this.ProxyServerAddress, "NameServer", this.TokenForInit))
             {
-                return false;
+                this.DisconnectedCause = DisconnectCause.None;
+                this.connectToBestRegion = false;
+                this.State = ClientState.ConnectingToNameServer;
+                this.Server = ServerConnection.NameServer;
+                return true;
             }
 
-            this.State = ClientState.ConnectingToNameServer;
-            this.Server = ServerConnection.NameServer;
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -1131,13 +1155,19 @@ namespace Photon.Realtime
                 return false;
             }
 
+            // when using authMode AuthOnce or AuthOnceWSS, the token must be available for the init request. if it's null in that case, don't connect
+            if (this.AuthMode != AuthModeOption.Auth && serverType != ServerConnection.NameServer && this.TokenForInit == null)
+            {
+                this.DebugReturn(DebugLevel.ERROR, "Connect() failed. Can't connect to " + serverType + " with Token == null in AuthMode: " + this.AuthMode);
+                return false;
+            }
 
-            // connect might fail, if the DNS name can't be resolved or if no network connection is available
-            this.DisconnectedCause = DisconnectCause.None;
+            // connect might fail, if the DNS name can't be resolved or if no network connection is available, etc.
             bool connecting = this.LoadBalancingPeer.Connect(serverAddress, proxyServerAddress, this.AppId, this.TokenForInit);
 
             if (connecting)
             {
+                this.DisconnectedCause = DisconnectCause.None;
                 this.Server = serverType;
 
                 switch (serverType)
@@ -1162,6 +1192,12 @@ namespace Photon.Realtime
         /// <remarks>Common use case: Press the Lock Button on a iOS device and you get disconnected immediately.</remarks>
         public bool ReconnectToMaster()
         {
+            if (this.LoadBalancingPeer.PeerState != PeerStateValue.Disconnected)
+            {
+                Debug.LogWarning("ReconnectToMaster() failed. Can only connect while in state 'Disconnected'. Current state: " + this.LoadBalancingPeer.PeerState);
+                return false;
+            }
+            
             if (string.IsNullOrEmpty(this.MasterServerAddress))
             {
                 this.DebugReturn(DebugLevel.WARNING, "ReconnectToMaster() failed. MasterServerAddress is null or empty.");
@@ -1184,7 +1220,7 @@ namespace Photon.Realtime
         }
 
         /// <summary>
-        /// Can be used to return to a room quickly, by directly reconnecting to a game server to rejoin a room.
+        /// Can be used to return to a room quickly by directly reconnecting to a game server to rejoin a room.
         /// </summary>
         /// <remarks>
         /// Rejoining room will not send any player properties. Instead client will receive up-to-date ones from server.
@@ -1193,6 +1229,12 @@ namespace Photon.Realtime
         /// <returns>False, if the conditions are not met. Then, this client does not attempt the ReconnectAndRejoin.</returns>
         public bool ReconnectAndRejoin()
         {
+            if (this.LoadBalancingPeer.PeerState != PeerStateValue.Disconnected)
+            {
+                Debug.LogWarning("ReconnectAndRejoin() failed. Can only connect while in state 'Disconnected'. Current state: " + this.LoadBalancingPeer.PeerState);
+                return false;
+            }
+
             if (string.IsNullOrEmpty(this.GameServerAddress))
             {
                 this.DebugReturn(DebugLevel.WARNING, "ReconnectAndRejoin() failed. It seems the client wasn't connected to a game server before (no address).");
@@ -1306,7 +1348,7 @@ namespace Photon.Realtime
         {
             if (this.IsUsingNameServer && this.Server != ServerConnection.NameServer && (this.AuthValues == null || this.AuthValues.Token == null))
             {
-                this.DebugReturn(DebugLevel.ERROR, "Authenticate without Token is only allowed on Name Server. Current server: " + this.Server + " on: " + this.CurrentServerAddress + ". State: " + this.State);
+                this.DebugReturn(DebugLevel.ERROR, "Authenticate without Token is only allowed on Name Server. Connecting to: " + this.Server + " on: " + this.CurrentServerAddress + ". State: " + this.State);
             }
 
             if (this.AuthMode == AuthModeOption.Auth)
@@ -2999,7 +3041,12 @@ namespace Photon.Realtime
                             this.LoadBalancingPeer.TransportProtocol = (this.LoadBalancingPeer.TransportProtocol == ConnectionProtocol.Tcp) ? ConnectionProtocol.Udp : ConnectionProtocol.Tcp;
                             this.NameServerPortInAppSettings = 0;                   // this does not affect the ServerSettings file, just a variable at runtime
                             this.ServerPortOverrides = new PhotonPortDefinition();  // use default ports for the fallback
-                            this.ConnectToNameServer();
+
+                            if (!this.LoadBalancingPeer.Connect(this.NameServerAddress, this.ProxyServerAddress, this.AppId, this.TokenForInit))
+                            {
+                                return;
+                            }
+                            this.State = ClientState.ConnectingToNameServer;
                             break;
                         case ClientState.PeerCreated:
                         case ClientState.Disconnecting:

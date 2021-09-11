@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using Photon;
-using Photon.Pun;
+//using Photon.Pun;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,7 +13,7 @@ using UnityEditor;
 public enum attackDirection { NEUTRAL, FORWARD, UP, DOWN };
 public enum attackType { LIGHT, HEAVY, BASIC_ABILITY, ULTIMATE_ABILITY };
 
-public class PlayerInputHandler : MonoBehaviourPun
+public class PlayerInputHandler : MonoBehaviour
 {
     // Variable stores an instance of the InputMaster, which holds all of our input actions for input processing
     InputMaster input;

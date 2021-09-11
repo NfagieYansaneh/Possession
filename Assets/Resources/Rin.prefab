@@ -169,9 +169,8 @@ GameObject:
   - component: {fileID: 315035005379060577}
   - component: {fileID: 315035005379060580}
   - component: {fileID: 315035005379060583}
-  - component: {fileID: 1856170905}
+  - component: {fileID: 3117935528457148332}
   - component: {fileID: 315035007163582720}
-  - component: {fileID: 6392061773810402691}
   m_Layer: 6
   m_Name: Rin
   m_TagString: Untagged
@@ -555,7 +554,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
-  requirePhotonView: 1
+  requirePhotonView: 0
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &315035005379060581
@@ -736,7 +735,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   source: {fileID: 315035005379060580}
---- !u!114 &1856170905
+--- !u!114 &3117935528457148332
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -745,21 +744,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 315035005379060584}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Script: {fileID: 155943207, guid: 5b00bf8b25851d440940a40ec23344f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 0
-  ObservedComponents:
-  - {fileID: 6392061773810402691}
-  - {fileID: 315035007163582720}
-  sceneViewId: 1
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
+  _sceneGuid: 
+  _serializerGuid: 08656c1b-fe22-410f-bced-78a9437cbffe
+  _prefabId: 1
+  _updateRate: 1
+  _autoFreezeProxyFrames: 0
+  _clientPredicted: 1
+  _allowInstantiateOnClient: 1
+  _persistThroughSceneLoads: 0
+  _sceneObjectDestroyOnDetach: 1
+  _sceneObjectAutoAttach: 1
+  _alwaysProxy: 0
+  _detachOnDisable: 1
+  _allowFirstReplicationWhenFrozen: 0
+  _autoRemoveChildEntities: 0
+  _entityBehaviourQueryOption: 0
+  _entityPriorityCalculatorQueryOption: 1
+  _entityReplicationFilterQueryOption: 1
 --- !u!114 &315035007163582720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -769,43 +773,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 315035005379060584}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Script: {fileID: 155943207, guid: 5b00bf8b25851d440940a40ec23344f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowLayerWeightsInspector: 1
-  ShowParameterInspector: 1
-  m_SynchronizeParameters:
-  - Type: 4
-    SynchronizeType: 1
-    Name: Running
-  - Type: 9
-    SynchronizeType: 0
-    Name: Landed
-  - Type: 3
-    SynchronizeType: 1
-    Name: Attack ID
-  - Type: 9
-    SynchronizeType: 1
-    Name: Perform Attack
-  m_SynchronizeLayers:
-  - SynchronizeType: 0
-    LayerIndex: 0
---- !u!114 &6392061773810402691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315035005379060584}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 0
-  m_SynchronizeScale: 1
-  m_UseLocal: 1
+  _sceneGuid: 
+  _serializerGuid: 08656c1b-fe22-410f-bced-78a9437cbffe
+  _prefabId: -1
+  _updateRate: 1
+  _autoFreezeProxyFrames: 0
+  _clientPredicted: 1
+  _allowInstantiateOnClient: 1
+  _persistThroughSceneLoads: 0
+  _sceneObjectDestroyOnDetach: 1
+  _sceneObjectAutoAttach: 1
+  _alwaysProxy: 0
+  _detachOnDisable: 1
+  _allowFirstReplicationWhenFrozen: 0
+  _autoRemoveChildEntities: 0
+  _entityBehaviourQueryOption: 0
+  _entityPriorityCalculatorQueryOption: 1
+  _entityReplicationFilterQueryOption: 1
 --- !u!1 &315035005380981571
 GameObject:
   m_ObjectHideFlags: 0

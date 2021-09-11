@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Photon;
-using Photon.Pun;
+//using Photon.Pun;
 using UnityEditor;
 
-public class Crown : MonoBehaviourPun
+public class Crown : MonoBehaviour
 {
     [Header("Basic variables")]
     public float throwSpeed;
@@ -81,7 +81,7 @@ public class Crown : MonoBehaviourPun
         // again. This is only in FixedUpdate() for convenice.
         if (requirePhotonView)
         {
-            if (!photonView.IsMine) return;
+            if (true) return;
         }
 
         upperFOVBound = transform.right * (characterAffnRange / 2);
@@ -108,7 +108,7 @@ public class Crown : MonoBehaviourPun
     {
         if (requirePhotonView)
         {
-            if (!photonView.IsMine) return;
+            if (true) return;
         }
 
         Gizmos.color = Color.yellow;
@@ -304,7 +304,7 @@ public class Crown : MonoBehaviourPun
     {
         if (requirePhotonView)
         {
-            if (!photonView.IsMine) return;
+            if (true) return;
         }
 
         // I should be using Physics2D.IgnoreCollision so I will implement that later
