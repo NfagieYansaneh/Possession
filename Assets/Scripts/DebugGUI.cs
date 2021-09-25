@@ -10,6 +10,7 @@ public class DebugGUI : MonoBehaviour
 {
     public bool globalShowHitboxes = false;
     public bool globalShowHealth = false;
+    public bool enableGUI = false;
 
     private void Start()
     {
@@ -26,6 +27,8 @@ public class DebugGUI : MonoBehaviour
 
     private void OnGUI()
     {
+        if (!enableGUI) return;
+
         if (GUI.Button(new Rect(20.0f, 20.0f, 150.0f, 40.0f), "Next Health Stage"))
         {
             foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)

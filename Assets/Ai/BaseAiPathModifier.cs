@@ -732,7 +732,7 @@ public class BaseAiPathModifier : MonoModifier
 
 
             // trims every path node from droopdownAtThisNode towards the selected landing node in order to clean up our path
-            TrimRequestStruct newTrimRequest = new TrimRequestStruct(dropdownAtThisNode, selectedNode);
+            TrimRequestStruct newTrimRequest = new TrimRequestStruct((newNodes.Contains(dropdownAtThisNode))? dropdownAtThisNode : jumpNode, selectedNode);
             trimRequests.Add(newTrimRequest);
 
             // if our landing node is not apart of the nodes in our new path, we will have to insert our landing node into the new path

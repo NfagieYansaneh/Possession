@@ -130,6 +130,8 @@ public class GridGraphGenerate : MonoBehaviour
     public const uint lowPenalty = 0; // low penalty represents the 0 penalty for walking on a ground node
     public const uint highPenalty = 3750; // high penalty represents the 3750 penalty for traversing through air and is to dissuade Ai paths to unnecessarily move through the air
 
+    public bool enableGUI = false;
+
     public static GridGraph gg;
 
     void Start()
@@ -267,12 +269,15 @@ public class GridGraphGenerate : MonoBehaviour
 
     private void OnGUI()
     {
-        drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
-
-        // If I press the "Refresh Grid Graph" button, I refresh the grid graph
-        if(GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
+        if (enableGUI)
         {
-            Scan();
+            drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
+
+            // If I press the "Refresh Grid Graph" button, I refresh the grid graph
+            if (GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
+            {
+                Scan();
+            }
         }
     }
 

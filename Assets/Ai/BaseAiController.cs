@@ -42,6 +42,9 @@ public class BaseAiController : MonoBehaviour
     public bool startPathing = false;
     public bool currentlyBeingPossessed = false;
 
+    public bool enableGUI = false;
+    public bool startPathingOnStartup = true;
+
     // specialWaypoint represents our structs for assigning commands at specific nodes, thus, allowing us to issue a jump command once we reach within the activation range of the special waypoint
     public struct specialWaypoint 
     {
@@ -147,6 +150,16 @@ public class BaseAiController : MonoBehaviour
 
     public List<specialWaypoint> specialWaypoints = new List<specialWaypoint>();
 
+    public void Start()
+    {
+        if(startPathingOnStartup)
+        {
+            specialWaypoints.Clear();
+            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+            InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.25f);
+            startPathing = true;
+        }
+    }
     private void OnDrawGizmos()
     {
         // debugging purposes
@@ -169,12 +182,18 @@ public class BaseAiController : MonoBehaviour
 
     private void OnGUI()
     {
-        if (GUI.Button(new Rect(500, 20, 135, 50), new GUIContent("Calculate Pathing")))
+        if (enableGUI)
         {
-            specialWaypoints.Clear();
-            seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
-            InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.25f);
-            startPathing = true;
+            if (GUI.Button(new Rect(500, 20, 135, 50), new GUIContent("Calculate Pathing")))
+            {
+                if (!startPathingOnStartup)
+                {
+                    specialWaypoints.Clear();
+                    seeker.StartPath(transform.position, targetPlayerPosition.position, OnPathComplete);
+                    InvokeRepeating("PeriodicUpdatePathRepeating", 1f, 0.25f);
+                    startPathing = true;
+                }
+            }
         }
     }
 

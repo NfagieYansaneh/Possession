@@ -86,11 +86,13 @@ public class PlayerInputHandler : MonoBehaviour
 
     public BaseCharacterController possessedCharacter; // currently possessed character
 
+    public bool enableGUI = false;
+
     private void Awake()
     {
         input = new InputMaster();
         controls = GetComponent<UnityEngine.InputSystem.PlayerInput>();
-        ParseDeviceName(controls.defaultControlScheme, true); // assesses the our default input device and updates currentDevice being used
+        currentDevice = ControlDevices.KeyboardAndMouse;
 
         /* when movement keys are performed, call the appropriate functions */
 
@@ -133,10 +135,13 @@ public class PlayerInputHandler : MonoBehaviour
 
     public void OnGUI()
     {
-        // Debugging purpose used to adjust and view the currentHealth of our currently possessed character
-        GUI.Label(new Rect(20f, 120f, 150f, 40f), new GUIContent("Current Health "));
-        possessedCharacter.healthHandler.currentHealth =
-            (int)GUI.HorizontalSlider(new Rect(20f, 140f, 150f, 40f), possessedCharacter.healthHandler.currentHealth, 0f, possessedCharacter.healthHandler.maxHealth);
+        if (enableGUI)
+        {
+            // Debugging purpose used to adjust and view the currentHealth of our currently possessed character
+            GUI.Label(new Rect(20f, 120f, 150f, 40f), new GUIContent("Current Health "));
+            possessedCharacter.healthHandler.currentHealth =
+                (int)GUI.HorizontalSlider(new Rect(20f, 140f, 150f, 40f), possessedCharacter.healthHandler.currentHealth, 0f, possessedCharacter.healthHandler.maxHealth);
+        }
     }
 
 #if UNITY_EDITOR
