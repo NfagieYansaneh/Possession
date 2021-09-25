@@ -7,9 +7,14 @@ using Pathfinding;
 using UnityEditor;
 #endif
 
+/* Helper.cs just stores some universal helpful tools that can be called upon by other scripts
+ */
+
 public static class Helper
 {
+    // This specific function was acquired from...
     // Jessy from & RazaTech https://forum.unity.com/threads/re-map-a-number-from-one-range-to-another.119437/
+    // So i do not take credit for this, this a just a 3rd party tool that assissted me in writing this program
     public static float Remap(this float from, float fromMin, float fromMax, float toMin, float toMax)
     {
         var fromAbs = from - fromMin;
@@ -25,11 +30,11 @@ public static class Helper
         return to;
     }
 
+    // Finds adjacent ground nodes from a specified node
     public static List<GraphNode> FindAdjacentNodes(GraphNode node, ref bool foundAdjNodes, AdjNodeSearchDirection searchDirection, int count = 0, GraphNode startCounterPastNode = null, int maxHeightDisplacementInNodes = 10)
     {
-        // Debug.Log("Called");
         List<GraphNode> adjNodes = new List<GraphNode>();
-        if (node.Penalty == GridGraphGenerate.highPenalty)
+        if (node.Penalty == GridGraphGenerate.highPenalty) // GridGraphGenerate.highPenalty represents the penalty value an air node would possess
         {
             foundAdjNodes = false;
             return null;
@@ -42,12 +47,15 @@ public static class Helper
         Vector2 temp = Helper.TurnPositionIntoPointOnGridGraph(GridGraphGenerate.gg, node);
         Vector2 scanNodePoint = temp;
 
+        // counter just allows us to put a cap on the number of adjacent nodes we find
         bool counterActive = false;
-        bool counterPaused = (startCounterPastNode != null && startCounterPastNode != node); // counter will be paused if startCounterPastNode exists, and we will turn on the counter later
+        bool counterPaused = (startCounterPastNode != null && startCounterPastNode != node); // counter will be paused if startCounterPastNode exists. 
+        // Thus we will turn on the counter later once we reach this the counter node if startCOunterPastNode exists...
+
         int counterIndex = 0;
         if (count != 0) counterActive = true;
 
-        // checking for adj nodes on the left
+        // checking for adjacent nodes on the left
         if (searchDirection == AdjNodeSearchDirection.LEFT || searchDirection == AdjNodeSearchDirection.BOTH)
             while (!stopCurrentScan && (!counterActive || (counterActive && counterIndex < count)))
             {
@@ -55,17 +63,16 @@ public static class Helper
                 if (scanNodePoint.x == 0f || scanNodePoint.y > GridGraphGenerate.gg.Depth) break;
                 if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y))
                 {
-                    // Debug.LogError("Hmm?" + Mathf.Abs(scanNodePoint.y - temp.y));
                     break;
                 }
 
+                // scanning to the left of our scanNodePoint as we check the bottom left adjacent node, middle left adjacent node, and upper left adjacent node
                 for (int z = 0; z < 3; z++)
                 {
 
                     if (scanNodePoint.y < GridGraphGenerate.gg.Depth - 1 && scanNodePoint.y != 0f)
                     {
                         currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(z - 1 + (int)(scanNodePoint.y)) * GridGraphGenerate.gg.width + (int)(scanNodePoint.x - 1)];
-                        // Helper.DrawArrow.ForDebugTimed((Vector3)currentNodeBeingVetted.position + Vector3.left * 1f, Vector3.right, Color.gray, 100f);
                     }
                     else if ((scanNodePoint.y == GridGraphGenerate.gg.Depth - 1 || scanNodePoint.y == 0f) && z == 0)
                         currentNodeBeingVetted = GridGraphGenerate.gg.nodes[(int)(scanNodePoint.x - 1)];
@@ -89,7 +96,6 @@ public static class Helper
                         if (scanNodePoint.x == 0) stopCurrentScan = true;
 
                         Vector3 pos = (Vector3)currentNodeBeingVetted.position;
-                        // Debug.Log(pos);
                         Helper.DrawArrow.ForDebugTimed(pos + Vector3.down * 1f, Vector3.up, Color.magenta, 3f);
                         foundAdjNodes = true;
                         break;
@@ -109,7 +115,7 @@ public static class Helper
                     counterIndex++;
             }
 
-        // Checking adj nodes to the right
+        // Checking adjacent nodes to the right
         stopCurrentScan = false;
         scanNodePoint = temp;
 
@@ -123,6 +129,7 @@ public static class Helper
                 if (scanNodePoint.x == GridGraphGenerate.gg.width || scanNodePoint.y > GridGraphGenerate.gg.Depth) break;
                 if (maxHeightDisplacementInNodes < Mathf.Abs(scanNodePoint.y - temp.y)) break;
 
+                // scanning to the right of our scanNodePoint as we check the bottom right adjacent node, middle right adjacent node, and upper right adjacent node
                 for (int z = 0; z < 3; z++)
                 {
 
@@ -169,10 +176,10 @@ public static class Helper
                     counterIndex++;
             }
 
-        // Debug.Log("whatsbcanw");
         return adjNodes;
     }
 
+    // takes a vector position and returns this as cooridantes on the Grid Graph because the Grid Graph is essentially a grid of nodes that represent what the Ai can see
     public static Vector2 TurnPositionIntoPointOnGridGraph(GridGraph gg, Vector3 position)
     {
         int x = (int)Helper.Remap(position.x,
@@ -193,6 +200,7 @@ public static class Helper
         return vector;
     }
 
+    // takes a node and returns this as cooridantes on the Grid Graph because the Grid Graph is essentially a grid of nodes that represent what the Ai can see
     public static Vector2 TurnPositionIntoPointOnGridGraph(GridGraph gg, GraphNode node)
     {
         Vector3 position = (Vector3)node.position;
@@ -216,90 +224,13 @@ public static class Helper
     }
 
     // http://members.chello.at/easyfilter/bresenham.html
-    // ??? doesn't work and is not as performan as BresenhamLine nor do i need the percesion of this
-    /*public static List<GraphNode> BresenhamBézierCurve(GridGraph gg, Vector2 start, Vector2 end, Vector2 temp, float VyInitial, float VyFinal, float Vx)
-    {
-        List<Vector2> nodePositionsOnGrid = new List<Vector2>();
-        List<GraphNode> nodes = new List<GraphNode>();
 
-        // https://www.math.fsu.edu/~rabert/TeX/parabola/bezier1.gif & https://www.math.fsu.edu/~rabert/TeX/parabola/parabola.html & http://members.chello.at/easyfilter/bresenham.html
-        Vector2 point0 = TurnPositionIntoPointOnGridGraph(gg, start);
-        Vector2 point2 = TurnPositionIntoPointOnGridGraph(gg, end);
-
-        // Vector2 temp = new Vector2(Vx* ((start.y - end.y) / (VyFinal - VyInitial)), VyInitial * ((start.y - end.y)/(VyFinal - VyInitial))+start.y);
-        Vector2 point1 = TurnPositionIntoPointOnGridGraph(gg, temp);
-
-        int Sx = (int)(point2.x - point1.x);
-        int Sy = (int)(point2.y - point1.y);
-
-        int Xx = (int)(point0.x - point1.x);
-        int Yy = (int)(point0.y - point1.y);
-        long Xy;
-
-        double cur = Xx * Sy - Yy * Sx;
-        double dx, dy, err;
-
-        if (Xx * Sx <= 0 && Yy * Sy <= 0)
-        {
-            // Sign of gradient must not change
-            return null;
-        }
-
-        if(Sx * Sx + Sy * Sy > Xx * Xx + Yy * Yy)
-        {
-            point2.x = point0.x;
-            point0.x = Sx + point1.x;
-            point2.y = point0.y;
-            point0.y = Sy + point1.y;
-            cur -= cur;
-        }
-
-        Debug.Log("Processing...");
-        if (cur != 0)
-        {
-            Xx += Sx;
-            Xx *= Sx = (point0.x < point2.x) ? 1 : -1;
-            Yy *= Sy = (point0.y < point2.y) ? 1 : -1;
-
-            Xy = 2 * Xx * Yy;
-            Xx *= Xx;
-            Yy *= Yy;
-            if(cur*Sx*Sy < 0)
-            {
-                Xx = -Xx;
-                Yy = -Yy;
-                Xy = -Xy;
-                cur -= cur;
-            }
-
-            dx = 4.0 * Sy * cur * (point1.x - point0.x) + Xx - Xy;
-            dy = 4.0 * Sx * cur * (point0.y - point1.y) + Yy - Xy;
-            Xx += Xx;
-            Yy += Yy;
-            err = dx + dy + Xy;
-            Debug.Log("Processing again...");
-            do
-            {
-                nodePositionsOnGrid.Add(new Vector2(point0.x, point0.y));
-                if (point0.x == point2.x && point0.y == point2.y) break;
-                // point1.y = 2 * err < dx;
-                if (2*err > dy) { point0.x += Sx; dx -= Xy; err += dy += Yy; }
-                if (2 * err < dx) { point0.y += Sy; dy -= Xy; err += dx += Xx; }
-
-                Debug.Log("More processing...");
-            } while (dy < dx);
-        }
-
-        foreach(Vector2 position in nodePositionsOnGrid)
-        {
-            nodes.Add(gg.nodes[(int)position.y * gg.width + (int)position.x]);
-        }
-
-        return nodes;
-    }
-    */
-
+    // This specific code was acquired from...
     // http://members.chello.at/easyfilter/bresenham.html
+    // So i do not take credit for this, this a just a 3rd party tool that assissted me in writing this program
+
+    // BresenhamLine is a line drawing algorithm that allows me to define a start and end position of a line apart of a grid, and determine all the 
+    // connecting squares to form a line from the start and end position. We can use this especially for our GridGraph that is essentially a grid of nodes that represent what the Ai can see
     public static List<GraphNode> BresenhamLine(GridGraph gg, Vector2 start, Vector2 end)
     {
         List<Vector2> nodePositionsOnGrid = new List<Vector2>();
@@ -333,6 +264,8 @@ public static class Helper
         return nodes;
     }
 
+    // Custom function I created that loops to a set of points and applies the BresenhamLine to each point of points as 
+    // now instead of a start and end position, we are handling a chain of position that could represent a path
     public static List<GraphNode> BresenhamLineLoopThrough(GridGraph gg, List<Vector2> points)
     {
         List<GraphNode> nodes = new List<GraphNode>();
@@ -346,7 +279,6 @@ public static class Helper
             Debug.DrawLine(points[index], points[index + 1], Color.red, 1f);
             for (int nodeIndex=0; nodeIndex<temp.Count; nodeIndex++)
             {
-                // hopefully, this isn't a performance intensive process
                 if (!nodes.Contains(temp[nodeIndex])) nodes.Add(temp[nodeIndex]);
             }
         }
@@ -354,11 +286,13 @@ public static class Helper
         return nodes;
     }
     
+    // seraches downwards in order to find the next groundNode from a point. If we do find a groundNode within a certain number of nodes
+    // that is defined by "distanceInNodes" we will return true, else, we will return false
+    // the returnedNode also represents the groundNode that we hit if we return true, else we will return the last node we searched if we return false
     public static bool SearchInDirection(GridGraph gg, GraphNode point, int distanceInNodes, ref GraphNode returnedNode)
     {
         Vector2 pointPosition = TurnPositionIntoPointOnGridGraph(gg, (Vector3)point.position);
         GraphNode currentNodeBeingVetted = null;
-        // GraphNode node = null;
 
         for (int z = 0; z < distanceInNodes; z++)
         {
@@ -372,15 +306,16 @@ public static class Helper
         returnedNode = gg.nodes[(-distanceInNodes - 1 + (int)pointPosition.y) * gg.width + ((int)pointPosition.x)];
         return false;
     }
-
+    
+    // Loops through a vector path that is esstiantlly a list of points and compares each pair or conseqcutive points in order
+    // to deduce if they "heading" in a uniform direction defined by "Vector2 direction" and returns true if that is the case. Else,
+    // we will be returning false
     public static bool CheckDirectionOfPathInSequence(List<Vector2> vectorPath, Vector2 direction, int sequenceCap)
     {
         if (vectorPath.Count < sequenceCap) return false;
 
         for (int index = sequenceCap; index < vectorPath.Count; index++)
         {
-            // Debug.Log("Calculated direction: " + (vectorPath[index] - vectorPath[index - 1]).normalized);
-            // Debug.DrawLine(vectorPath[index], vectorPath[index - 1], Color.magenta, 5f);
             for (int i = 1; i < sequenceCap; i++)
             {
                 if ((vectorPath[index] - vectorPath[index - 1]).normalized != direction) return false;
@@ -390,7 +325,10 @@ public static class Helper
         return true;
     }
 
+    // This specific code was acquired from...
     // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
+    // So i do not take credit for this, this a just a 3rd party tool that assissted me in writing this program
+    // especially when it came to debugging elements in my code
     public static class DrawArrow
     {
         public static void ForGizmo(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
@@ -461,10 +399,13 @@ public static class Helper
         }
     }
 
+    // This specific code was acquired from...
     // AnomalusUndrdog & Nikolay-Lezhnev https://forum.unity.com/threads/debug-drawarrow.85980/
+    // So i do not take credit for this, this a just a 3rd party tool that assissted me in writing this program
+    // especially when it came to debugging elements in my code
     public static class DrawCapsule
     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR // we have to make sure to not compile this code if we are building our code for a release since this can cause some compiler errors
         public static void DrawWireCapsule(Vector3 _pos, Quaternion _rot, float _radius, float _height, Color _color = default(Color))
         {
             if (_color != default(Color))
@@ -494,8 +435,7 @@ public static class Helper
 
         public static void ForGizmo(Vector3 pos, Vector3 rotation)
         {
-            // just a dream...
-            // not anymore!
+            // ...
         }
     }
 }

@@ -274,7 +274,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Dodge"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -329,7 +329,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""path"": ""<Gamepad>/buttonNorth"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Heavy Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -439,7 +439,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""path"": ""<Mouse>/position"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard and mouse"",
                     ""action"": ""Mouse Position"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

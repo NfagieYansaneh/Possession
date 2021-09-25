@@ -261,7 +261,7 @@
                     "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Gamepad",
                     "action": "Dodge",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -316,7 +316,7 @@
                     "path": "<Gamepad>/buttonNorth",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Gamepad",
                     "action": "Heavy Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -426,7 +426,7 @@
                     "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Keyboard and mouse",
                     "action": "Mouse Position",
                     "isComposite": false,
                     "isPartOfComposite": false

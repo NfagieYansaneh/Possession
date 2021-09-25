@@ -13,9 +13,6 @@ public class Crown : MonoBehaviour
     public Vector2 velocity;
     // public AnimationCurve velocityChangeCurve; // how our speed changes overtime when our velocity changes (typically by deflections)
 
-    // t_ variables are for timing purposes (and are hidden)
-    // [HideInInspector] public float t_velocityChangeCurveTimestamp = 0f;
-
     public PlayerInputHandler playerInputHandler; // player input handler that controls this crown
 
     [Header("Collision detection")]
@@ -251,6 +248,8 @@ public class Crown : MonoBehaviour
         // Tutorial that taught me how to intergrate proportional navigation into my crown
         // https://www.moddb.com/members/blahdy/blogs/gamedev-introduction-to-proportional-navigation-part-i
         // https://answers.unity.com/questions/585035/lookat-2d-equivalent-.html
+        // So I do not take entire credit towards ProportionalNavigation, however, I did have to convert the 3-dimensional proportional navigation into
+        // a 2D version equivalent...
 
         SeekCharacters();
         if (VettSeekedCharacters(false, Vector2.zero) == false) return false;

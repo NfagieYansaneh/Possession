@@ -3,34 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
-using System; // rid of this later
+using System; 
+
+/* Purpose of Rin_CharacterController is to override some functions within the BaseCharacterController script to fit
+ * the specific needs of our character, Rin
+ */
 
 
 public class Rin_CharacterController : BaseCharacterController
 {
     // Vector2 movementDirection = Vector2.zero; // already defined in BaseCharacterController.cs
 
-    /* The variables & functions you have access too on baseCharacterController is...
-     * 
-     * movementSpeed
-     * curVerticalVelocity
-     * 
-     * 
-     * 
-     * 
-     * 
-     */
+    // Note, I also have access to movmentSpeed and curVerticalVelocity that is apart of our BaseCharacterController
 
     float oldAnimSpeed = 0f;
     bool playingJumpAnimation = false;
+
+    // Code that is run at every update frame and we have to do it in this manner because we are not inheriting from MonoBehaviour
     public override void RunAtUpdate()
     {
         base.RunAtUpdate();
 
+        // If are capable of accessing our jump animation
         if (!overrideJumpAnim && !hitStopActive)
         {
+            // and we are also falling...
             if (!isGrounded || isGrounded && curVerticalVelocity > 0f)
             {
+                // then apply the appropriate jump animation frame based on our current vertical velocity
                 playingJumpAnimation = true;
                 int airIndex;
                 float peakRisingVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
@@ -40,6 +40,7 @@ public class Rin_CharacterController : BaseCharacterController
                 {
                     oldAnimSpeed = anim.speed;
                 }
+
                 anim.speed = 0f;
                 anim.Play("Rin_Jump", 0, (1f / 8) * airIndex);
             }
@@ -47,7 +48,7 @@ public class Rin_CharacterController : BaseCharacterController
             {
                 if (playingJumpAnimation)
                 {
-                    // Debug.Log("Landed");
+                    // in this case, we just landed so we will play our appropriate squash frame (but I haven't animated the squash frame yet)
                     anim.SetTrigger(Animator.StringToHash("Landed"));
                     playingJumpAnimation = false;
                     anim.speed = 1f;
@@ -58,10 +59,12 @@ public class Rin_CharacterController : BaseCharacterController
         } 
         else if (!hitStopActive)
         {
+            // make sure animation speed is returned to normal if we are currently not in a hitstop
             anim.speed = 1f;
         }
     }
 
+    // Code that is essentially Start() and we have to do it in this manner because we are not inheriting from MonoBehaviour
     public override void RunAtStart()
     {
         base.RunAtStart();
@@ -69,34 +72,37 @@ public class Rin_CharacterController : BaseCharacterController
         oldAnimSpeed = anim.speed;
     }
 
+    // Code that is run at every 'x' seconds and we have to do it in this manner because we are not inheriting from MonoBehaviour
     public override void RunAtFixedUpdate()
     {
         base.RunAtFixedUpdate();
     }
 
-    Vector2 oldGroundMovementDirection = Vector2.zero; // quick fix
+    Vector2 oldGroundMovementDirection = Vector2.zero;
+    
+    // handles movement code and flips the character respectve to the direction it is moving (but can also be flipped do to mouse movements, so this function's
+    // request to flip is not absoulte)
+
+    // Also ensures that we play the running animation when performing movement
     public override void PerformMovement(InputAction.CallbackContext context)
     {
-        //movementDirection = context.ReadValue<Vector2>();
         movementDirection = playerInputHandler.groundMovementDirection;
-        if (oldGroundMovementDirection == movementDirection) return;
+        if (oldGroundMovementDirection == movementDirection && oldGroundMovementDirection != Vector2.zero) return;
 
         if (movementDirection.magnitude <= playerInputHandler.universalFixedMinDeadzone)
         {
-            // Debug.LogWarning("IN DEADZONE");
             movementDirection = Vector2.zero;
             anim.SetBool(Animator.StringToHash("Running"), false);
         } else
         {
             anim.SetBool(Animator.StringToHash("Running"), true);
-            // Debug.Log(movementDirection.magnitude + " : " + playerInputHandler.universalFixedMinDeadzone);
         }
 
         Vector2 targetVelocity;
 
-        // calculates our velocity, but leaves the character current vertical velocity alone
+        // calculates the target velocity as this is the velocity that this character to attempting to approach
         targetVelocity = new Vector2(movementSpeed * movementDirection.x, curVerticalVelocity);
-        SetVelocity(targetVelocity); // u can speed boost if you spam S or W while moving. Fix this bug (applied a quick fix)
+        SetVelocity(targetVelocity);
 
         // flips player based on movement keys
         if (movementDirection.x < -0.2 && facingRight == true)
@@ -117,32 +123,30 @@ public class Rin_CharacterController : BaseCharacterController
         oldGroundMovementDirection = movementDirection;
     }
 
+    // Performs movement but this is called from an Ai's request and takes in the Ai's requested direction to move in
+    // the direction that is taken in is typically normalized
     public override void PerformMovementAi(Vector2 direction)
     {
         if (holdMovementAiOverride) direction = Vector2.zero;
-        // do a better check
-        // if (rb.velocity.normalized != direction.normalized) return;
 
+        // ensuring that our character is running
         if (direction == Vector2.zero)
         {
-            // Debug.LogWarning("IN DEADZONE");
-            // movementDirection = Vector2.zero;
             anim.SetBool(Animator.StringToHash("Running"), false);
         }
         else
         {
             anim.SetBool(Animator.StringToHash("Running"), true);
-            // Debug.Log(movementDirection.magnitude + " : " + playerInputHandler.universalFixedMinDeadzone);
         }
 
         Ai_movementDirection = direction;
         Vector2 targetVelocity;
 
-        // calculates our velocity, but leaves the character current vertical velocity alone
+        // calculates the target velocity as this is the velocity that this character to attempting to approach
         targetVelocity = new Vector2(movementSpeed * direction.x, curVerticalVelocity);
-        SetVelocity(targetVelocity); // u can speed boost if you spam S or W while moving. Fix this bug (applied a quick fix)
+        SetVelocity(targetVelocity);
 
-        // flips player based on movement keys
+        // flips player based on requested direction of the Ai
         if (direction.x < -0.2 && facingRight == true)
         {
             dodgeCarryingMomentum = false;
@@ -160,53 +164,60 @@ public class Rin_CharacterController : BaseCharacterController
 
     }
 
+    // Performs a jump based on whether we have pressed the jump key
     public override void PerformJump(InputAction.CallbackContext context)
     {
+        // if we have not exceeded the maximum number of jumps
         if (jumpIndex <= maxJumps - 1)
         {
+            // we use kinematic equations to determine our targetVerticalVelocity based on this characters specified jumpHeight and gravity
             float targetVerticalVelocity;
             isFalling = false;
 
             if (isGrounded) { 
-                // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
+                // performing a ground jump
                 targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
             } else
             {
+                // performing an airborne jump
                 float currentHeightReduction = Mathf.Pow(successiveJumpHeightReduction, airJumpsPerformed);
                 targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * airborneJumpHeight * currentHeightReduction);
                 airJumpsPerformed++;
             }
-            isGrounded = false;
 
+            isGrounded = false;
             curVerticalVelocity = targetVerticalVelocity;
             rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
             jumpIndex++;
         }
     }
 
+    // Performs a jump but on the request of the Ai, we will also take into consideration if the Ai requests to hold the jump key down
+    // in order to form a higher jump
     public override void PerformJumpAi(bool holdSpaceKey =false, bool mustBeGrounded=false)
     {
-        // if (holdMovementAiOverride) return;
-
-        Ai_holdSpaceKey = holdSpaceKey; // need to make sure it is not holding space key when sliding I think...
+        Ai_holdSpaceKey = holdSpaceKey; // will the Ai be holding the jump key down to form a higher jump
         if (mustBeGrounded && !isGrounded)
         {
-            Ai_jumpIsQueued = true;
+            Ai_jumpIsQueued = true; // queues a jump if the jump requested stated that we must be grounded
             return;
         }
 
+        // if it is possible to form a jump
         if (jumpIndex <= maxJumps - 1)
         {
+            // we use kinematic equations to determine our targetVerticalVelocity based on this characters specified jumpHeight and gravity
             float targetVerticalVelocity;
             isFalling = false;
 
             if (isGrounded)
             {
-                // using a kinematic formula to compute the intial vertical velocity I need to reach a given height
+                // performing a ground jump
                 targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * jumpHeight);
             }
             else
             {
+                // performing an airborne jump
                 float currentHeightReduction = Mathf.Pow(successiveJumpHeightReduction, airJumpsPerformed);
                 targetVerticalVelocity = Mathf.Sqrt(2 * gravity * gravityMultiplier * airborneJumpHeight * currentHeightReduction);
                 airJumpsPerformed++;
@@ -217,7 +228,7 @@ public class Rin_CharacterController : BaseCharacterController
             rb.velocity = new Vector2(rb.velocity.x, curVerticalVelocity);
             jumpIndex++;
         } else { 
-            Ai_jumpIsQueued = true; // should un-queue after a certain distance
+            Ai_jumpIsQueued = true; // queue a jump if it was impossible to form a jump during this request
         }
     }
 
@@ -245,30 +256,31 @@ public class Rin_CharacterController : BaseCharacterController
                 anim.SetTrigger(Animator.StringToHash("Up Light"));
                 break;
         }
-        //anim.SetTrigger(Animator.StringToHash("Forward Light"));
-        overrideJumpAnim = true;
-        Debug.LogWarning("Light Attack performed");
+
+        overrideJumpAnim = true; // overriding jump animation
     }
 
-    // please shift these to base character controller script when creating more characters
+    // Resets the override on jump animations so the player can resume to its jump animation typically after an attack animation has been completed
     public void ResetOverrideJumpAnim()
     {
+        // Clears one time IDs that basically represent the IDs of the characters who were hit during the duration of the entire attack animati
         HITBOXES_ClearOnetimeIDs();
 
         overrideJumpAnim = false;
         if (!isGrounded)
         {
-            EnableShadowCrownDebug();
+            EnableShadowCrownDebug(); // toggles back on the shadow and crown of a character
         }
     }
 
-    // Quick Debugging tools
+    // Quick Debugging tool that allows me to disable the shadow and crown of a character
     public void DisableShadowCrownDebug()
     {
         shadow.SetActive(false);
         crown.SetActive(false);
-        //basicOutline.SetActive(false);
     }
+
+    // Quick Debugging tool that allows me to enable the shadow and crown of a character
     public void EnableShadowCrownDebug()
     {
         shadow.SetActive(true);
@@ -296,23 +308,29 @@ public class Rin_CharacterController : BaseCharacterController
                 break;
         }
 
-        overrideJumpAnim = true;
-        Debug.LogWarning("Heavy Attack performed");
+        overrideJumpAnim = true; // overriding jump animation
     }
 
     public override void PerformBasicAbility(InputAction.CallbackContext context)
     {
-        Debug.LogWarning("Basic Ability performed");
+
     }
 
     public override void PerformUltimateAbility(InputAction.CallbackContext context)
     {
-        Debug.LogWarning("Ultimate Ability performed");
+
     }
 
     public override void PerformCrownThrow(InputAction.CallbackContext context)
     {
         base.PerformCrownThrow(context);
-        Debug.LogWarning("Crown Throw performed");
+
+    }
+
+    public override void OnPossessionLeave()
+    {
+        base.OnPossessionLeave();
+
+        oldGroundMovementDirection = Vector2.zero;
     }
 }

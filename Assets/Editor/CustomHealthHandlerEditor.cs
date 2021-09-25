@@ -4,10 +4,14 @@ using UnityEditor;
 using UnityEngine;
 using System;
 
+/* Purpose of CustomHealthHandlerEditor is just to draw health data in the editor in a more inuitive manner
+ */
+
 [CustomEditor(typeof(HealthHandler))]
 [CanEditMultipleObjects]
 public class CustomHealthHandlerEditor : Editor
 {
+    // these properties can be better understoon from from HealthHandler.cs
     SerializedProperty currentHealth;
     SerializedProperty maxHealth;
     SerializedProperty injuredThreshold;
@@ -65,14 +69,14 @@ public class CustomHealthHandlerEditor : Editor
         minSlider = exposedThreshold.intValue;
 
         if(!checkHealthEveryFrame.hasMultipleDifferentValues)
-            EditorGUILayout.PropertyField(checkHealthEveryFrame, new GUIContent("Hp Chq Evry Frame: "));
+            EditorGUILayout.PropertyField(checkHealthEveryFrame, new GUIContent("Hp Chq Evry Frame: ")); // "Health check every frame", had to shorten so it fits in the editor
 
         if (!forceDisplayHealth.hasMultipleDifferentValues)
             EditorGUILayout.PropertyField(forceDisplayHealth, new GUIContent("Force Display Hp: "));
 
-        ProgressBar(((float)currentHealth.intValue / (float)maxHealth.intValue), "Current Health / Max Health");
+        ProgressBar(((float)currentHealth.intValue / (float)maxHealth.intValue), "Current Health / Max Health"); // Progress bar that is essentially the health bar drawn in the Editor
 
-        // You can use these calcuations somewhere else if you wish...
+        // I can use these calcuations somewhere else if I need to determine how close a character is from entering a different health state...
 
         if (currentHealth.intValue > injuredThreshold.intValue && !currentHealth.hasMultipleDifferentValues) {
             ProgressBar(((float)(currentHealth.intValue - injuredThreshold.intValue) / (float)(maxHealth.intValue - injuredThreshold.intValue)),
@@ -89,14 +93,12 @@ public class CustomHealthHandlerEditor : Editor
                 (float)(exposedThreshold.intValue)), "(iii) Exposed Status");
         }
 
-        //EditorGUILayout.MinMaxSlider();
-        // ProgressBar();
         serializedObject.ApplyModifiedProperties();
     }
 
     void ProgressBar(float value, string label)
     {
-        // Get a rect for the progress bar using the same margins as a textfield:
+        // Get a rect for the progress bar using the same margins as a textfield...
         Rect rect = GUILayoutUtility.GetRect(18, 18, "TextField");
         EditorGUI.ProgressBar(rect, value, label);
         EditorGUILayout.Space();

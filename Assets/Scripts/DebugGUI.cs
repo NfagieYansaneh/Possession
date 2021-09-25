@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Purpose of DebugGUI is just to hold the majority of coded GUI elements into one file so I can enable and disable them on 
+ * demand with ease during runtime
+ */
+
 public class DebugGUI : MonoBehaviour
 {
     public bool globalShowHitboxes = false;

@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
+/* purpose of GridGraphGenerate is just to generate the grid of nodes that Ai characters will see as these nodes represent the Ai's vision
+ */
+
 public class GridGraphGenerate : MonoBehaviour
 {
+    // NodeGroupStruct are groupings of adjacent groundNodes in order to quickly assess how many 'platforms' we have in our scene 
+
     public struct NodeGroupStruct
     {
         public List<GraphNode> allNodes;
@@ -19,19 +24,21 @@ public class GridGraphGenerate : MonoBehaviour
         public GraphNode leftistNode;
         public Vector3 leftistNodePosition { get { return (Vector3)leftistNode.position; } }
 
-        public GraphNode leftistNode_3IN;
+        public GraphNode leftistNode_3IN; // 3 nodes in from our leftist node (if that isn't possible, leftistNoe_3IN will adjust)
+        // the 3 node in just makes sure that I can select the leftist node and have a sufficent enough padding without fear of the Ai falling short of reaching the leftist node
         public Vector3 leftistNode_3IN_Position { get { return (Vector3)leftistNode_3IN.position; } }
 
         public GraphNode rightistNode;
         public Vector3 rightistNodePosition { get { return (Vector3)rightistNode.position; } }
 
-        public GraphNode rightistNode_3IN;
+        public GraphNode rightistNode_3IN; // 3 nodes in from our rightest node (if that isn't possible, rightestNoe_3IN will adjust)
+        // the 3 node in just makes sure that I can select the rightist node and have a sufficent enough padding without fear of the Ai falling short of reaching the rightist node
         public Vector3 rightistNode_3IN_Position { get { return (Vector3)rightistNode_3IN.position; } }
 
         public GraphNode middleNode;
         public Vector3 middleNodePosition { get { return (Vector3)middleNode.position; } }
 
-        public int Area;
+        public int Area; // how much area does this nodeGroup (our platform) take up?
 
         public NodeGroupStruct(List<GraphNode> nodes, bool leftToRight = true)
         {
@@ -115,27 +122,24 @@ public class GridGraphGenerate : MonoBehaviour
 
     public static List<NodeGroupStruct> nodeGroups = new List<NodeGroupStruct>();
 
-    bool drawForLowPenalty = false;
-    List<GraphNode> lowPenaltyNodes = new List<GraphNode>();
+    bool drawForLowPenalty = false; // just a debugging tool to draw all ground nodes 
+    // (doesn't work in build since this is dependent on editor tools and I only need this tool in the editor anyways...
 
-    public const uint lowPenalty = 0;
-    public const uint highPenalty = 3750;
+    List<GraphNode> lowPenaltyNodes = new List<GraphNode>(); // low penalty nodes represent ground nodes
+
+    public const uint lowPenalty = 0; // low penalty represents the 0 penalty for walking on a ground node
+    public const uint highPenalty = 3750; // high penalty represents the 3750 penalty for traversing through air and is to dissuade Ai paths to unnecessarily move through the air
 
     public static GridGraph gg;
 
-    // Start is called before the first frame update
     void Start()
     {
         nodeGroups.Clear();
         Scan();
 
-        /* gg.GetNodes(node => {
-            Debug.Log((Vector3)node.position);
-            node.Penalty = (uint)Mathf.Log(node.position.y + 5 * node.position.y);
-        }); */
-
     }
 
+    // finds the nodegroup that this node is apart of...
     public static NodeGroupStruct FindThisNodesNodeGroup(GraphNode node)
     {
         for(int index=0; index<nodeGroups.Count;index++)
@@ -145,8 +149,10 @@ public class GridGraphGenerate : MonoBehaviour
                 return nodeGroup;
         }
 
-        return nodeGroups[0]; // this will never happen
+        return nodeGroups[0]; // this will typically never be called, but I had to include this because of compiler error
     }
+
+    // Scans the scene to update GridGraph
     private void Scan()
     {
         AstarPath.FindAstarPath();
@@ -161,6 +167,10 @@ public class GridGraphGenerate : MonoBehaviour
         List<GraphNode> nodes = new List<GraphNode>();
         gg.GetNodes((System.Action<GraphNode>)nodes.Add);
 
+        // At this point in the function, we have just stored a grid of nodes that represent all walkable and non-walkable nodes 
+        // non-walkable nodes are areas that are being taken up by a ground collider
+        // and now I will loop through every node in the grid graph and identity grounded nodes (represented with a low penalty and drawn as a green square)
+        // as well as identifying air nodes (represented with a high penalty and drawn as a red square)
 
         for (int x = 0; x < gg.width; x++)
         {
@@ -187,6 +197,8 @@ public class GridGraphGenerate : MonoBehaviour
                 }
             }
         }
+
+        // at this point, we are going to be cycling through every node in order to identify all nodeGroups (essentially all platforms in our scene)...
 
         bool searchingForNewGroup = true;
         bool requirementReached = false;
@@ -241,6 +253,7 @@ public class GridGraphGenerate : MonoBehaviour
             }
         }
 
+        // Debugging that helps illustrate where all nodeGroups (essentially platforms) are within the scene
         Debug.LogError("About to print # of nodeGroups...");
         Debug.LogError("How many node groups? " + nodeGroups.Count);
         foreach (NodeGroupStruct nodeGroup in nodeGroups)
@@ -255,6 +268,8 @@ public class GridGraphGenerate : MonoBehaviour
     private void OnGUI()
     {
         drawForLowPenalty = GUI.Toggle(new Rect(500, 120, 230, 25), drawForLowPenalty, new GUIContent("Draw for low penalty"));
+
+        // If I press the "Refresh Grid Graph" button, I refresh the grid graph
         if(GUI.Button(new Rect(500, 140, 100, 40), new GUIContent("Refresh Grid Graph")))
         {
             Scan();
@@ -270,15 +285,9 @@ public class GridGraphGenerate : MonoBehaviour
 
             foreach (GraphNode node in lowPenaltyNodes)
             {
-                // Debug.Log((Vector3)node.position);
+                // draws a green opaque square at every ground node
                 Gizmos.DrawCube((Vector3)node.position, new Vector3(gg.nodeSize, gg.nodeSize));
             }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

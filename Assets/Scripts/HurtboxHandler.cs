@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Purpose of HurtboxHandler just handles our hurtboxes that every character contains as these 
+ * hurtboxes are places where the character can take damage
+ */
+
 [RequireComponent(typeof(CapsuleCollider2D))]
 public class HurtboxHandler : MonoBehaviour
 {
@@ -19,31 +23,10 @@ public class HurtboxHandler : MonoBehaviour
         // ...
     }
 
-    // 4-directional knockback
-    /*
-    void HandleKnockback(attackDirection directionalAttack, bool attackedFromTheRight)
-    {
-        switch (directionalAttack)
-        {
-            case attackDirection.UP:
-                break;
-
-            case attackDirection.DOWN:
-                break;
-
-            case attackDirection.FORWARD:
-                if (attackedFromTheRight)
-                {
-                    baseCharacterController.ApplyKnockback(Vector2.rig)
-                }
-                break;
-        }
-    }
-    */
-
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
+        // drawing hurtboxes if requested
         if (baseCharacterController.showHitboxes)
         {
             Vector2 position = hurtbox.bounds.center;

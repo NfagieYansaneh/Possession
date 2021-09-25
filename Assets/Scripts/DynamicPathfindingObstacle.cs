@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
+/* DyanmicPathfindingObstacle is just a test to see how to handle dynamically moving nodes 
+ */
+
 public class DynamicPathfindingObstacle : MonoBehaviour
 {
     BoxCollider2D boxCollider2D;

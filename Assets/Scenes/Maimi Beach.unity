@@ -2624,7 +2624,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210819810}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13.08, y: 0.90625, z: 0}
+  m_LocalPosition: {x: -12.58, y: 0.40625, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 902152755}
@@ -2722,7 +2722,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   t_startMovementCurveTimestamp: 93.6561
-  t_endMovementCurveTimestamp: 0
   backgroundVelocities: []
   backgroundVelocityTimestamps: []
   backgroundVelocityDurations: []
@@ -2853,20 +2852,19 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   dodgeTimestamp: 93.65954
-  gravityEnabled: 1
   dodgeVelocity: {x: -39.44888, y: 0}
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
   dodgeBoxSize: {x: 0.1, y: 1.14}
-  dodgeBoxPosition: {x: -5.11, y: 9.63625}
+  dodgeBoxPosition: {x: -4.61, y: 9.13625}
   dodgeBoxOffset: {x: 0.39, y: -0.27}
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 1195648330}
   ceilingCheck: {fileID: 409893739}
-  groundedRadius: 0.25
   isGrounded: 1
+  gravityEnabled: 1
   maxSlopeAngle: 45
   maxSteepSlopeAngle: 55
   isSliding: 0
@@ -2874,7 +2872,6 @@ MonoBehaviour:
   isOnWalkableSlope: 1
   isOnSteepSlope: 0
   willIgnoreSteepSlope: 0
-  ceilingRadius: 0.2
   ceilingTimeAmount: 0.2
   ceilingTimerActive: 0
   myCollider: {fileID: 210819818}
@@ -2922,6 +2919,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
+  baseAiController: {fileID: 1464349302}
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &210819813
@@ -11829,7 +11827,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: a46e25e3dc2d6c843a3f887fe8be366f, type: 3}
-  m_Color: {r: 0.14117648, g: 0.9882353, b: 0.6666667, a: 1}
+  m_Color: {r: 0.14117648, g: 0.9882353, b: 0.6666667, a: 0.65882355}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -12464,7 +12462,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235444
+  m_Name: pb_Mesh148722
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -13595,7 +13593,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235398
+  m_Name: pb_Mesh148676
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -13801,7 +13799,14 @@ MonoBehaviour:
   targetPlayerPosition: {fileID: 692122547}
   baseCharacterController: {fileID: 210819812}
   seeker: {fileID: 370582183}
+  currentWaypoint: 0
+  reachedEndOfPath: 0
+  pathComplete: 0
   takingDetour: 0
+  specialWaypointUpcoming: 0
+  startPathing: 0
+  currentlyBeingPossessed: 0
+  startedEnumerator: 0
 --- !u!114 &370582182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13819,7 +13824,6 @@ MonoBehaviour:
   newVectorPath: []
   baseCharacterController: {fileID: 210819812}
   baseAiController: {fileID: 370582181}
-  resolution: 10
 --- !u!114 &370582183
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14097,7 +14101,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 413490890}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.58, y: 0.40625048, z: 0}
+  m_LocalPosition: {x: -0.5799999, y: 2.4062505, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 403957590}
@@ -14195,7 +14199,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   t_startMovementCurveTimestamp: 93.6561
-  t_endMovementCurveTimestamp: 0
   backgroundVelocities: []
   backgroundVelocityTimestamps: []
   backgroundVelocityDurations: []
@@ -14326,20 +14329,19 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   dodgeTimestamp: 93.65954
-  gravityEnabled: 1
   dodgeVelocity: {x: -39.44888, y: 0}
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
   dodgeBoxSize: {x: 0.1, y: 1.14}
-  dodgeBoxPosition: {x: -3.6100001, y: 9.13625}
+  dodgeBoxPosition: {x: 7.39, y: 11.13625}
   dodgeBoxOffset: {x: 0.39, y: -0.27}
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 1057265397}
   ceilingCheck: {fileID: 664162583}
-  groundedRadius: 0.25
   isGrounded: 1
+  gravityEnabled: 1
   maxSlopeAngle: 45
   maxSteepSlopeAngle: 55
   isSliding: 0
@@ -14347,7 +14349,6 @@ MonoBehaviour:
   isOnWalkableSlope: 1
   isOnSteepSlope: 0
   willIgnoreSteepSlope: 0
-  ceilingRadius: 0.2
   ceilingTimeAmount: 0.2
   ceilingTimerActive: 0
   myCollider: {fileID: 413490898}
@@ -14395,6 +14396,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
+  baseAiController: {fileID: 370582181}
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &413490893
@@ -14651,7 +14653,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh236030
+  m_Name: pb_Mesh149308
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -15334,7 +15336,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235600
+  m_Name: pb_Mesh148878
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -15580,7 +15582,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235268
+  m_Name: pb_Mesh148546
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -16105,7 +16107,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234838
+  m_Name: pb_Mesh148116
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -17221,7 +17223,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235762
+  m_Name: pb_Mesh149040
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19110,7 +19112,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235664
+  m_Name: pb_Mesh148942
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19306,7 +19308,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235570
+  m_Name: pb_Mesh148848
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19881,7 +19883,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235088
+  m_Name: pb_Mesh148366
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20127,7 +20129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235986
+  m_Name: pb_Mesh149264
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20322,7 +20324,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh236142
+  m_Name: pb_Mesh149420
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20351,7 +20353,7 @@ Mesh:
   m_KeepVertices: 1
   m_KeepIndices: 1
   m_IndexFormat: 0
-  m_IndexBuffer: 000001000200020001000300010004000300040005000300
+  m_IndexBuffer: 010002000000000002000500020003000500030004000500
   m_VertexData:
     serializedVersion: 3
     m_VertexCount: 6
@@ -20413,7 +20415,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 288
-    _typelessdata: e2f6abbe000010b7da986cc0c733d6360000803fbd0079b60000803fc733d6b6bd00f9a1000080bfe2f6abbeda986cc062bd3fbf000000b766d184c05487b8350000803f75a1a4b60000803f5487b8b5f1815ba1000080bf62bd3fbf66d184c0447dffbe0000b8b6461949c0eaa643360000803fb34d3fb60000803feaa643b6b34d3fa1000080bf447dffbe461949c057ff12c1000020b7d9fb30c0ecd50bb70000803f2561edb60000803fecd50b3700000000000080bf57ff12c1d9fb30c0103812c1000090b716b867c0ab1d4db70000803f885521b70000803fab1d4d3700000000000080bf103812c116b867c0075d15c1000094b726b34ec050cdbeb70000803fb95f2bb70000803f50cdbe3700000000000080bf075d15c126b34ec0
+    _typelessdata: 447dffbe0000b8b6461949c0eaa643360000803fb34d3fb60000803feaa643b6b34d3fa1000080bf447dffbe461949c0e2f6abbe000010b7da986cc0c733d6360000803fbd0079b60000803fc733d6b6bd00f9a1000080bfe2f6abbeda986cc062bd3fbf000000b766d184c05487b8350000803f75a1a4b60000803f5487b8b5f1815ba1000080bf62bd3fbf66d184c0103812c1000090b716b867c0ab1d4db70000803f885521b70000803fab1d4d3700000000000080bf103812c116b867c0075d15c1000094b726b34ec050cdbeb70000803fb95f2bb70000803f50cdbe3700000000000080bf075d15c126b34ec057ff12c1000020b7d9fb30c0ecd50bb70000803f2561edb60000803fecd50b3700000000000080bf57ff12c1d9fb30c0
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -20824,7 +20826,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235172
+  m_Name: pb_Mesh148450
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -21012,6 +21014,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48c658d5f2eefe74a91d82710e5465d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentDevice: 0
   playerColor: {r: 0.43137255, g: 0.93333334, b: 1, a: 0.65882355}
   universalFixedMinDeadzone: 0.61404455
   universalFixedMaxDeadzone: 0.92499995
@@ -21031,8 +21034,6 @@ MonoBehaviour:
   aerialMovementDirection: {x: 0, y: 0}
   dashingMovementDirection: {x: 0, y: 0}
   RAWattackDirection: {x: 0, y: 0}
-  groundAttackDirection: {x: 0, y: 0}
-  aerialAttackDirection: {x: 0, y: 0}
   spaceKeyHeld: 0
   possessedCharacter: {fileID: 413490892}
 --- !u!114 &979204402
@@ -21123,7 +21124,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234824
+  m_Name: pb_Mesh148102
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -21784,7 +21785,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235516
+  m_Name: pb_Mesh148794
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -21948,7 +21949,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234866
+  m_Name: pb_Mesh148144
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -24207,7 +24208,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: a46e25e3dc2d6c843a3f887fe8be366f, type: 3}
-  m_Color: {r: 1, g: 0.627451, b: 0.4392157, a: 1}
+  m_Color: {r: 0.43137255, g: 0.93333334, b: 1, a: 0.65882355}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -24598,7 +24599,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234852
+  m_Name: pb_Mesh148130
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -24762,7 +24763,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234954
+  m_Name: pb_Mesh148232
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -25526,7 +25527,6 @@ MonoBehaviour:
   newVectorPath: []
   baseCharacterController: {fileID: 210819812}
   baseAiController: {fileID: 1464349302}
-  resolution: 10
 --- !u!114 &1464349302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25542,7 +25542,14 @@ MonoBehaviour:
   targetPlayerPosition: {fileID: 370582180}
   baseCharacterController: {fileID: 210819812}
   seeker: {fileID: 1464349300}
+  currentWaypoint: 0
+  reachedEndOfPath: 0
+  pathComplete: 0
   takingDetour: 0
+  specialWaypointUpcoming: 0
+  startPathing: 0
+  currentlyBeingPossessed: 0
+  startedEnumerator: 0
 --- !u!1 &1464864683
 GameObject:
   m_ObjectHideFlags: 0
@@ -26661,7 +26668,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235316
+  m_Name: pb_Mesh148594
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -26959,7 +26966,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   t_startMovementCurveTimestamp: 93.6561
-  t_endMovementCurveTimestamp: 0
   backgroundVelocities: []
   backgroundVelocityTimestamps: []
   backgroundVelocityDurations: []
@@ -27090,7 +27096,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   dodgeTimestamp: 93.65954
-  gravityEnabled: 1
   dodgeVelocity: {x: -39.44888, y: 0}
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
@@ -27102,8 +27107,8 @@ MonoBehaviour:
     m_Bits: 8
   groundCheck: {fileID: 1068141760}
   ceilingCheck: {fileID: 1953442914}
-  groundedRadius: 0.25
   isGrounded: 1
+  gravityEnabled: 1
   maxSlopeAngle: 45
   maxSteepSlopeAngle: 55
   isSliding: 0
@@ -27111,7 +27116,6 @@ MonoBehaviour:
   isOnWalkableSlope: 1
   isOnSteepSlope: 0
   willIgnoreSteepSlope: 0
-  ceilingRadius: 0.2
   ceilingTimeAmount: 0.2
   ceilingTimerActive: 0
   myCollider: {fileID: 1680645373}
@@ -27159,6 +27163,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
+  baseAiController: {fileID: 0}
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &1680645367
@@ -27487,12 +27492,14 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.3561864, y: 3.6820295}
-      - {x: -0.72466856, y: 4.087215}
-      - {x: -9.174475, y: 3.6091423}
-      - {x: -9.3468275, y: 3.165328}
-      - {x: -9.179493, y: 2.8104758}
-      - {x: -0.5297885, y: 3.1478353}
+    - - {x: -0.65488374, y: 3.173979}
+      - {x: -0.56302696, y: 3.20638}
+      - {x: -0.641703, y: 4.0308456}
+      - {x: -0.69369555, y: 4.087215}
+      - {x: -9.081896, y: 3.6154895}
+      - {x: -9.12637, y: 3.6005042}
+      - {x: -9.148467, y: 2.9915886}
+      - {x: -9.028072, y: 2.795269}
 --- !u!1 &1692056977
 GameObject:
   m_ObjectHideFlags: 0
@@ -29236,7 +29243,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235954
+  m_Name: pb_Mesh149232
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -29502,7 +29509,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   t_startMovementCurveTimestamp: 93.6561
-  t_endMovementCurveTimestamp: 0
   backgroundVelocities: []
   backgroundVelocityTimestamps: []
   backgroundVelocityDurations: []
@@ -29633,7 +29639,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   dodgeTimestamp: 93.65954
-  gravityEnabled: 1
   dodgeVelocity: {x: -39.44888, y: 0}
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
@@ -29645,8 +29650,8 @@ MonoBehaviour:
     m_Bits: 8
   groundCheck: {fileID: 1868531069}
   ceilingCheck: {fileID: 980441266}
-  groundedRadius: 0.25
   isGrounded: 1
+  gravityEnabled: 1
   maxSlopeAngle: 45
   maxSteepSlopeAngle: 55
   isSliding: 0
@@ -29654,7 +29659,6 @@ MonoBehaviour:
   isOnWalkableSlope: 1
   isOnSteepSlope: 0
   willIgnoreSteepSlope: 0
-  ceilingRadius: 0.2
   ceilingTimeAmount: 0.2
   ceilingTimerActive: 0
   myCollider: {fileID: 1835812409}
@@ -29702,6 +29706,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
+  baseAiController: {fileID: 0}
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &1835812403
@@ -30127,7 +30132,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235888
+  m_Name: pb_Mesh149166
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -31234,7 +31239,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh236108
+  m_Name: pb_Mesh149386
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -31833,7 +31838,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   t_startMovementCurveTimestamp: 93.6561
-  t_endMovementCurveTimestamp: 0
   backgroundVelocities: []
   backgroundVelocityTimestamps: []
   backgroundVelocityDurations: []
@@ -31964,7 +31968,6 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   dodgeTimestamp: 93.65954
-  gravityEnabled: 1
   dodgeVelocity: {x: -39.44888, y: 0}
   t_dodgeCurveTimestamp: 93.539536
   dodgeMomentumFallofCurveTimestamp: 93.965965
@@ -31976,8 +31979,8 @@ MonoBehaviour:
     m_Bits: 8
   groundCheck: {fileID: 938691565}
   ceilingCheck: {fileID: 713238591}
-  groundedRadius: 0.25
   isGrounded: 1
+  gravityEnabled: 1
   maxSlopeAngle: 45
   maxSteepSlopeAngle: 55
   isSliding: 0
@@ -31985,7 +31988,6 @@ MonoBehaviour:
   isOnWalkableSlope: 1
   isOnSteepSlope: 0
   willIgnoreSteepSlope: 0
-  ceilingRadius: 0.2
   ceilingTimeAmount: 0.2
   ceilingTimerActive: 0
   myCollider: {fileID: 1973447450}
@@ -32033,6 +32035,7 @@ MonoBehaviour:
   Ai_movementDirection: {x: 0, y: 0}
   Ai_holdDownKey: 0
   Ai_holdSpaceKey: 0
+  baseAiController: {fileID: 0}
   previousRbVelocity: {x: 0, y: 0}
   holdMovementAiOverride: 0
 --- !u!114 &1973447445
@@ -32606,7 +32609,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh234772
+  m_Name: pb_Mesh148050
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -32770,7 +32773,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh235292
+  m_Name: pb_Mesh148570
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

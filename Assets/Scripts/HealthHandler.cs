@@ -2,12 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum healthStates { HEALTH_NORMAL, HEALTH_INJURED, HEALTH_EXPOSED };
-public enum blinkerStates { BLINKER_ON, BLINKER1_OFF, BLINKER_BURST_ON, BLINKER2_OFF }
+/* Purpose of HealthHandler.cs is to handle and manage a character's health
+ * and health status
+ */
+
+public enum healthStates { HEALTH_NORMAL, HEALTH_INJURED, HEALTH_EXPOSED }; // health_exposed means that the character is critically low
+
+// hardcoded pattern that will be used to cause the skull icon (that represents current player health)
+// to blink in a defined pattern
+public enum blinkerStates { BLINKER_ON, BLINKER1_OFF, BLINKER_BURST_ON, BLINKER2_OFF } 
 
 public class HealthHandler : MonoBehaviour
 {
-    private Rect buttonPos;
+    // private Rect buttonPos;
     public SpriteRenderer spriteRenderer;
     public Sprite[] skullSprites;
 
@@ -21,6 +28,8 @@ public class HealthHandler : MonoBehaviour
     public bool checkHealthEveryFrame = false;
     public bool forceDisplayHealth = false;
 
+    /* blinker variables used let the skull (the health icon) flash in a specific manner to bring player's attention towards it */
+
     public static float universalBlinkerOnTiming = 0.2f;
     public static float universalBlinkerOffTiming = 0.1f;
     static IEnumerator blinkerCoroutine;
@@ -30,11 +39,9 @@ public class HealthHandler : MonoBehaviour
 
     void Start()
     {
-        buttonPos = new Rect(20.0f, 20.0f, 150.0f, 40.0f);
-
-        // get rid of magic value
         if (!coroutineRunning)
         {
+            // starts up a coroutine that will flash the health icons of all skulls (health icons) in sync when they are at the injured status
             blinkerCoroutine = injuredStatusBlinker(0.5f, 0.1f, 0.1f);
             StartCoroutine(blinkerCoroutine);
         }
@@ -97,7 +104,13 @@ public class HealthHandler : MonoBehaviour
     static IEnumerator injuredStatusBlinker(float blinkerOnTiming, float blinkerOnBurstTiming, float blinkerOffTiming)
     {
         // [][][]||[]||
+        // squares represent when the skull icon is visible []
+        // and double lines represent when the skull icon is not visible ||
+        // just quickly showing how the skull will flash
+
         coroutineRunning = true;
+
+        // performing blinking pattern when our player is at the injured status
         while (true)
         {
             switch (currentBlinkerState)
@@ -127,6 +140,7 @@ public class HealthHandler : MonoBehaviour
                     break;
             }
 
+            // makes sure that all blinking with occur in sync with other characters if they are also at the injured status
             foreach (BaseCharacterController baseCharacterController in BaseCharacterController.baseCharacterControllers)
             {
                 if(baseCharacterController.healthHandler != null && baseCharacterController.healthHandler.healthStatus == (int)healthStates.HEALTH_INJURED)

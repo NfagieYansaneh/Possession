@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/* Purpose of HitboxHandler is to handle our hitboxes when performing attacks and to deal damage towards other
+ * characters if the hitbox hits their hurt box
+ */
+
 public enum knockbackDirection { 
     UP, UP_FORWARD60, UP_FORWARD45, UP_FORWARD30, 
     FORWARD, DOWN_FORWARD30, DOWN_FORWARD45, DOWN_FORWARD60,
@@ -9,12 +13,22 @@ public enum knockbackDirection {
     BACK, DOWN_BACK30, DOWN_BACK45, DOWN_BACK60
 };
 
+// essentially, when I hitbox hits a character, we store that character into a list of recently hit characters and in some instances
+// we will only store that list for one frame of animation and clear it by calling a clear command. Clear degree just states the degree
+// at which we clear our recently hit characers list. DONT_CLEAR states that we will not clear the recently hit characters list for this
+// hitbox. CLEAR_ME states we will clear the recently hit characters list for this hitbox. CLEAR_ALL states that we will clear the recently
+// hit characters list for all hitboxes that is stored for the character
 public enum clearDegree
 {
     DONT_CLEAR, CLEAR_ME, CLEAR_ALL
 }
 
+// stored this knockbackDirectionClass seperate from HitboxHandler since this function is very useful and may be used outside
+// of the domain of the HitboxHandler.cs
+
 public static class knockbackDirectionClass {
+
+    // calculating knockback direction to give to other character that has just been struck by this character
     public static Vector2 calculateKnockbackDirection(knockbackDirection direction, bool attackerFacingRight)
     {
         Vector2 temp;
@@ -157,23 +171,21 @@ public static class knockbackDirectionClass {
                  
         }
 
+        // else, no knockback direction could be calculated, so we just return nothing
         return Vector2.zero;
     }
 }
 
 [RequireComponent(typeof(CapsuleCollider2D))]
-public class HitboxHandler : MonoBehaviour
+public class HitboxHandler : MonoBehaviour 
 {
     public BaseCharacterController baseCharacterController;
     public CapsuleCollider2D hitbox;
     public List<BaseCharacterController> recentlyHitCharacters;
     public List<int> recentlyHitCharactersID; // its not the type of id you think, and its works differently, its more so an id to their
-    // background velocities
+    // background velocities that we have just applied to them in the form of a knockback
 
-    //public List<float> recentlyHitCharacterTimestamps;
-    //public static float recentlyHitDelay = 0.1f;
-
-    public static List<HitboxHandler> allHitboxHandlers;
+    public static List<HitboxHandler> allHitboxHandlers; // all hitboxes in our scene
     public List<HitboxHandler> myHitboxHandlers;
     public knockbackDirection currentKnockbackDirection;
 
@@ -219,64 +231,35 @@ public class HitboxHandler : MonoBehaviour
         }
     }
 
-    List<int> indexesMarked = new List<int>(0);
-    /*public void Update()
-    {
-        int index = 0;
-        foreach (BaseCharacterController hitCharacters in recentlyHitCharacters)
-        {
-            if(recentlyHitCharacterTimestamps[index] < Time.time)
-                indexesMarked.Add(index);
-
-            index++;
-        }
-
-        int numOfItemsRemoved = 0;
-        foreach (int i in indexesMarked)
-        {
-            if(recentlyHitCharacters.Count >= (i - numOfItemsRemoved) && recentlyHitCharacterTimestamps.Count >= (i - numOfItemsRemoved))
-            recentlyHitCharacters.RemoveAt(i - numOfItemsRemoved);
-            recentlyHitCharacterTimestamps.RemoveAt(i - numOfItemsRemoved);
-
-            numOfItemsRemoved++;
-        }
-
-        if (indexesMarked.Count > 0)
-            indexesMarked.Clear();
-    }
-    */
-
+    // Handles trigger box processing in which our hitbox collides with another collider
     void HandleTrigger(Collider2D collision)
     {
         // if its an interact w/ Dmg, we shouldn't put it on a timestamp, and instead wait if a new attack is used
+        // however, not objects utilise "Interact w/ Dmg" and may be depricated if there is no use...
+
         if(collision.tag == "Hurtbox" || collision.tag == "Interact w/ Dmg")
         {
 
             HurtboxHandler hurtboxHandler = collision.gameObject.GetComponent<HurtboxHandler>();
             BaseCharacterController theirCharacterController = hurtboxHandler.baseCharacterController;
 
-            //the "this." part is just to emphasis that I am checking wether their character controller is equal to my character controller
             foreach(BaseCharacterController baseCharacterController in recentlyHitCharacters)
             {
-                //Debug.LogWarning(baseCharacterController + " & " + theirCharacterController);
                 if (baseCharacterController == theirCharacterController) return;
             }
-            //if (theirCharacterController == this.baseCharacterController) return;
 
             theirCharacterController.healthHandler.UpdateHealth((int)(baseCharacterController.damageTiers[damagePointer] 
                 * baseCharacterController.damageMultiplier * -1));
 
             Debug.LogError("RIN DID " + baseCharacterController.damageTiers[damagePointer] + " OF DAMAGE");
-            //Debug.LogWarning("RIN HIT STOP @ " + baseCharacterController.hitStopTiers[damagePointer]);
             
 
-            // apply this to all other hitboxes parented to the character
+            // updating recentlyHitCharacters list to all other hitboxes parented to the character if linkHitboxList is true
             if (linkHitboxList)
             {
                 foreach (HitboxHandler hitboxHandler in myHitboxHandlers)
                 {
                     hitboxHandler.recentlyHitCharacters.Add(theirCharacterController);
-                    //hitboxHandler.recentlyHitCharacterTimestamps.Add(Time.time + baseCharacterController.hitStopTiers[damagePointer] + recentlyHitDelay + Time.deltaTime);
                 }
             } 
             else
@@ -291,7 +274,6 @@ public class HitboxHandler : MonoBehaviour
             // Applying Knockback
             if (theirCharacterController.canRecvieceKnockback)
             {
-                //Vector2 direction = theirCharacterController.gameObject.transform.position - transform.position;
                 bool attackerFacingRight = baseCharacterController.facingRight;
 
                 float distance = baseCharacterController.knockbackDistanceTiers[damagePointer];
@@ -300,7 +282,8 @@ public class HitboxHandler : MonoBehaviour
                 theirCharacterController.ApplyKnockback(currentKnockbackDirection, attackerFacingRight, distance,
                     baseCharacterController.knockbackDurationTiers[damagePointer]);
 
-                // Implement knockback dragging later idek
+                // Implement knockback dragging that essentially allows to attack to influence the vector of knockback applied to the other character, based on their movement dureing 
+                // the attack
                 foreach (int id in recentlyHitCharactersID)
                 {
                     if (theirCharacterController.backgroundVelocityID.Contains(id))
@@ -312,18 +295,18 @@ public class HitboxHandler : MonoBehaviour
                 recentlyHitCharactersID.Add(theirCharacterController.SetNewBackgroundVelocityGravityIncorporated_Velcoity(baseCharacterController.previousRbVelocity / 3f,
                             baseCharacterController.knockbackDurationTiers[damagePointer] - Time.deltaTime * 2));
                 
-
-                // add a cap to the magnitude of background velocity
             }
         }
     }
 
+    // Clears one time IDs that basically represent the IDs of the characters who were hit during the duration of the entire attack animation
     public void ClearOnetimeIDs()
     {
         recentlyHitCharactersID.Clear();
         ClearIDs(clearAmount);
     }
 
+    // Clears IDs that basically represent the IDs of the characters who were hit this frame. However, its clear degree depends on hitbox.clearAmount
     public void ClearIDs(clearDegree clear)
     {
         switch (clear)
@@ -344,9 +327,10 @@ public class HitboxHandler : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR // we have to make sure to not compile this code if we are building our code for a release since this can cause some compiler errors
     private void OnDrawGizmos()
     {
+        // draws hitboxes in editor if debugging process is enabled
         if (baseCharacterController.showHitboxes && canDrawHitboxes && hitbox.enabled)
         {
             Vector2 position = hitbox.bounds.center;
@@ -372,10 +356,5 @@ public class HitboxHandler : MonoBehaviour
         if (canDamage)
             HandleTrigger(collision);
     }
-    /*private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (canDamage)
-            HandleTrigger(collision);
-    }*/
 }
 

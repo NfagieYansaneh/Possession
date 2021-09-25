@@ -6,23 +6,32 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-// deadzones are meant to refine raw data input
+/* Purpose of CustomDeadzonesWindow is to be a tool that allows to visualise who player inputs are being
+ * processed within the game
+ */
 
 public class CustomDeadzonesWindow : EditorWindow
 {
+    /* List of deadzones are used to tweak the feel of gameplay to determine how sensitive inputs should be respective to player inputs */
+
+    // "universal" is typically used to just understand the direction of the movement keys with basic deadzones applied to it
     float universalFixedMinDeadzone = 0.125f;
     float universalFixedMaxDeadzone = 0.925f;
 
+    // "ground" is typically used to just understand whether our movement keys are heading to the left or right
     float groundHorizontalDeadzone = 0.2f;
     float groundVerticalDeadzone = 0.2f;
 
+    // "aerial" is typically used to just understand whether our movement keys are heading up or down
     float aerialHorizontalDeadzone = 0.2f;
     float aerialVerticalDeadzone = 0.2f;
 
+    // "attack" is typically used to just understand the direction of our attack
+    // here we are uses angles to determine the angle our attack direction as it will have to be relative to our player's position to select from different directional attacks
     float attackVerticalAngleDeadzone = 90f;
     float attackHorizontalAngleDeadzone = 90f;
 
-    // where the disc is held
+    // Position of where the GUI joystick circle should be placed to represent the boundaries of a joystick (that can also be translated into movements on a keyboard)
     Vector3 groundDeadzonePosition = Vector3.zero;
     Vector3 aerialDeadzonePosition = Vector3.zero;
     Vector3 universalDeadzonePosition = Vector3.zero;
@@ -30,7 +39,8 @@ public class CustomDeadzonesWindow : EditorWindow
     Vector3 RAWMovementDeadzonePosition = Vector3.zero;
     Vector3 RAWAttackDeadzonePosition = Vector3.zero;
 
-    // where the little cyan circle is held
+    // where the little cyan circle is held represents the GUI joystick stick position relative to the GUI joystick base
+    // and the GUI joystick stick can also be translated into movements on a keyboard
     Vector3 groundMovementGUIPosition = Vector3.zero;
     Vector3 aerialMovementGUIPosition = Vector3.zero;
     Vector3 universalDeadzoneGUIPosition = Vector3.zero;
@@ -42,10 +52,11 @@ public class CustomDeadzonesWindow : EditorWindow
     static CustomDeadzonesWindow window;
     static PlayerInputHandler playerInputHandler = null;
 
-    float radius; // radius for deadzone circles
+    float radius; // radius for GUI joystick circles circles
 
     bool bootup = true;
 
+    // Creating our CustomDeadzones window when we click on "Tools" then "Deadzones" on our menu items
     [MenuItem("Tools/Deadzones")]
     public static void ShowWindow()
     {
@@ -64,9 +75,10 @@ public class CustomDeadzonesWindow : EditorWindow
         }
     }
 
+    // Drawing GUI elements
     private void OnGUI()
     {
-        // grabs playerInputHandler 
+        // grabs playerInputHandler stored deadzones
         if (bootup)
         {
             LoadDeadzones(); bootup = false;
@@ -74,6 +86,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
         Rect rect = EditorGUILayout.BeginVertical();
 
+        /* drawing sliders that allow us to adjust deadzones of our inputs*/
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Universal Fixed Min/Max Deadzone:");
         EditorGUILayout.MinMaxSlider(ref universalFixedMinDeadzone, ref universalFixedMaxDeadzone, 0f, 1f);
@@ -133,35 +146,28 @@ public class CustomDeadzonesWindow : EditorWindow
             SaveDeadzones();
         }
 
-
-        // This function is only a dream :(
-        // I need to fix it later
-        /*if (GUILayout.Button("Fix Drift"))
-        {
-            universalFixedMinDeadzone = playerInputHandler.possessedCharacter.movementDirection.magnitude + 0.1f;
-        }*/
-
         EditorGUILayout.Space();
 
-        float margin = 5f; // magic value
+        float margin = 5f;
         radius = (window.position.width / 8) - 2 * margin;
 
-        // Top row left to right
+        // going from top row left to top right, as I am assiging the position of the joystick circles to be then drawn with Handles.DrawSolidDisc
         groundDeadzonePosition = new Vector3(rect.position.x + rect.width / 8 + margin, radius + rect.height);
         aerialDeadzonePosition = new Vector3(rect.position.x + 3 * rect.width / 8 + margin, radius + rect.height);
         universalDeadzonePosition = new Vector3(rect.position.x + rect.width - (rect.width / 8) + margin, radius + rect.height);
         attackDeadzonePosition = new Vector3(rect.position.x + rect.width - (3*rect.width / 8) + margin, radius + rect.height);
 
-        // Bottom row left to right
+        // going from bottom row left to bottom right, as I am assiging the position of the joystick circles to be then drawn with Handles.DrawSolidDisc
         RAWMovementDeadzonePosition = new Vector3(rect.position.x + rect.width / 8 + margin, window.position.height - radius - margin);
         RAWAttackDeadzonePosition = new Vector3(rect.position.x + 3 * rect.width / 8 + margin, window.position.height - radius - margin);
-        //aerialDeadzonePosition = new Vector3(rect.position.x + rect.width - (rect.width / 8) + margin, window.position.height - radius - margin);
-        //aerialDeadzonePosition = new Vector3(rect.position.x + rect.width - (3 * rect.width / 8) + margin, window.position.height - radius - margin);
+        // newPotentialDeadzonePosition = new Vector3(rect.position.x + rect.width - (rect.width / 8) + margin, window.position.height - radius - margin);
+        // newPotentialDeadzonePosition = new Vector3(rect.position.x + rect.width - (3 * rect.width / 8) + margin, window.position.height - radius - margin);
 
         DrawDeadzones();
 
     }
 
+    // Draws deadzones (as well as some other joystick GUI elements) that will be shown in our CustomDeadzones window
     void DrawDeadzones()
     {
         Vector3[] vertices;
@@ -175,7 +181,7 @@ public class CustomDeadzonesWindow : EditorWindow
             Handles.DrawSolidDisc(attackDeadzonePosition, new Vector3(0, 0, 1), radius);
         }
 
-        /* TOP ROW Grounded deadzone visualiser */
+        /* drawing TOP ROW Grounded deadzone visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(groundDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -213,7 +219,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
 
 
-        /* TOP ROW Aerial deadzones visualiser */
+        /* drawing TOP ROW Aerial deadzones visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(aerialDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -252,7 +258,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
 
 
-        /* TOP ROW Universal deadzone visualiser */
+        /* drawing TOP ROW Universal deadzone visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(universalDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -264,7 +270,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
 
 
-        /* TOP ROW Attack deadzone visualiser */
+        /* drawing TOP ROW Attack deadzone visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(attackDeadzonePosition, new Vector3(0, 0, 1), radius * universalFixedMaxDeadzone);
@@ -289,7 +295,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
 
 
-        /* BOTTOM ROW RAW movement visualiser */
+        /* drawing BOTTOM ROW RAW movement visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(RAWMovementDeadzonePosition, new Vector3(0, 0, 1), radius);
@@ -299,7 +305,7 @@ public class CustomDeadzonesWindow : EditorWindow
 
 
 
-        /* BOTTOM ROW RAW movement visualiser */
+        /* drawing BOTTOM ROW RAW movement visualiser */
 
         Handles.color = Color.white;
         Handles.DrawSolidDisc(RAWAttackDeadzonePosition, new Vector3(0, 0, 1), radius);
@@ -307,7 +313,13 @@ public class CustomDeadzonesWindow : EditorWindow
         Handles.color = Color.magenta;
         Handles.Label(RAWAttackDeadzonePosition + Vector3.down * radius + Vector3.left * radius, "RAW Attack");
 
+
+        // Updates and checks for new player inputs to assess where the GUI joystick stick should be relative to our GUI joystick base
         UpdateMovementGUIPosition();
+
+        // Drawing the little cyan circle within our GUI joystick base that represents the GUI joystick stick's current position relative to the
+        // GUI joystick base (that can also be translated into movements on a keyboard)
+
         Handles.color = Color.cyan;
         Handles.DrawSolidDisc(groundMovementGUIPosition, new Vector3(0, 0, 1), radius / 10);
         Handles.DrawSolidDisc(aerialMovementGUIPosition, new Vector3(0, 0, 1), radius / 10);
@@ -356,12 +368,13 @@ public class CustomDeadzonesWindow : EditorWindow
         if (playerInputHandler != null && playerInputHandler.RAWmovementDirection == previousMovementDirection &&
             playerInputHandler.RAWattackDirection == previousAttackDrection) return;
 
-        window.Repaint();
+        window.Repaint(); // redraws window
 
         previousMovementDirection = playerInputHandler.RAWmovementDirection;
         previousAttackDrection = playerInputHandler.RAWattackDirection;
     }
 
+    // acquires player's inputs to assess where the GUI joystick stick should be drawn relative to the GUI joystick base for our CustomDeadzones window
     public void UpdateMovementGUIPosition()
     {
         groundMovementGUIPosition = groundDeadzonePosition +

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+/* Depreicated and not used anymore because it is unnecessary. However, I may update this in the future if I wish... */
 
 public class CustomPossesserWindow : EditorWindow
 {
