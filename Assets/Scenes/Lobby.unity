@@ -1270,7 +1270,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 223512734}
-  - component: {fileID: 223512735}
   m_Layer: 0
   m_Name: Matchmaker
   m_TagString: Untagged
@@ -1292,19 +1291,6 @@ Transform:
   m_Father: {fileID: 438048078}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &223512735
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223512733}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24580f956da374f49854ade6ee57f1a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  client: {fileID: 1699160047}
 --- !u!1 &226139117
 GameObject:
   m_ObjectHideFlags: 0
@@ -3486,8 +3472,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 223512735}
-        m_TargetAssemblyTypeName: Matchmaker, Assembly-CSharp
+      - m_Target: {fileID: 849415937}
+        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
         m_MethodName: FindMatch
         m_Mode: 1
         m_Arguments:
@@ -4762,6 +4748,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   appId: 480
+  gameVersion: v0.4.0-alpha.1
+  activeSteamSocketServer: 0
+  activeSteamSocketConnect: 0
+  activeSteamSocketConnection: 0
+  NOT_HOST: 1
 --- !u!1 &871033608
 GameObject:
   m_ObjectHideFlags: 0
@@ -5101,7 +5092,7 @@ GameObject:
   m_Component:
   - component: {fileID: 944227615}
   m_Layer: 0
-  m_Name: Data Persistence
+  m_Name: Steam Connection Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7270,8 +7261,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 223512735}
-        m_TargetAssemblyTypeName: Matchmaker, Assembly-CSharp
+      - m_Target: {fileID: 849415937}
+        m_TargetAssemblyTypeName: SteamManager, Assembly-CSharp
         m_MethodName: HostMatch
         m_Mode: 1
         m_Arguments:
@@ -9219,9 +9210,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1699160046}
-  - component: {fileID: 1699160047}
   m_Layer: 0
-  m_Name: Client
+  m_Name: Steam Socket Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9241,18 +9231,6 @@ Transform:
   m_Father: {fileID: 438048078}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1699160047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1699160045}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ae25f8f5ac93494797581ab86cca20b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1702812630
 GameObject:
   m_ObjectHideFlags: 0
@@ -15200,7 +15178,7 @@ MonoBehaviour:
     upgradeData: 
     file_cachedStartup: {fileID: 4900000, guid: 508a589e674c1ac4fa266c4e2a08a1fb, type: 3}
     data_cachedStartup: 
-    cacheStartup: 1
+    cacheStartup: 0
   showNavGraphs: 1
   showUnwalkableNodes: 1
   debugMode: 4
