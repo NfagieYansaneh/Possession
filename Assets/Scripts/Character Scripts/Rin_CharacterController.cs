@@ -87,7 +87,14 @@ public class Rin_CharacterController : BaseCharacterController
     public override void PerformMovement(InputAction.CallbackContext context)
     {
         movementDirection = playerInputHandler.groundMovementDirection;
-        if (oldGroundMovementDirection == movementDirection && oldGroundMovementDirection != Vector2.zero) return;
+        if (oldGroundMovementDirection == movementDirection)
+        {
+            if (resetOldGroundMovementDirection)
+            {
+                resetOldGroundMovementDirection = false;
+            } else
+            return;
+        }
 
         if (movementDirection.magnitude <= playerInputHandler.universalFixedMinDeadzone)
         {
@@ -321,16 +328,17 @@ public class Rin_CharacterController : BaseCharacterController
 
     }
 
-    public override void PerformCrownThrow(InputAction.CallbackContext context)
+    public override void PerformCrownThrow(InputAction.CallbackContext context, Vector2 direction)
     {
-        base.PerformCrownThrow(context);
+        base.PerformCrownThrow(context, direction);
 
     }
 
-    public override void OnPossessionLeave()
-    {
-        base.OnPossessionLeave();
+    bool resetOldGroundMovementDirection = false;
 
-        oldGroundMovementDirection = Vector2.zero;
+    public override void PossessMe()
+    {
+        base.PossessMe();
+        resetOldGroundMovementDirection = true;
     }
 }

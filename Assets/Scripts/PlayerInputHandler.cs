@@ -171,7 +171,6 @@ public class PlayerInputHandler : MonoBehaviour
     {
         // updates currentDevice enum so PlayerInputHandler is now aware of current input device
         ParseDeviceName(curPlayerInput.currentControlScheme, true);
-
         /*
         if (curPlayerInput.currentControlScheme == "Gamepad")
         {
@@ -226,7 +225,8 @@ public class PlayerInputHandler : MonoBehaviour
 
         if(RAWattackDirection.magnitude <= universalFixedMinDeadzone)
         {
-            playerAttackDirection = (int)attackDirection.NEUTRAL;
+            // playerAttackDirection = (int)attackDirection.NEUTRAL;
+            playerAttackDirection = (int)attackDirection.FORWARD; // default attack direction for now until we get a neutral attack in place
             return;
         }
 
@@ -335,7 +335,14 @@ public class PlayerInputHandler : MonoBehaviour
         if (possessedCharacter != null)
         {
             Debug.LogWarning("Crown throw performed");
-            possessedCharacter.PerformCrownThrow(context);
+            if (currentDevice == ControlDevices.Gamepad)
+            {
+                possessedCharacter.PerformCrownThrow(context, universalMovementDirection);
+            }
+            else if (currentDevice == ControlDevices.KeyboardAndMouse)
+            {
+                possessedCharacter.PerformCrownThrow(context, mouseNormalized);
+            }
         }
     }
 

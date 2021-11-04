@@ -277,7 +277,7 @@ public class BaseAiController : MonoBehaviour
             {
                 Debug.Log("Recalculating pathing after completing the detour");
                 startedEnumerator = true;
-                StartCoroutine(CalculateNewPathEnumerator(0.2f));
+                StartCoroutine(CalculateNewPathEnumerator(0.05f)); // do you even need 0.05f at this point
             }
         }
 
@@ -376,28 +376,33 @@ public class BaseAiController : MonoBehaviour
             distanceToWaypoint = Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x); */
         }
 
+        bool targetPlayerOnSamePlatformAsAi = GridGraphGenerate.FindThisNodesNodeGroup(path.path[0]).leftistNodePosition == GridGraphGenerate.FindThisNodesNodeGroup(path.path[path.path.Count - 1]).leftistNodePosition;
         // in the case that we have not reached the end of the path, nor did we reach the targetPlayerPosition, nor are we currently experiencing a holdMovementAiOverride
         // we will assess the direction of the current waypoint we are heading towards, and set the appropriate direction via PerformMovementAi
-        if (!reachedEndOfPath && !pathComplete && !baseCharacterController.holdMovementAiOverride)
+        if (!pathComplete && !baseCharacterController.holdMovementAiOverride && !startedEnumerator)
         {
             if ((baseCharacterController.Ai_movementDirection == Vector2.right || baseCharacterController.Ai_movementDirection == Vector2.zero)
-                && (path.vectorPath[currentWaypoint] - transform.position).x < 0f)
+                && ((path.vectorPath[currentWaypoint] - baseCharacterController.groundCheck.position).x < 0f || 
+                (targetPlayerOnSamePlatformAsAi && (targetPlayerPosition.position - baseCharacterController.groundCheck.position).x < 0f)))
             {
-                if(Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.2f)
+                if((Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.25f && !specialWaypointUpcoming) || specialWaypointUpcoming ||
+                    (targetPlayerOnSamePlatformAsAi && (targetPlayerPosition.position - baseCharacterController.groundCheck.position).x < 0.25f))
                     baseCharacterController.PerformMovementAi(Vector2.left);
                 else
                     baseCharacterController.PerformMovementAi(Vector2.zero);
             }
             else if ((baseCharacterController.Ai_movementDirection == Vector2.left || baseCharacterController.Ai_movementDirection == Vector2.zero)
-              && (path.vectorPath[currentWaypoint] - transform.position).x > 0f)
+                && ((path.vectorPath[currentWaypoint] - baseCharacterController.groundCheck.position).x > 0f ||
+                (targetPlayerOnSamePlatformAsAi && (targetPlayerPosition.position - baseCharacterController.groundCheck.position).x > 0f)))
             {
-                if (Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.2f)
+                if ((Mathf.Abs(baseCharacterController.groundCheck.position.x - path.vectorPath[currentWaypoint].x) > 0.25f && !specialWaypointUpcoming) || specialWaypointUpcoming ||
+                    (targetPlayerOnSamePlatformAsAi && (targetPlayerPosition.position - baseCharacterController.groundCheck.position).x > 0.25f))
                     baseCharacterController.PerformMovementAi(Vector2.right);
                 else
                     baseCharacterController.PerformMovementAi(Vector2.zero);
             }
         }
-        else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero && currentTypeofWaypoint == typeofWaypoint.RUN)
+        else if (pathComplete && baseCharacterController.Ai_movementDirection != Vector2.zero && currentTypeofWaypoint == typeofWaypoint.RUN && !startedEnumerator)
         {
             // in this case, our path is complete, so we just set PerformMovementAi to Vector2.zero
             baseCharacterController.PerformMovementAi(Vector2.zero);

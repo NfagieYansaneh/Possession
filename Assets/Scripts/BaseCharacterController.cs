@@ -1118,14 +1118,14 @@ public class BaseCharacterController : MonoBehaviour
         // meant to be overwritten by specialised character controller that inherits this character controller
     }
 
-    public virtual void PerformCrownThrow(InputAction.CallbackContext context)
+    public virtual void PerformCrownThrow(InputAction.CallbackContext context, Vector2 direction)
     {
         // not typically meant to be overwritten
 
         // on crown throw, we activate the crown object and run its crown throwing script
         crownObject.SetActive(true);
         crownObject.transform.position = transform.position;
-        crownScript.ThrowMe(playerInputHandler.universalMovementDirection, myCollider);
+        crownScript.ThrowMe(direction, myCollider);
     }
 
     // code that is called when intially possessed by a character

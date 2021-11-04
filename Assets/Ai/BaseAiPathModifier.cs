@@ -313,12 +313,13 @@ public class BaseAiPathModifier : MonoModifier
 
 
         // AssessAndEstablishNewDetour() in a naunced instance where no jumpEndNodes are formed even though one jumpNode exists
+        /*
         if (jumpEndNodes.Count == 0 && jumpNodes.Count == 1 && Vector3.Distance(newVectorPath[0], newVectorPath[newVectorPath.Count-1])>2f
             && !Helper.SearchInDirection(GridGraphGenerate.gg, newNodes[0], 0, ref returnedNode))
         {
             AssessAndEstablishNewDetour();
         }
-
+        */
 
         // trimming parts of the new path
         foreach(TrimRequestStruct trimRequest in trimRequests)
@@ -661,7 +662,7 @@ public class BaseAiPathModifier : MonoModifier
             GraphNode dropdownAtThisNode;
 
             if (jumpNodePosition.x != jumpEndNodePosition.x) {
-                dropdownAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + ((waypointFacingRight) ? 1f : -1f),
+                dropdownAtThisNode = GridGraphGenerate.gg.GetNearest(new Vector3(jumpNodePosition.x + ((waypointFacingRight) ? 1.5f : -1.5f),
                     jumpNodePosition.y - 0.5f)).node;
             }
             else
